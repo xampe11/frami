@@ -1,0 +1,104 @@
+import { Link } from "wouter";
+import { BlockchainLogo } from "@/assets/icons";
+import { Github, Twitter, MessageCircleCode, Send } from "lucide-react";
+
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
+  
+  return (
+    <footer className="bg-dark text-white pt-16 pb-8">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+          <div>
+            <div className="flex items-center mb-4">
+              <BlockchainLogo className="h-8 w-8 text-primary" />
+              <span className="ml-2 text-xl font-bold font-space">
+                RealWorld<span className="text-primary">Projects</span>
+              </span>
+            </div>
+            <p className="text-gray-400 mb-4">
+              Bringing creative projects to life with blockchain technology.
+            </p>
+            <div className="flex space-x-4">
+              <a 
+                href="#" 
+                className="text-gray-400 hover:text-primary transition"
+                aria-label="Twitter"
+              >
+                <Twitter size={20} />
+              </a>
+              <a 
+                href="#" 
+                className="text-gray-400 hover:text-primary transition"
+                aria-label="MessageCircleCode"
+              >
+                <MessageCircleCode size={20} />
+              </a>
+              <a 
+                href="#" 
+                className="text-gray-400 hover:text-primary transition"
+                aria-label="Github"
+              >
+                <Github size={20} />
+              </a>
+              <a 
+                href="#" 
+                className="text-gray-400 hover:text-primary transition"
+                aria-label="Telegram"
+              >
+                <Send size={20} />
+              </a>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="text-lg font-bold mb-4 font-inter">For Creators</h4>
+            <ul className="space-y-2">
+              <li><Link href="/create" className="text-gray-400 hover:text-white transition">Start a Project</Link></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Creator Guidelines</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Fees & Payments</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Blockchain Education</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Creator Resources</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="text-lg font-bold mb-4 font-inter">For Backers</h4>
+            <ul className="space-y-2">
+              <li><Link href="/explore" className="text-gray-400 hover:text-white transition">Discover Projects</Link></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Wallet Setup Guide</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Trust & Safety</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Backer Protection</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">FAQs</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="text-lg font-bold mb-4 font-inter">About</h4>
+            <ul className="space-y-2">
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Our Mission</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Stats</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Press</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Careers</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition">Contact Us</a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="border-t border-gray-800 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="text-gray-500 text-sm mb-4 md:mb-0">
+              &copy; {currentYear} RealWorldProjects. All rights reserved.
+            </div>
+            <div className="flex flex-wrap gap-4 sm:gap-6 justify-center">
+              <a href="#" className="text-gray-500 hover:text-white text-sm transition">Terms of Service</a>
+              <a href="#" className="text-gray-500 hover:text-white text-sm transition">Privacy Policy</a>
+              <a href="#" className="text-gray-500 hover:text-white text-sm transition">Cookie Policy</a>
+              <a href="#" className="text-gray-500 hover:text-white text-sm transition">Accessibility</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

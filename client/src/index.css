@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 98%;
+  --foreground: 240 10% 3.9%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --primary: 255 87% 70%; /* #6C63FF */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 174 100% 41%; /* #00D0A3 */
+  --secondary-foreground: 0 0% 100%;
+  --accent: 339 100% 56.5%; /* #FF4081 */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 240 10% 3.9%;
+  --radius: 0.5rem;
+
+  /* Custom colors */
+  --dark: 240 23% 14.5%; /* #1A1A2E */
+  --light: 210 11.1% 96.9%; /* #F8F9FA */
+  --slate: 240 15.7% 35.3%; /* #4A4A68 */
+  --success: 142 71.4% 42%; /* #27AE60 */
+  --warning: 32 93.4% 48.6%; /* #F2994A */
+  --error: 0 79.4% 52.5%; /* #EB5757 */
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 255 87% 70%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 174 100% 41%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 339 100% 56.5%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-['DM_Sans'] antialiased overflow-x-hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-['Inter'];
+  }
+
+  .font-space {
+    @apply font-['Space_Grotesk'];
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+  }
+  
+  .animated-bg {
+    @apply relative overflow-hidden;
+  }
+  
+  .animated-bg::before {
+    content: '';
+    @apply absolute top-[-50%] left-[-50%] w-[200%] h-[200%] z-[-1];
+    background: linear-gradient(
+      45deg,
+      rgba(108, 99, 255, 0.1) 0%,
+      rgba(0, 208, 163, 0.1) 25%,
+      rgba(255, 64, 129, 0.1) 50%,
+      rgba(108, 99, 255, 0.1) 75%,
+      rgba(0, 208, 163, 0.1) 100%
+    );
+    animation: rotate 20s linear infinite;
+  }
+  
+  @keyframes rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .progress-bar {
+    @apply h-1 rounded-full overflow-hidden;
+  }
+  
+  .search-container:focus-within {
+    @apply shadow-[0_0_0_2px_hsl(var(--primary))];
+  }
+  
+  .featured-project-img {
+    @apply h-64 object-cover transition-transform duration-500;
+  }
+  
+  .featured-project:hover .featured-project-img {
+    transform: scale(1.03);
+  }
+  
+  .project-card {
+    @apply transition-all duration-300;
+  }
+  
+  .project-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .connect-wallet-btn {
+    @apply relative overflow-hidden z-[1];
+  }
+  
+  .connect-wallet-btn::after {
+    content: '';
+    @apply absolute left-[-20%] top-0 w-[20%] h-full z-[-1];
+    background: rgba(255, 255, 255, 0.3);
+    transform: skewX(-30deg);
+    transition: all 0.6s ease;
+  }
+  
+  .connect-wallet-btn:hover::after {
+    @apply left-[120%];
+  }
+  
+  .category-btn.active {
+    @apply bg-primary text-white;
+  }
+}
