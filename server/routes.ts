@@ -84,6 +84,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/categories/:slug", async (req: Request, res: Response) => {
     const slug = req.params.slug;
+    
+    // Check if it's a numeric ID
+    if (/^\d+$/.test(slug)) {
+      const id = parseInt(slug, 10);
+      const category = await storage.getCategoryById(id);
+      
+      if (!category) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+      
+      return res.json(category);
+    }
+    
+    // Handle as slug
     const category = await storage.getCategoryBySlug(slug);
     
     if (!category) {

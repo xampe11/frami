@@ -70,17 +70,17 @@ const Header = () => {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/">
-            <a className="flex items-center">
+            <div className="flex items-center">
               <span className="text-2xl font-bold font-heading text-gradient">RealWorldProjects</span>
-            </a>
+            </div>
           </Link>
           
           <nav className="hidden md:flex ml-12 space-x-8">
             {navLinks.map((link) => (
               <Link key={link.path} href={link.path}>
-                <a className={`nav-link ${location === link.path ? "text-primary" : ""}`}>
+                <span className={`nav-link ${location === link.path ? "text-primary" : ""}`}>
                   {link.title}
-                </a>
+                </span>
               </Link>
             ))}
           </nav>
@@ -146,11 +146,11 @@ const Header = () => {
                 <nav className="flex flex-col py-6">
                   {navLinks.map((link) => (
                     <Link key={link.path} href={link.path}>
-                      <a className={`py-3 px-2 font-medium ${
+                      <span className={`py-3 px-2 font-medium block cursor-pointer ${
                         location === link.path ? "text-primary" : "text-gray-800"
                       }`}>
                         {link.title}
-                      </a>
+                      </span>
                     </Link>
                   ))}
                 </nav>

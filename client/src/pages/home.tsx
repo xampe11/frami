@@ -13,48 +13,41 @@ export default function Home() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   
   useEffect(() => {
-    const initAnimation = async () => {
-      if (typeof window !== "undefined") {
-        const { gsap } = await import("gsap");
-        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-        
-        gsap.registerPlugin(ScrollTrigger);
-        
-        if (!isMobile) {
-          // Smooth scroll animation for anchor links
-          document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-              e.preventDefault();
-              
-              const targetId = this.getAttribute('href');
-              if (targetId && targetId !== '#') {
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                  gsap.to(window, {
-                    duration: 1,
-                    scrollTo: {
-                      y: targetElement,
-                      offsetY: 80
-                    },
-                    ease: "power2.inOut"
-                  });
-                }
-              }
-            });
+    // Set the document title
+    document.title = "RealWorld Projects | Blockchain Crowdfunding";
+    
+    // Since scrollTo isn't automatically available in GSAP
+    // we'll use standard browser scrolling for anchor links
+    const handleAnchorClick = (e: Event) => {
+      e.preventDefault();
+      const target = e.currentTarget as HTMLAnchorElement;
+      const targetId = target.getAttribute('href');
+      
+      if (targetId && targetId !== '#') {
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          const offset = 80; // header height offset
+          const elementPosition = targetElement.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
           });
         }
       }
     };
     
-    initAnimation();
+    // Add event listeners to anchor links
+    const anchors = document.querySelectorAll('a[href^="#"]');
+    anchors.forEach(anchor => {
+      anchor.addEventListener('click', handleAnchorClick);
+    });
     
-    // Set the document title
-    document.title = "RealWorld Projects | Blockchain Crowdfunding";
-    
+    // Clean up function
     return () => {
-      // Clean up any listeners or animations
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.removeEventListener('click', function() {});
+      anchors.forEach(anchor => {
+        anchor.removeEventListener('click', handleAnchorClick);
       });
     };
   }, [isMobile]);
