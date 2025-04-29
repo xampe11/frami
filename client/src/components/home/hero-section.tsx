@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useGsapReveal } from "@/hooks/use-gsap";
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -9,8 +8,6 @@ export default function HeroSection() {
   const imageRef = useRef<HTMLDivElement>(null);
   const floatingRef1 = useRef<HTMLDivElement>(null);
   const floatingRef2 = useRef<HTMLDivElement>(null);
-  
-  useGsapReveal(sectionRef);
   
   useEffect(() => {
     const initAnimation = async () => {
@@ -75,15 +72,15 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-12 md:py-20 animated-bg bg-white">
+    <section ref={sectionRef} className="bg-white py-12 md:py-20">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex flex-col md:flex-row items-center">
           <div ref={textRef} className="w-full md:w-1/2 mb-10 md:mb-0 pr-0 md:pr-12">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-inter leading-tight mb-6">
-              <span className="text-black">Fund the future with </span>
-              <span className="text-primary font-extrabold">blockchain</span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+              <span style={{ color: "#000000" }}>Fund the future with </span>
+              <span style={{ color: "#6366f1", fontWeight: 800 }}>blockchain</span>
             </h1>
-            <p className="text-gray-800 text-lg md:text-xl mb-8 font-medium">
+            <p style={{ color: "#374151" }} className="text-lg md:text-xl mb-8 font-medium">
               Bringing creative projects to life with transparency, security, and global access through blockchain technology.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
@@ -94,7 +91,7 @@ export default function HeroSection() {
                 <Link href="/create">Start a Project</Link>
               </Button>
             </div>
-            <div className="mt-8 flex items-center space-x-2 text-sm text-gray-800">
+            <div className="mt-8 flex items-center space-x-2">
               <div className="flex -space-x-2">
                 {[1, 2, 3].map((id) => (
                   <img 
@@ -105,7 +102,7 @@ export default function HeroSection() {
                   />
                 ))}
               </div>
-              <span>Join <span className="font-bold text-black">12,000+</span> creators worldwide</span>
+              <span style={{ color: "#4B5563" }}>Join <span style={{ color: "#000000", fontWeight: 700 }}>12,000+</span> creators worldwide</span>
             </div>
           </div>
           <div ref={imageRef} className="w-full md:w-1/2 relative">
@@ -115,7 +112,7 @@ export default function HeroSection() {
                 alt="Blockchain Crowdfunding" 
                 className="w-full rounded-2xl"
               />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-6">
+              <div className="absolute bottom-0 left-0 right-0 p-6" style={{ background: "linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%)" }}>
                 <span className="bg-secondary text-white text-xs px-3 py-1 rounded-full uppercase font-medium">Featured</span>
                 <h3 className="text-white text-xl font-bold mt-2">Decentralized Innovation Hub</h3>
                 <div className="flex items-center mt-3">
@@ -124,15 +121,15 @@ export default function HeroSection() {
                   </div>
                   <span className="text-white font-medium text-sm">75%</span>
                 </div>
-                <div className="flex justify-between mt-2 text-sm text-white/80">
-                  <span>$75,000 raised</span>
-                  <span>$100,000 goal</span>
+                <div className="flex justify-between mt-2 text-sm">
+                  <span style={{ color: "#FFFFFF" }}>$75,000 raised</span>
+                  <span style={{ color: "#FFFFFF" }}>$100,000 goal</span>
                 </div>
               </div>
             </div>
             
             {/* Floating Elements */}
-            <div ref={floatingRef1} className="absolute -top-6 -right-6 bg-white p-3 rounded-lg shadow-card rotate-3 hidden md:block">
+            <div ref={floatingRef1} className="absolute -top-6 -right-6 bg-white p-3 rounded-lg shadow-lg rotate-3 hidden md:block">
               <div className="flex items-center space-x-2">
                 <div className="bg-primary/10 p-2 rounded-full">
                   <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,13 +137,13 @@ export default function HeroSection() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-700">Secured by</p>
-                  <p className="text-sm font-bold text-black">Blockchain</p>
+                  <p className="text-xs" style={{ color: "#4B5563" }}>Secured by</p>
+                  <p className="text-sm font-bold" style={{ color: "#000000" }}>Blockchain</p>
                 </div>
               </div>
             </div>
             
-            <div ref={floatingRef2} className="absolute -bottom-6 -left-6 bg-white p-3 rounded-lg shadow-card -rotate-3 hidden md:block">
+            <div ref={floatingRef2} className="absolute -bottom-6 -left-6 bg-white p-3 rounded-lg shadow-lg -rotate-3 hidden md:block">
               <div className="flex items-center space-x-2">
                 <div className="bg-secondary/10 p-2 rounded-full">
                   <svg className="h-5 w-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -154,8 +151,8 @@ export default function HeroSection() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-700">Global</p>
-                  <p className="text-sm font-bold text-black">Participation</p>
+                  <p className="text-xs" style={{ color: "#4B5563" }}>Global</p>
+                  <p className="text-sm font-bold" style={{ color: "#000000" }}>Participation</p>
                 </div>
               </div>
             </div>
