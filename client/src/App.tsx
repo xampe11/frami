@@ -12,7 +12,7 @@ import Discover from "@/pages/discover";
 import Project from "@/pages/project";
 import CreateProject from "@/pages/create-project";
 import NotFound from "@/pages/not-found";
-import Header from "@/components/layout/header";
+import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { useMediaQuery } from "@/hooks/use-mobile";
 
@@ -55,7 +55,7 @@ function Router() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <Navbar />
       <main className="flex-grow">
         <Switch>
           <Route path="/" component={Home} />
