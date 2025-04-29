@@ -144,7 +144,7 @@ export default function FeaturedProjects() {
   }
 
   return (
-    <section ref={sectionRef} className="pt-12 pb-2 bg-light">
+    <section ref={sectionRef} className="py-10 bg-light">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold font-inter">Featured Projects</h2>
@@ -172,10 +172,13 @@ export default function FeaturedProjects() {
         
         <div 
           ref={carouselRef}
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 overflow-x-auto md:overflow-hidden pb-4 hide-scrollbar"
+          className="flex flex-nowrap gap-8 overflow-x-auto pb-6 hide-scrollbar"
+          style={{ minHeight: "400px" }}
         >
           {featuredProjects.map((project: Project) => (
-            <FeaturedProjectCard key={project.id} project={project} />
+            <div key={project.id} className="min-w-[350px] md:min-w-[400px] flex-shrink-0">
+              <FeaturedProjectCard project={project} />
+            </div>
           ))}
         </div>
       </div>

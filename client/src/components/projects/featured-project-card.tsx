@@ -56,9 +56,13 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
       <Link href={`/projects/${project.slug}`}>
         <div className="overflow-hidden relative">
           <img 
-            src={project.thumbnailUrl} 
+            src={project.thumbnailUrl || "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"} 
             alt={project.title} 
             className="featured-project-img w-full"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
+            }}
           />
           <div className="overlay">
             <span className={`bg-${category?.slug === 'sustainability' ? 'secondary' : 'primary'}/20 text-white text-xs px-3 py-1 rounded-full uppercase font-bold`}>

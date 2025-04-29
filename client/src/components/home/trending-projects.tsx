@@ -12,7 +12,7 @@ export default function TrendingProjects() {
   
   useGsapReveal(sectionRef);
   
-  const { data: trendingProjects, isLoading } = useQuery({
+  const { data: trendingProjects, isLoading } = useQuery<Project[]>({
     queryKey: ['/api/projects/trending'],
   });
 
@@ -54,7 +54,7 @@ export default function TrendingProjects() {
     );
   }
 
-  if (!trendingProjects || trendingProjects.length === 0) {
+  if (!trendingProjects || !Array.isArray(trendingProjects) || trendingProjects.length === 0) {
     return null;
   }
 
