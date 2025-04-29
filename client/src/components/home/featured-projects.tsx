@@ -14,12 +14,15 @@ export default function FeaturedProjects() {
   
   useGsapReveal(sectionRef);
   
-  const { data: featuredProjects, isLoading } = useQuery({
+  const { data: featuredProjects, isLoading, error } = useQuery({
     queryKey: ['/api/projects/featured'],
     queryFn: async () => {
+      console.log('Fetching featured projects...');
       const response = await fetch('/api/projects/featured');
       if (!response.ok) throw new Error('Failed to fetch featured projects');
-      return response.json();
+      const data = await response.json();
+      console.log('Featured projects data:', data);
+      return data;
     }
   });
 
@@ -112,8 +115,32 @@ export default function FeaturedProjects() {
     );
   }
 
+  if (error) {
+    console.error("Error fetching featured projects:", error);
+    return (
+      <section className="py-12 bg-light">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold font-inter text-black mb-4">Featured Projects</h2>
+            <p className="text-red-500">Failed to load featured projects. Please try again later.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (!featuredProjects || featuredProjects.length === 0) {
-    return null;
+    console.log("No featured projects found or empty array returned");
+    return (
+      <section className="py-12 bg-light">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold font-inter text-black mb-4">Featured Projects</h2>
+            <p className="text-gray-700">Check back soon for featured projects!</p>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
