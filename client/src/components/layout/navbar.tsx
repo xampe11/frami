@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import Web3WalletButton from '../wallet/web3-wallet-button';
+import RainbowWalletButton from '../wallet/rainbow-wallet-button';
 import { Menu, X, Search } from 'lucide-react';
 
 export default function Navbar() {
@@ -58,7 +58,7 @@ export default function Navbar() {
             <Button variant="ghost" size="icon" className="text-slate-700 hover:bg-slate-100">
               <Search className="h-5 w-5" />
             </Button>
-            <Web3WalletButton />
+            <RainbowWalletButton />
           </div>
 
           {/* Mobile Menu Button */}
@@ -99,7 +99,7 @@ export default function Navbar() {
               </span>
             </Link>
             <div className="pt-2">
-              <Web3WalletButton />
+              <RainbowWalletButton />
             </div>
           </nav>
         </div>
