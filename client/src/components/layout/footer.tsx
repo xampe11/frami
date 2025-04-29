@@ -4,7 +4,7 @@ import { Github, Twitter, MessageCircleCode, Send } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
-  
+
   return (
     <footer className="bg-dark text-white pt-16 pb-8">
       <div className="container mx-auto px-4 sm:px-6">
@@ -50,9 +50,9 @@ export default function Footer() {
               </a>
             </div>
           </div>
-          
+
           <div>
-            <h4 className="text-lg font-bold mb-4 font-inter">For Creators</h4>
+            <h4 className="text-lg font-bold mb-4 font-inter text-gray-200">For Creators</h4>
             <ul className="space-y-2">
               <li><Link href="/create" className="text-gray-400 hover:text-white transition">Start a Project</Link></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition">Creator Guidelines</a></li>
@@ -61,9 +61,9 @@ export default function Footer() {
               <li><a href="#" className="text-gray-400 hover:text-white transition">Creator Resources</a></li>
             </ul>
           </div>
-          
+
           <div>
-            <h4 className="text-lg font-bold mb-4 font-inter">For Backers</h4>
+            <h4 className="text-lg font-bold mb-4 font-inter text-gray-200">For Backers</h4>
             <ul className="space-y-2">
               <li><Link href="/explore" className="text-gray-400 hover:text-white transition">Discover Projects</Link></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition">Wallet Setup Guide</a></li>
@@ -72,9 +72,9 @@ export default function Footer() {
               <li><a href="#" className="text-gray-400 hover:text-white transition">FAQs</a></li>
             </ul>
           </div>
-          
+
           <div>
-            <h4 className="text-lg font-bold mb-4 font-inter">About</h4>
+            <h4 className="text-lg font-bold mb-4 font-inter text-gray-200">About</h4>
             <ul className="space-y-2">
               <li><a href="#" className="text-gray-400 hover:text-white transition">Our Mission</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition">Stats</a></li>
@@ -84,11 +84,11 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        
+
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-gray-500 text-sm mb-4 md:mb-0">
-              &copy; {currentYear} RealWorldProjects. All rights reserved.
+            <div className="text-gray-600 text-sm mb-4 md:mb-0">
+              <p className="text-gray-600">© {currentYear} RealWorldProjects. All rights reserved.</p>
             </div>
             <div className="flex flex-wrap gap-4 sm:gap-6 justify-center">
               <a href="#" className="text-gray-500 hover:text-white text-sm transition">Terms of Service</a>
