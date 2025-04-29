@@ -1,81 +1,111 @@
-import { useEffect, RefObject } from 'react';
+import { useEffect, RefObject } from "react";
 
 /**
- * A hook to handle GSAP reveal animations for elements
- * @param elementRef - React ref object pointing to the element to animate
- * @param options - Animation options
+ * Hook to create reveal animations using GSAP when elements enter the viewport
  */
-export function useGsapReveal(
-  elementRef: RefObject<HTMLElement>,
-  options = {
-    y: 30,
-    opacity: 0,
-    duration: 0.8,
-    staggerChildren: 0.1,
-    childSelector: '.animate-item',
-    start: 'top 85%',
-  }
-) {
+export function useGsapReveal(sectionRef: RefObject<HTMLElement>, delay: number = 0.1) {
   useEffect(() => {
-    const initAnimation = async () => {
-      if (typeof window !== 'undefined' && elementRef.current) {
-        const { gsap } = await import('gsap');
-        const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+    const initGsap = async () => {
+      if (typeof window !== "undefined" && sectionRef.current) {
+        const { gsap } = await import("gsap");
+        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
         
         gsap.registerPlugin(ScrollTrigger);
         
-        // Main element reveal animation
-        gsap.fromTo(
-          elementRef.current,
-          { opacity: 0, y: options.y },
-          {
-            opacity: 1,
-            y: 0,
-            duration: options.duration,
-            scrollTrigger: {
-              trigger: elementRef.current,
-              start: options.start,
-              toggleActions: 'play none none none',
-            },
-          }
-        );
+        // Animate heading, paragraphs and other elements
+        const headings = sectionRef.current.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        const paragraphs = sectionRef.current.querySelectorAll('p');
+        const buttons = sectionRef.current.querySelectorAll('button, a.btn, .btn');
+        const cards = sectionRef.current.querySelectorAll('.card, .project-card, .featured-project');
+        const images = sectionRef.current.querySelectorAll('img');
         
-        // Staggered children animation if children exist
-        const children = elementRef.current.querySelectorAll(options.childSelector);
-        if (children.length > 0) {
-          gsap.fromTo(
-            children,
-            { opacity: 0, y: options.y / 2 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: options.duration * 0.8,
-              stagger: options.staggerChildren,
-              scrollTrigger: {
-                trigger: elementRef.current,
-                start: options.start,
-                toggleActions: 'play none none none',
-              },
-            }
-          );
-        }
-      }
-    };
-    
-    initAnimation();
-    
-    // Cleanup function
-    return () => {
-      if (typeof window !== 'undefined') {
-        // Import needs to be in a try/catch because it's async
-        import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
-          ScrollTrigger.getAll().forEach(trigger => {
-            if (trigger.vars.trigger === elementRef.current) {
-              trigger.kill();
-            }
+        // Headings come in from bottom with stagger
+        if (headings.length > 0) {
+          gsap.from(headings, {
+            y: 40,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 80%",
+            },
+            delay
           });
-        }).catch(console.error);
+        }
+        
+        // Paragraphs fade in
+        if (paragraphs.length > 0) {
+          gsap.from(paragraphs, {
+            opacity: 0,
+            y: 20,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 80%",
+            },
+            delay: delay + 0.2
+          });
+        }
+        
+        // Buttons scale and fade in
+        if (buttons.length > 0) {
+          gsap.from(buttons, {
+            scale: 0.9,
+            opacity: 0,
+            duration: 0.5,
+            stagger: 0.1,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 80%",
+            },
+            delay: delay + 0.4
+          });
+        }
+        
+        // Cards fade in and rise with stagger
+        if (cards.length > 0) {
+          gsap.from(cards, {
+            y: 60,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: cards[0],
+              start: "top 90%",
+            },
+            delay: delay + 0.3
+          });
+        }
+        
+        // Images fade in and scale
+        if (images.length > 0) {
+          gsap.from(images, {
+            opacity: 0,
+            scale: 0.95,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 80%",
+            },
+            delay: delay + 0.2
+          });
+        }
+        
+        return () => {
+          // Clean up ScrollTriggers when component unmounts
+          ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+        };
       }
     };
-  }, [elementRef, options]);
+    
+    initGsap();
+  }, [sectionRef, delay]);
 }

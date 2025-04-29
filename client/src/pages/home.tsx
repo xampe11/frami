@@ -1,58 +1,73 @@
-import { useEffect } from "react";
-import Hero from "@/components/home/hero";
-import Categories from "@/components/home/categories";
+import { useEffect, useRef } from "react";
+import HeroSection from "@/components/home/hero-section";
+import CategoryNavigation from "@/components/home/category-navigation";
 import FeaturedProjects from "@/components/home/featured-projects";
-import BlockchainFeatures from "@/components/home/blockchain-features";
 import TrendingProjects from "@/components/home/trending-projects";
-import CreateProjectCTA from "@/components/home/create-project-cta";
+import BlockchainFeatures from "@/components/home/blockchain-features";
 import HowItWorks from "@/components/home/how-it-works";
-import Newsletter from "@/components/home/newsletter";
-import gsap from "gsap";
+import CTASection from "@/components/home/cta-section";
+import { useMediaQuery } from "@/hooks/use-mobile";
 
-const Home = () => {
+export default function Home() {
+  const pageRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  
   useEffect(() => {
-    // Animate elements on scroll
-    const animateElements = document.querySelectorAll('.animate-on-scroll');
-    
-    animateElements.forEach(element => {
-      gsap.fromTo(element, 
-        {
-          opacity: 0,
-          y: 30,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: element as Element,
-            start: 'top 85%',
-            toggleActions: 'play none none none'
-          }
+    const initAnimation = async () => {
+      if (typeof window !== "undefined") {
+        const { gsap } = await import("gsap");
+        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+        
+        gsap.registerPlugin(ScrollTrigger);
+        
+        if (!isMobile) {
+          // Smooth scroll animation for anchor links
+          document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+              e.preventDefault();
+              
+              const targetId = this.getAttribute('href');
+              if (targetId && targetId !== '#') {
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                  gsap.to(window, {
+                    duration: 1,
+                    scrollTo: {
+                      y: targetElement,
+                      offsetY: 80
+                    },
+                    ease: "power2.inOut"
+                  });
+                }
+              }
+            });
+          });
         }
-      );
-    });
+      }
+    };
+    
+    initAnimation();
+    
+    // Set the document title
+    document.title = "RealWorld Projects | Blockchain Crowdfunding";
     
     return () => {
-      // Clean up ScrollTrigger instances when component unmounts
-      gsap.context(() => {
-        ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      // Clean up any listeners or animations
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.removeEventListener('click', function() {});
       });
     };
-  }, []);
+  }, [isMobile]);
 
   return (
-    <>
-      <Hero />
-      <Categories />
+    <div ref={pageRef}>
+      <HeroSection />
+      <CategoryNavigation />
       <FeaturedProjects />
-      <BlockchainFeatures />
       <TrendingProjects />
-      <CreateProjectCTA />
+      <BlockchainFeatures />
       <HowItWorks />
-      <Newsletter />
-    </>
+      <CTASection />
+    </div>
   );
-};
-
-export default Home;
+}
