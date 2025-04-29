@@ -88,13 +88,13 @@
     @apply absolute top-[-50%] left-[-50%] w-[200%] h-[200%] z-[-1];
     background: linear-gradient(
       45deg,
-      rgba(108, 99, 255, 0.03) 0%, 
-      rgba(0, 208, 163, 0.03) 25%,
-      rgba(255, 64, 129, 0.03) 50%,
-      rgba(108, 99, 255, 0.03) 75%,
-      rgba(0, 208, 163, 0.03) 100%
+      rgba(108, 99, 255, 0.08) 0%, 
+      rgba(0, 208, 163, 0.08) 25%,
+      rgba(255, 64, 129, 0.08) 50%,
+      rgba(108, 99, 255, 0.08) 75%,
+      rgba(0, 208, 163, 0.08) 100%
     );
-    animation: rotate 60s linear infinite;
+    animation: rotate 40s linear infinite;
   }
   
   @keyframes rotate {

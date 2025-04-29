@@ -144,7 +144,7 @@ export default function FeaturedProjects() {
   }
 
   return (
-    <section ref={sectionRef} className="pt-12 pb-6 bg-light">
+    <section ref={sectionRef} className="pt-12 pb-2 bg-light">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold font-inter">Featured Projects</h2>
