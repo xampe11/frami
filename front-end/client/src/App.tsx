@@ -20,7 +20,7 @@ function Router() {
   const { toast } = useToast();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  useEffect(() => {
+/*   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
       const seedData = async () => {
         try {
@@ -32,7 +32,7 @@ function Router() {
       };
       seedData();
     }
-  }, []);
+  }, []); */
 
   useEffect(() => {
     // Initialize Gsap ScrollTrigger
