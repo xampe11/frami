@@ -16,6 +16,11 @@ export default function FeaturedProjects() {
   
   const { data: featuredProjects, isLoading } = useQuery({
     queryKey: ['/api/projects/featured'],
+    queryFn: async () => {
+      const response = await fetch('/api/projects/featured');
+      if (!response.ok) throw new Error('Failed to fetch featured projects');
+      return response.json();
+    }
   });
 
   const scrollLeft = () => {

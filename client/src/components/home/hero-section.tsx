@@ -83,7 +83,7 @@ export default function HeroSection() {
               <span style={{ color: 'rgba(0, 0, 0, 0.9)' }}>Fund the future with </span>
               <span className="gradient-text font-extrabold" style={{ color: '#6366f1' }}>blockchain</span>
             </h1>
-            <p className="text-slate text-lg md:text-xl mb-8">
+            <p className="text-gray-800 text-lg md:text-xl mb-8 font-medium">
               Bringing creative projects to life with transparency, security, and global access through blockchain technology.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
@@ -94,7 +94,7 @@ export default function HeroSection() {
                 <Link href="/create">Start a Project</Link>
               </Button>
             </div>
-            <div className="mt-8 flex items-center space-x-2 text-sm text-slate">
+            <div className="mt-8 flex items-center space-x-2 text-sm text-gray-800">
               <div className="flex -space-x-2">
                 {[1, 2, 3].map((id) => (
                   <img 
@@ -105,7 +105,7 @@ export default function HeroSection() {
                   />
                 ))}
               </div>
-              <span>Join <span className="font-bold text-dark">12,000+</span> creators worldwide</span>
+              <span>Join <span className="font-bold text-black">12,000+</span> creators worldwide</span>
             </div>
           </div>
           <div ref={imageRef} className="w-full md:w-1/2 relative">
@@ -140,8 +140,8 @@ export default function HeroSection() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs text-slate">Secured by</p>
-                  <p className="text-sm font-bold text-dark">Blockchain</p>
+                  <p className="text-xs text-gray-700">Secured by</p>
+                  <p className="text-sm font-bold text-black">Blockchain</p>
                 </div>
               </div>
             </div>
@@ -154,8 +154,8 @@ export default function HeroSection() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs text-slate">Global</p>
-                  <p className="text-sm font-bold text-dark">Participation</p>
+                  <p className="text-xs text-gray-700">Global</p>
+                  <p className="text-sm font-bold text-black">Participation</p>
                 </div>
               </div>
             </div>
