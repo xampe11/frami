@@ -19,16 +19,22 @@ export default function RainbowWalletButton() {
         openAccountModal,
         openChainModal,
         openConnectModal,
+        authenticationStatus,
         mounted,
       }) => {
-        const ready = mounted;
-        const connected = ready && account && chain;
+        const ready = mounted && authenticationStatus !== 'loading';
+        const connected =
+          ready &&
+          account &&
+          chain &&
+          (!authenticationStatus ||
+            authenticationStatus === 'authenticated');
 
         return (
           <div
             {...(!ready && {
               'aria-hidden': true,
-              style: {
+              'style': {
                 opacity: 0,
                 pointerEvents: 'none',
                 userSelect: 'none',
@@ -64,14 +70,14 @@ export default function RainbowWalletButton() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
                       <Wallet className="mr-2 h-4 w-4" />
-                      {account.displayName}
+                      {shortenAddress(account.address)}
                       <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="flex flex-col space-y-1 p-2">
                       <p className="text-xs text-slate-500">Connected to {chain.name}</p>
-                      <p className="font-medium">{account.displayName}</p>
+                      <p className="font-medium">{shortenAddress(account.address, 8)}</p>
                       <p className="text-sm text-slate-600">
                         {account.displayBalance
                           ? `${account.displayBalance}`
@@ -80,18 +86,20 @@ export default function RainbowWalletButton() {
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => {
-                      if (account.address) {
-                        navigator.clipboard.writeText(account.address);
-                      }
+                      navigator.clipboard.writeText(account.address);
                     }}>
                       <Copy className="mr-2 h-4 w-4" />
                       Copy Address
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => {
-                      if (account.address) {
-                        // Use Etherscan as a fallback if blockExplorers is not available
-                        const explorerUrl = chain.blockExplorers?.default?.url || `https://etherscan.io`;
+                      // Try to use the chain's block explorer if available
+                      try {
+                        const explorerUrl = chain.blockExplorers?.default?.url || 
+                          `https://etherscan.io`;
                         window.open(`${explorerUrl}/address/${account.address}`, '_blank');
+                      } catch (error) {
+                        // Fallback to Etherscan
+                        window.open(`https://etherscan.io/address/${account.address}`, '_blank');
                       }
                     }}>
                       <ExternalLink className="mr-2 h-4 w-4" />

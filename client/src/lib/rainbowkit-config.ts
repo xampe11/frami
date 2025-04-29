@@ -1,22 +1,19 @@
 import '@rainbow-me/rainbowkit/styles.css';
-
-import {
-  getDefaultConfig,
-} from '@rainbow-me/rainbowkit';
-import { http } from 'wagmi';
+import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { mainnet, sepolia } from 'wagmi/chains';
+import { http } from 'wagmi';
 
 // Get WalletConnect projectId from environment variables
-const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
+const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID as string;
 
 if (!projectId) {
   console.warn("VITE_WALLET_CONNECT_PROJECT_ID not found. WalletConnect functionality may be limited.");
 }
 
-// Configure the Wagmi config with RainbowKit's getDefaultConfig helper
+// Configure Wagmi with RainbowKit's getDefaultConfig
 export const config = getDefaultConfig({
   appName: 'Real World Projects',
-  projectId: projectId as string,
+  projectId: projectId,
   chains: [mainnet, sepolia],
   transports: {
     [mainnet.id]: http(),
