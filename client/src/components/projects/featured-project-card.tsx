@@ -54,12 +54,25 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
   return (
     <div className="featured-project bg-white rounded-xl overflow-hidden shadow-card hover:shadow-hover transition duration-300">
       <Link href={`/projects/${project.slug}`}>
-        <div className="overflow-hidden">
+        <div className="overflow-hidden relative">
           <img 
             src={project.thumbnailUrl} 
             alt={project.title} 
             className="featured-project-img w-full"
           />
+          <div className="overlay">
+            <span className={`bg-${category?.slug === 'sustainability' ? 'secondary' : 'primary'}/20 text-white text-xs px-3 py-1 rounded-full uppercase font-bold`}>
+              {category?.name || 'Featured'}
+            </span>
+            <h3>{project.title}</h3>
+            <div className="w-full rounded-full h-2 bg-gray-300/30 mb-2">
+              <div className="bg-secondary h-2 rounded-full" style={{width: `${progress}%`}}></div>
+            </div>
+            <div className="flex justify-between mt-1 text-sm text-white">
+              <span className="font-bold">{formatCurrency(project.raisedAmount)} raised</span>
+              <span>{formatCurrency(project.goalAmount)} goal</span>
+            </div>
+          </div>
         </div>
       </Link>
       
