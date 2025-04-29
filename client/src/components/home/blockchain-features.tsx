@@ -13,12 +13,12 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, color, title, description }: FeatureCardProps) {
   return (
-    <div className="bg-slate/10 p-6 rounded-xl backdrop-blur-sm">
+    <div className="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
       <div className={`bg-${color}/20 w-14 h-14 flex items-center justify-center rounded-full mb-4`}>
         {icon}
       </div>
-      <h3 className="text-xl font-bold font-inter mb-3">{title}</h3>
-      <p className="text-gray-300">{description}</p>
+      <h3 className="text-xl font-bold font-inter mb-3 text-slate-800">{title}</h3>
+      <p className="text-slate-600">{description}</p>
     </div>
   );
 }
@@ -30,19 +30,19 @@ export default function BlockchainFeatures() {
   
   const features = [
     {
-      icon: <Lock className="text-xl text-primary" />,
+      icon: <Lock className="h-6 w-6 text-primary" />,
       color: "primary",
       title: "Transparent & Secure",
       description: "All transactions and funding milestones are recorded on the blockchain, providing complete transparency and immutable proof of funding activity."
     },
     {
-      icon: <Globe className="text-xl text-secondary" />,
+      icon: <Globe className="h-6 w-6 text-secondary" />,
       color: "secondary",
       title: "Global Access",
       description: "Anyone with an internet connection and cryptocurrency can participate, removing geographical restrictions and banking limitations."
     },
     {
-      icon: <FileText className="text-xl text-accent" />,
+      icon: <FileText className="h-6 w-6 text-accent" />,
       color: "accent",
       title: "Smart Contracts",
       description: "Automated smart contracts ensure funds are only released when predetermined project milestones are reached, protecting both creators and backers."
@@ -50,11 +50,11 @@ export default function BlockchainFeatures() {
   ];
 
   return (
-    <section ref={sectionRef} className="py-16 bg-dark text-white">
+    <section ref={sectionRef} className="py-16 bg-white text-slate-800">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold font-inter mb-4">Why Blockchain Crowdfunding?</h2>
-          <p className="text-gray-300 max-w-2xl mx-auto">
+          <p className="text-slate-600 max-w-2xl mx-auto font-medium">
             Our platform leverages blockchain technology to provide unmatched transparency, 
             security, and global accessibility for all your projects.
           </p>
