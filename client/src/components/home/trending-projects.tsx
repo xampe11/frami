@@ -59,7 +59,7 @@ export default function TrendingProjects() {
   }
 
   return (
-    <section ref={sectionRef} className="py-12 bg-white">
+    <section ref={sectionRef} className="pt-6 pb-12 bg-white">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold font-inter">Trending Projects</h2>

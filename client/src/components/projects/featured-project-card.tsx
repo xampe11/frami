@@ -72,7 +72,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
               </span>
             )}
             <Link href={`/projects/${project.slug}`}>
-              <h3 className="text-xl font-bold mt-2 font-inter hover:text-primary transition-colors">
+              <h3 className="text-xl font-bold mt-2 mb-1 font-inter hover:text-primary transition-colors text-black">
                 {project.title}
               </h3>
             </Link>
