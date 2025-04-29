@@ -26,22 +26,22 @@ export default function ProjectProgress({
     <div className={cn("w-full", className)}>
       {showAmounts && (
         <div className={`flex justify-between ${textSizeClass} mb-1`}>
-          <span className="font-medium">{formatCurrency(raisedAmount)} raised</span>
+          <span className="font-bold text-black">{formatCurrency(raisedAmount)} raised</span>
           <span className={`font-bold ${statusClass}`}>{progress}%</span>
         </div>
       )}
       
-      <div className={`progress-bar bg-gray-100 ${heightClass}`}>
+      <div className={`progress-bar bg-gray-100 rounded-full ${heightClass}`}>
         <div 
-          className={`bg-secondary h-full`} 
+          className={`bg-secondary h-full rounded-full`} 
           style={{ width: `${progress}%` }}
         ></div>
       </div>
       
       {showAmounts && size !== "sm" && (
-        <div className="flex justify-between text-xs mt-1 text-slate-500">
+        <div className="flex justify-between text-xs mt-1 text-slate-700 font-medium">
           <span>{formatCurrency(raisedAmount)}</span>
-          <span>Goal: {formatCurrency(goalAmount)}</span>
+          <span>Goal: <span className="font-bold">{formatCurrency(goalAmount)}</span></span>
         </div>
       )}
     </div>
