@@ -2,7 +2,7 @@ import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi";
 import { mainnet, sepolia } from "wagmi/chains";
 
 // 1. Define constants - using environment variable
-const projectId = process.env.WALLET_CONNECT_PROJECT_ID as string;
+const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID as string;
 
 // 2. Create wagmiConfig
 const metadata = {
