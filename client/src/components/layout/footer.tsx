@@ -12,7 +12,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center mb-4">
               <BlockchainLogo className="h-8 w-8 text-primary" />
-              <span className="ml-2 text-xl font-bold font-space text-white">
+              <span className="ml-2 text-xl font-bold font-space">
                 RealWorld<span className="text-primary">Projects</span>
               </span>
             </div>
@@ -52,35 +52,35 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-lg font-bold mb-4 font-inter text-white">For Creators</h4>
+            <h4 className="text-lg font-bold mb-4 font-inter text-gray-200">For Creators</h4>
             <ul className="space-y-2">
-              <li><Link href="/create" className="text-gray-300 hover:text-white transition">Start a Project</Link></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Creator Guidelines</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Fees & Payments</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Blockchain Education</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Creator Resources</a></li>
+              <li><Link href="/create" className="text-gray-600 hover:text-white transition">Start a Project</Link></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Creator Guidelines</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Fees & Payments</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Blockchain Education</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Creator Resources</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-lg font-bold mb-4 font-inter text-white">For Backers</h4>
+            <h4 className="text-lg font-bold mb-4 font-inter text-gray-200">For Backers</h4>
             <ul className="space-y-2">
-              <li><Link href="/explore" className="text-gray-300 hover:text-white transition">Discover Projects</Link></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Wallet Setup Guide</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Trust & Safety</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Backer Protection</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">FAQs</a></li>
+              <li><Link href="/explore" className="text-gray-600 hover:text-white transition">Discover Projects</Link></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Wallet Setup Guide</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Trust & Safety</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Backer Protection</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">FAQs</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-lg font-bold mb-4 font-inter text-white">About</h4>
+            <h4 className="text-lg font-bold mb-4 font-inter text-gray-200">About</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Our Mission</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Stats</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Press</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Careers</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition">Contact Us</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Our Mission</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Stats</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Press</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Careers</a></li>
+              <li><a href="#" className="text-gray-600 hover:text-white transition">Contact Us</a></li>
             </ul>
           </div>
         </div>
