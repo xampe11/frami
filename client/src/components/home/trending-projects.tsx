@@ -14,6 +14,7 @@ export default function TrendingProjects() {
   
   const { data: trendingProjects, isLoading } = useQuery<Project[]>({
     queryKey: ['/api/projects/trending'],
+    select: (data) => data?.slice(0, 4) // Limit to 4 projects
   });
 
   if (isLoading) {
@@ -25,7 +26,7 @@ export default function TrendingProjects() {
             <Skeleton className="h-6 w-32" />
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="bg-white rounded-xl overflow-hidden shadow-card">
                 <Skeleton className="w-full h-48" />
@@ -72,7 +73,7 @@ export default function TrendingProjects() {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {trendingProjects.map((project: Project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
