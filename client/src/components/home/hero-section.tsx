@@ -72,7 +72,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="bg-white py-12 md:py-20">
+    <section ref={sectionRef} className="animated-bg bg-white py-12 md:py-20">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex flex-col md:flex-row items-center">
           <div ref={textRef} className="w-full md:w-1/2 mb-10 md:mb-0 pr-0 md:pr-12">
