@@ -75,8 +75,8 @@
   }
 
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary font-black;
-    text-shadow: 0 0 1px rgba(0,0,0,0.1);
+    @apply bg-clip-text bg-gradient-to-r from-primary to-secondary font-black;
+    /* We're keeping the actual text color solid for better visibility */
   }
   
   .animated-bg {
@@ -88,13 +88,13 @@
     @apply absolute top-[-50%] left-[-50%] w-[200%] h-[200%] z-[-1];
     background: linear-gradient(
       45deg,
-      rgba(108, 99, 255, 0.1) 0%,
-      rgba(0, 208, 163, 0.1) 25%,
-      rgba(255, 64, 129, 0.1) 50%,
-      rgba(108, 99, 255, 0.1) 75%,
-      rgba(0, 208, 163, 0.1) 100%
+      rgba(108, 99, 255, 0.05) 0%, 
+      rgba(0, 208, 163, 0.05) 25%,
+      rgba(255, 64, 129, 0.05) 50%,
+      rgba(108, 99, 255, 0.05) 75%,
+      rgba(0, 208, 163, 0.05) 100%
     );
-    animation: rotate 20s linear infinite;
+    animation: rotate 30s linear infinite;
   }
   
   @keyframes rotate {

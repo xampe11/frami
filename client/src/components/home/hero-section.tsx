@@ -75,13 +75,13 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-12 md:py-20 animated-bg">
+    <section ref={sectionRef} className="py-12 md:py-20 animated-bg bg-white">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex flex-col md:flex-row items-center">
           <div ref={textRef} className="w-full md:w-1/2 mb-10 md:mb-0 pr-0 md:pr-12">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-inter leading-tight mb-6">
-              <span style={{ color: 'rgba(0, 0, 0, 0.9)' }}>Fund the future with </span>
-              <span className="gradient-text font-extrabold" style={{ color: '#6366f1' }}>blockchain</span>
+              <span className="text-black">Fund the future with </span>
+              <span className="text-primary font-extrabold">blockchain</span>
             </h1>
             <p className="text-gray-800 text-lg md:text-xl mb-8 font-medium">
               Bringing creative projects to life with transparency, security, and global access through blockchain technology.
