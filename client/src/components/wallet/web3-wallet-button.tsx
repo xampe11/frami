@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useWeb3Modal } from '@web3modal/wagmi/react';
 import { useAccount, useDisconnect, useBalance } from 'wagmi';
-import { type GetBalanceReturnType } from '@wagmi/core';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,12 +14,12 @@ import { useState } from 'react';
 import { shortenAddress } from '../../lib/utils';
 
 export default function Web3WalletButton() {
-  const { open } = useWeb3Modal();
+  const web3Modal = useWeb3Modal();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const [isCopied, setIsCopied] = useState(false);
   
-  // Updated for Wagmi v2
+  // Using Wagmi v2 balance hook
   const { data: balanceData } = useBalance({
     address,
   });
@@ -53,7 +52,7 @@ export default function Web3WalletButton() {
   if (!isConnected) {
     return (
       <Button 
-        onClick={() => open()} 
+        onClick={() => web3Modal.open()} 
         className="bg-gradient-to-r from-primary to-[#9376FF] hover:opacity-90 text-white font-medium"
       >
         <Wallet className="mr-2 h-4 w-4" />
