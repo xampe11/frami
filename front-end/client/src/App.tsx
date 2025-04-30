@@ -20,20 +20,6 @@ function Router() {
   const { toast } = useToast();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-/*   useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      const seedData = async () => {
-        try {
-          await apiRequest("POST", "/api/seed", {});
-          console.log("Development data seeded successfully");
-        } catch (error) {
-          console.error("Failed to seed development data:", error);
-        }
-      };
-      seedData();
-    }
-  }, []); */
-
   useEffect(() => {
     // Initialize Gsap ScrollTrigger
     const initGsap = async () => {

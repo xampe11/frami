@@ -9,8 +9,8 @@ export default defineConfig({
   plugins: [
     react(),
     runtimeErrorOverlay(),
-    ...(import.meta.env.NODE_ENV !== "production" &&
-    import.meta.env.REPL_ID !== undefined
+    ...(process.env.VITE_NODE_ENV !== "production" &&
+    process.env.VITE_REPL_ID !== undefined
       ? [
           await import("@replit/vite-plugin-cartographer").then((m) =>
             m.cartographer()
