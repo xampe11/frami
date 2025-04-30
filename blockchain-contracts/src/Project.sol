@@ -105,7 +105,7 @@ contract Project is Ownable, ReentrancyGuard {
         address _platformTreasury,
         address _verificationOracle,
         address _platformRegistry
-    ) Ownable(_creator) ReentrancyGuard() {
+    ) Ownable(address(this)) ReentrancyGuard() {
         creator = _creator;
         name = _name;
         description = _description;
