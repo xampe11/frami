@@ -103,7 +103,7 @@ contract PlatformRegistryTest is Test {
         address[] memory teamMembers = new address[](0);
 
         vm.prank(user1);
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(abi.encodeWithSignature("EnforcedPause()"));
         registry.createProject(name, description, fundingGoal, duration, isFlexibleFunding, teamMembers);
 
         registry.unpausePlatform();
