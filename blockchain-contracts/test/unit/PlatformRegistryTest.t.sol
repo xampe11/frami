@@ -2,15 +2,23 @@
 pragma solidity 0.8.28;
 
 import "forge-std/Test.sol";
+import {ERC1967Proxy} from "../../src/proxy/ERC1967Proxy.sol";
 import {PlatformRegistry} from "../../src/PlatformRegistry.sol";
 import {Project} from "../../src/Project.sol";
 import {VerificationOracle} from "../../src/VerificationOracle.sol";
+import {TokenInvestment} from "../../src/TokenInvestment.sol";
+import {ProjectFactory} from "../../src/ProjectFactory.sol";
+import {ProjectNFT} from "../../src/ProjectNFT.sol";
 
 contract PlatformRegistryTest is Test {
+    PlatformRegistry public implementation;
     PlatformRegistry public registry;
+    ERC1967Proxy public proxy;
+
     address public owner;
     address public treasury;
     address public oracle;
+    address public factory;
     address public user1;
     address public user2;
 
@@ -20,56 +28,41 @@ contract PlatformRegistryTest is Test {
         owner = address(this);
         treasury = makeAddr("treasury");
         oracle = makeAddr("oracle");
+        factory = makeAddr("factory");
         user1 = makeAddr("user1");
         user2 = makeAddr("user2");
 
-        // Create verification oracle
-        VerificationOracle verificationOracle = new VerificationOracle(1);
-        oracle = address(verificationOracle);
+        // Deploy implementation
+        implementation = new PlatformRegistry();
 
-        // Initialize registry with 5% fee (500 basis points)
-        registry = new PlatformRegistry(500, treasury, oracle);
+        // Prepare initialization data
+        bytes memory data = abi.encodeWithSelector(
+            PlatformRegistry.initialize.selector,
+            owner,
+            500, // 5% platform fee
+            treasury,
+            oracle,
+            factory
+        );
 
-        // Add tokens
-        registry.addSupportedToken(address(0x1));
+        // Deploy proxy
+        proxy = new ERC1967Proxy(address(implementation), data);
+
+        // Cast proxy to implementation type for easier testing
+        registry = PlatformRegistry(address(proxy));
 
         // Give users some ETH
         vm.deal(user1, 10 ether);
         vm.deal(user2, 10 ether);
     }
 
-    function testCreateProject() public {
-        string memory name = "Test Project";
-        string memory description = "Test Description";
-        uint256 fundingGoal = 5 ether;
-        uint256 duration = 30 days;
-        bool isFlexibleFunding = false;
-        address[] memory teamMembers = new address[](1);
-        teamMembers[0] = user2;
-
-        vm.prank(user1);
-        vm.expectEmit(true, true, false, false);
-        emit ProjectCreated(address(0), user1); // We don't know the exact address, so using address(0)
-
-        address projectAddr =
-            registry.createProject(name, description, fundingGoal, duration, isFlexibleFunding, teamMembers);
-
-        assertTrue(registry.registeredProjects(projectAddr), "Project should be registered");
-        Project project = Project(payable(projectAddr));
-
-        // Check project was initialized correctly
-        (string memory pName, string memory pDesc, address pCreator, uint256 pFundingGoal,,,, bool pIsFlexibleFunding) =
-            project.getProjectDetails();
-
-        assertEq(pName, name, "Project name mismatch");
-        assertEq(pDesc, description, "Project description mismatch");
-        assertEq(pCreator, user1, "Project creator mismatch");
-        assertEq(pFundingGoal, fundingGoal, "Project funding goal mismatch");
-        assertEq(pIsFlexibleFunding, isFlexibleFunding, "Project funding type mismatch");
-
-        // Check team members
-        assertTrue(project.teamMembers(user1), "Creator should be a team member");
-        assertTrue(project.teamMembers(user2), "User2 should be a team member");
+    function testInitialization() public {
+        assertEq(registry.platformFeePercentage(), 500, "Wrong platform fee");
+        assertEq(registry.platformTreasury(), treasury, "Wrong treasury address");
+        assertEq(registry.verificationOracle(), oracle, "Wrong oracle address");
+        assertEq(registry.projectFactory(), factory, "Wrong factory address");
+        assertTrue(registry.hasRole(registry.ADMIN_ROLE(), owner), "Owner should have ADMIN_ROLE");
+        assertTrue(registry.hasRole(registry.UPGRADER_ROLE(), owner), "Owner should have UPGRADER_ROLE");
     }
 
     function testUpdatePlatformFee() public {
@@ -91,40 +84,75 @@ contract PlatformRegistryTest is Test {
         registry.updatePlatformFee(newFee);
     }
 
-    function testPausePlatform() public {
-        registry.pausePlatform();
-        assertTrue(registry.paused(), "Platform should be paused");
+    function testTokenSupport() public {
+        address token = makeAddr("token");
+        assertFalse(registry.isSupportedToken(token), "Token should not be supported initially");
 
-        string memory name = "Test Project";
-        string memory description = "Test Description";
-        uint256 fundingGoal = 5 ether;
-        uint256 duration = 30 days;
-        bool isFlexibleFunding = false;
-        address[] memory teamMembers = new address[](0);
+        registry.addSupportedToken(token);
+        assertTrue(registry.isSupportedToken(token), "Token should be supported after adding");
 
-        vm.prank(user1);
-        vm.expectRevert(abi.encodeWithSignature("EnforcedPause()"));
-        registry.createProject(name, description, fundingGoal, duration, isFlexibleFunding, teamMembers);
-
-        registry.unpausePlatform();
-        assertFalse(registry.paused(), "Platform should be unpaused");
+        registry.removeSupportedToken(token);
+        assertFalse(registry.isSupportedToken(token), "Token should not be supported after removal");
     }
 
-    function testGetProjectCount() public {
-        uint256 initialCount = registry.getProjectCount();
+    function testUpdateOracle() public {
+        address newOracle = makeAddr("newOracle");
+        registry.updateVerificationOracle(newOracle);
+        assertEq(registry.verificationOracle(), newOracle, "Oracle not updated");
+    }
 
-        // Create a project
-        string memory name = "Test Project";
-        string memory description = "Test Description";
-        uint256 fundingGoal = 5 ether;
-        uint256 duration = 30 days;
-        bool isFlexibleFunding = false;
-        address[] memory teamMembers = new address[](0);
+    function testUpdateTreasury() public {
+        address newTreasury = makeAddr("newTreasury");
+        registry.updateTreasury(newTreasury);
+        assertEq(registry.platformTreasury(), newTreasury, "Treasury not updated");
+    }
 
-        vm.prank(user1);
-        registry.createProject(name, description, fundingGoal, duration, isFlexibleFunding, teamMembers);
+    function testUpdateFactory() public {
+        address newFactory = makeAddr("newFactory");
+        registry.updateProjectFactory(newFactory);
+        assertEq(registry.projectFactory(), newFactory, "Factory not updated");
+    }
 
-        uint256 newCount = registry.getProjectCount();
-        assertEq(newCount, initialCount + 1, "Project count should be incremented");
+    function testPauseUnpause() public {
+        assertFalse(registry.paused(), "Should not be paused initially");
+
+        registry.pausePlatform();
+        assertTrue(registry.paused(), "Should be paused after pausePlatform");
+
+        registry.unpausePlatform();
+        assertFalse(registry.paused(), "Should not be paused after unpausePlatform");
+    }
+
+    function testRoleManagement() public {
+        address newCreator = makeAddr("newCreator");
+        assertFalse(registry.hasRole(registry.PROJECT_CREATOR_ROLE(), newCreator), "Should not have role initially");
+
+        registry.grantProjectCreatorRole(newCreator);
+        assertTrue(registry.hasRole(registry.PROJECT_CREATOR_ROLE(), newCreator), "Should have role after granting");
+
+        registry.revokeRole(registry.PROJECT_CREATOR_ROLE(), newCreator);
+        assertFalse(
+            registry.hasRole(registry.PROJECT_CREATOR_ROLE(), newCreator), "Should not have role after revoking"
+        );
+    }
+
+    function testUpgrade() public {
+        // Deploy new implementation
+        PlatformRegistry newImplementation = new PlatformRegistry();
+
+        // Upgrade
+        registry.upgradeToAndCall(address(newImplementation), "");
+
+        // Verify upgrade successful
+        address implementationAddress;
+        bytes32 slot = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+        assembly {
+            implementationAddress := sload(slot)
+        }
+
+        assertEq(implementationAddress, address(newImplementation), "Implementation not updated");
+
+        // Verify state preserved
+        assertEq(registry.platformFeePercentage(), 500, "State not preserved after upgrade");
     }
 }

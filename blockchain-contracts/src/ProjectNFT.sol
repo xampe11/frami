@@ -1,23 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 // Platform registry interface
 interface IPlatformRegistry {
     function isProjectRegistered(address) external view returns (bool);
 }
 
-contract ProjectNFT is ERC721URIStorage, Ownable {
+contract ProjectNFTStorage {
     // Platform registry
-    address public platformRegistry;
+    address internal _platformRegistry;
 
     // Project tracking
-    mapping(address => bool) public authorizedProjects;
+    mapping(address => bool) internal _authorizedProjects;
 
     // NFT minting tracking
-    uint256 public tokenIdCounter;
+    uint256 internal _tokenIdCounter;
 
     // NFT tiers
     struct NFTTier {
@@ -29,85 +32,212 @@ contract ProjectNFT is ERC721URIStorage, Ownable {
     }
 
     // project -> tier ID -> tier data
-    mapping(address => mapping(uint256 => NFTTier)) public projectTiers;
-    mapping(address => uint256) public projectTierCount;
+    mapping(address => mapping(uint256 => NFTTier)) internal _projectTiers;
+    mapping(address => uint256) internal _projectTierCount;
 
     // NFT ownership tracking
     // investor -> project -> bool
-    mapping(address => mapping(address => bool)) public hasProjectNFT;
+    mapping(address => mapping(address => bool)) internal _hasProjectNFT;
+}
+
+contract ProjectNFT is
+    Initializable,
+    ProjectNFTStorage,
+    ERC721URIStorageUpgradeable,
+    OwnableUpgradeable,
+    AccessControlUpgradeable,
+    UUPSUpgradeable
+{
+    // Access control roles
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+    bytes32 public constant PROJECT_ROLE = keccak256("PROJECT_ROLE");
 
     // Events
     event ProjectAuthorized(address indexed project);
     event TierCreated(address indexed project, uint256 indexed tierId);
     event NFTMinted(address indexed to, uint256 indexed tokenId, address indexed project, uint256 tierId);
 
-    constructor(address _platformRegistry) ERC721("Real World Project Investment", "RWPI") Ownable(msg.sender) {
-        platformRegistry = _platformRegistry;
+    /**
+     * @dev Prevents initialization function from being called twice
+     */
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
     }
 
-    // Authorize project to mint NFTs
-    function authorizeProject(address _project) external onlyOwner {
-        require(IPlatformRegistry(platformRegistry).isProjectRegistered(_project), "Invalid project");
-        authorizedProjects[_project] = true;
-        emit ProjectAuthorized(_project);
+    /**
+     * @dev Initializes the contract
+     */
+    function initialize(address initialOwner, address platformRegistry) external initializer {
+        __ERC721_init("Real World Project Investment", "RWPI");
+        __ERC721URIStorage_init();
+        __Ownable_init(initialOwner);
+        __AccessControl_init();
+        __UUPSUpgradeable_init();
+
+        _platformRegistry = platformRegistry;
+
+        // Set up access control
+        _grantRole(DEFAULT_ADMIN_ROLE, initialOwner);
+        _grantRole(ADMIN_ROLE, initialOwner);
+        _grantRole(UPGRADER_ROLE, initialOwner);
     }
 
-    // Create NFT tier for a project
-    function createTier(string memory _name, string memory _description, uint256 _minInvestment, string memory _baseURI)
+    /**
+     * @dev Authorize project to mint NFTs
+     */
+    function authorizeProject(address project) external onlyRole(ADMIN_ROLE) {
+        require(IPlatformRegistry(_platformRegistry).isProjectRegistered(project), "Invalid project");
+        _authorizedProjects[project] = true;
+        _grantRole(PROJECT_ROLE, project);
+
+        emit ProjectAuthorized(project);
+    }
+
+    /**
+     * @dev Create NFT tier for a project
+     */
+    function createTier(string memory name, string memory description, uint256 minInvestment, string memory baseURI)
         external
+        onlyRole(PROJECT_ROLE)
     {
-        require(authorizedProjects[msg.sender], "Not authorized project");
+        require(_authorizedProjects[msg.sender], "Not authorized project");
 
-        uint256 tierId = projectTierCount[msg.sender];
+        uint256 tierId = _projectTierCount[msg.sender];
 
-        projectTiers[msg.sender][tierId] = NFTTier({
-            name: _name,
-            description: _description,
-            minInvestment: _minInvestment,
-            baseURI: _baseURI,
+        _projectTiers[msg.sender][tierId] = NFTTier({
+            name: name,
+            description: description,
+            minInvestment: minInvestment,
+            baseURI: baseURI,
             active: true
         });
 
-        projectTierCount[msg.sender]++;
+        _projectTierCount[msg.sender]++;
 
         emit TierCreated(msg.sender, tierId);
     }
 
-    // Mint NFT for investor
-    function mintInvestorNFT(address _investor, uint256 _tierId) external returns (uint256) {
-        require(authorizedProjects[msg.sender], "Not authorized project");
-        require(projectTiers[msg.sender][_tierId].active, "Tier not active");
-        require(!hasProjectNFT[_investor][msg.sender], "Already has project NFT");
+    /**
+     * @dev Mint NFT for investor
+     */
+    function mintInvestorNFT(address investor, uint256 tierId) external onlyRole(PROJECT_ROLE) returns (uint256) {
+        require(_authorizedProjects[msg.sender], "Not authorized project");
+        require(_projectTiers[msg.sender][tierId].active, "Tier not active");
+        require(!_hasProjectNFT[investor][msg.sender], "Already has project NFT");
 
         // Get next token ID
-        uint256 tokenId = tokenIdCounter;
-        tokenIdCounter++;
+        uint256 tokenId = _tokenIdCounter;
+        _tokenIdCounter++;
 
         // Mint NFT
-        _safeMint(_investor, tokenId);
-        _setTokenURI(tokenId, projectTiers[msg.sender][_tierId].baseURI);
+        _safeMint(investor, tokenId);
+        _setTokenURI(tokenId, _projectTiers[msg.sender][tierId].baseURI);
 
         // Mark investor as having an NFT for this project
-        hasProjectNFT[_investor][msg.sender] = true;
+        _hasProjectNFT[investor][msg.sender] = true;
 
-        emit NFTMinted(_investor, tokenId, msg.sender, _tierId);
+        emit NFTMinted(investor, tokenId, msg.sender, tierId);
 
         return tokenId;
     }
 
-    // Disable tier
-    function disableTier(uint256 _tierId) external {
-        require(authorizedProjects[msg.sender], "Not authorized project");
-        require(_tierId < projectTierCount[msg.sender], "Invalid tier");
+    /**
+     * @dev Disable tier
+     */
+    function disableTier(uint256 tierId) external onlyRole(PROJECT_ROLE) {
+        require(_authorizedProjects[msg.sender], "Not authorized project");
+        require(tierId < _projectTierCount[msg.sender], "Invalid tier");
 
-        projectTiers[msg.sender][_tierId].active = false;
+        _projectTiers[msg.sender][tierId].active = false;
     }
 
-    // Enable tier
-    function enableTier(uint256 _tierId) external {
-        require(authorizedProjects[msg.sender], "Not authorized project");
-        require(_tierId < projectTierCount[msg.sender], "Invalid tier");
+    /**
+     * @dev Enable tier
+     */
+    function enableTier(uint256 tierId) external onlyRole(PROJECT_ROLE) {
+        require(_authorizedProjects[msg.sender], "Not authorized project");
+        require(tierId < _projectTierCount[msg.sender], "Invalid tier");
 
-        projectTiers[msg.sender][_tierId].active = true;
+        _projectTiers[msg.sender][tierId].active = true;
+    }
+
+    /**
+     * @dev Check if a project is authorized
+     */
+    function isProjectAuthorized(address project) external view returns (bool) {
+        return _authorizedProjects[project];
+    }
+
+    /**
+     * @dev Get tier count for a project
+     */
+    function getProjectTierCount(address project) external view returns (uint256) {
+        return _projectTierCount[project];
+    }
+
+    /**
+     * @dev Get tier details
+     */
+    function getTierDetails(address project, uint256 tierId)
+        external
+        view
+        returns (
+            string memory name,
+            string memory description,
+            uint256 minInvestment,
+            string memory baseURI,
+            bool active
+        )
+    {
+        require(tierId < _projectTierCount[project], "Invalid tier");
+
+        NFTTier storage tier = _projectTiers[project][tierId];
+        return (tier.name, tier.description, tier.minInvestment, tier.baseURI, tier.active);
+    }
+
+    /**
+     * @dev Check if investor has NFT for project
+     */
+    function hasProjectNFT(address investor, address project) external view returns (bool) {
+        return _hasProjectNFT[investor][project];
+    }
+
+    /**
+     * @dev Get platform registry
+     */
+    function getPlatformRegistry() external view returns (address) {
+        return _platformRegistry;
+    }
+
+    /**
+     * @dev Update platform registry
+     */
+    function updatePlatformRegistry(address newRegistry) external onlyRole(ADMIN_ROLE) {
+        require(newRegistry != address(0), "Invalid registry address");
+        _platformRegistry = newRegistry;
+    }
+
+    /**
+     * @dev Authorization for upgrades
+     */
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {
+        // Additional upgrade logic if needed
+    }
+
+    // Override functions required by Solidity
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721URIStorageUpgradeable, AccessControlUpgradeable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 }

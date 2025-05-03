@@ -1,0 +1,138 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.28;
+
+import "forge-std/Script.sol";
+import {ERC1967Proxy} from "../src/proxy/ERC1967Proxy.sol";
+import {ProxyAdmin} from "../src/proxy/ProxyAdmin.sol";
+import {PlatformRegistry} from "../src/PlatformRegistry.sol";
+import {Project} from "../src/Project.sol";
+import {VerificationOracle} from "../src/VerificationOracle.sol";
+import {TokenInvestment} from "../src/TokenInvestment.sol";
+import {ProjectFactory} from "../src/ProjectFactory.sol";
+import {ProjectNFT} from "../src/ProjectNFT.sol";
+
+contract DeployUpgradeableScript is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployer = vm.addr(deployerPrivateKey);
+
+        vm.startBroadcast(deployerPrivateKey);
+
+        // Deploy ProxyAdmin for managing proxies
+        ProxyAdmin proxyAdmin = new ProxyAdmin(deployer);
+        console.log("ProxyAdmin deployed at:", address(proxyAdmin));
+
+        // Deploy implementation contracts
+        PlatformRegistry platformRegistryImpl = new PlatformRegistry();
+        console.log("PlatformRegistry implementation deployed at:", address(platformRegistryImpl));
+
+        VerificationOracle verificationOracleImpl = new VerificationOracle();
+        console.log("VerificationOracle implementation deployed at:", address(verificationOracleImpl));
+
+        ProjectFactory projectFactoryImpl = new ProjectFactory();
+        console.log("ProjectFactory implementation deployed at:", address(projectFactoryImpl));
+
+        Project projectImpl = new Project();
+        console.log("Project implementation deployed at:", address(projectImpl));
+
+        TokenInvestment tokenInvestmentImpl = new TokenInvestment();
+        console.log("TokenInvestment implementation deployed at:", address(tokenInvestmentImpl));
+
+        ProjectNFT projectNFTImpl = new ProjectNFT();
+        console.log("ProjectNFT implementation deployed at:", address(projectNFTImpl));
+
+        // Deploy Verification Oracle proxy first
+        bytes memory verificationOracleData = abi.encodeWithSelector(
+            VerificationOracle.initialize.selector,
+            deployer, // initialOwner
+            2 // requiredVerifications
+        );
+
+        ERC1967Proxy verificationOracleProxy = new ERC1967Proxy(address(verificationOracleImpl), verificationOracleData);
+        console.log("VerificationOracle proxy deployed at:", address(verificationOracleProxy));
+
+        // Treasury address - you can use a separate address in production
+        address treasury = deployer;
+
+        // Deploy Platform Registry proxy
+        bytes memory platformRegistryData = abi.encodeWithSelector(
+            PlatformRegistry.initialize.selector,
+            deployer, // initialOwner
+            500, // 5% platform fee
+            treasury, // treasury address
+            address(verificationOracleProxy), // oracle address
+            address(0) // factory address (will be updated after deployment)
+        );
+
+        ERC1967Proxy platformRegistryProxy = new ERC1967Proxy(address(platformRegistryImpl), platformRegistryData);
+        console.log("PlatformRegistry proxy deployed at:", address(platformRegistryProxy));
+
+        // Deploy Project Factory proxy
+        bytes memory projectFactoryData = abi.encodeWithSelector(
+            ProjectFactory.initialize.selector,
+            deployer, // initialOwner
+            address(platformRegistryProxy), // registry address
+            address(projectImpl) // project implementation
+        );
+
+        ERC1967Proxy projectFactoryProxy = new ERC1967Proxy(address(projectFactoryImpl), projectFactoryData);
+        console.log("ProjectFactory proxy deployed at:", address(projectFactoryProxy));
+
+        // Deploy ProjectNFT proxy
+        bytes memory projectNFTData = abi.encodeWithSelector(
+            ProjectNFT.initialize.selector,
+            deployer, // initialOwner
+            address(platformRegistryProxy) // registry address
+        );
+
+        ERC1967Proxy projectNFTProxy = new ERC1967Proxy(address(projectNFTImpl), projectNFTData);
+        console.log("ProjectNFT proxy deployed at:", address(projectNFTProxy));
+
+        // Deploy Token Investment proxy
+        bytes memory tokenInvestmentData = abi.encodeWithSelector(
+            TokenInvestment.initialize.selector,
+            deployer, // initialOwner
+            address(platformRegistryProxy) // registry address
+        );
+
+        ERC1967Proxy tokenInvestmentProxy = new ERC1967Proxy(address(tokenInvestmentImpl), tokenInvestmentData);
+        console.log("TokenInvestment proxy deployed at:", address(tokenInvestmentProxy));
+
+        // Update registry with factory address
+        PlatformRegistry platformRegistry = PlatformRegistry(address(platformRegistryProxy));
+        platformRegistry.updateProjectFactory(address(projectFactoryProxy));
+        console.log("Updated PlatformRegistry with ProjectFactory address");
+
+        // Grant roles for various contracts
+
+        // Set up the VerificationOracle roles
+        VerificationOracle verificationOracle = VerificationOracle(address(verificationOracleProxy));
+        verificationOracle.grantRole(verificationOracle.VERIFIER_ROLE(), deployer);
+        console.log("Granted VERIFIER_ROLE to deployer in VerificationOracle");
+
+        // Grant ProjectFactory registry access
+        ProjectFactory projectFactory = ProjectFactory(address(projectFactoryProxy));
+        projectFactory.grantRole(projectFactory.ADMIN_ROLE(), address(platformRegistryProxy));
+        console.log("Granted ADMIN_ROLE to PlatformRegistry in ProjectFactory");
+
+        // Add a supported token in the registry for testing (this could be any ERC20 token)
+        address testToken = address(0x1); // Replace with an actual token in production
+        platformRegistry.addSupportedToken(testToken);
+        console.log("Added supported token to registry:", testToken);
+
+        // Optional: Grant additional roles to deployer or other addresses
+        platformRegistry.grantProjectCreatorRole(deployer);
+        console.log("Granted PROJECT_CREATOR_ROLE to deployer in PlatformRegistry");
+
+        // Optional: Transfer proxy admin ownership to a multisig in production
+        // proxyAdmin.transferOwnership(multiSigAddress);
+
+        vm.stopBroadcast();
+
+        console.log("Deployment completed successfully!");
+        console.log("Next steps:");
+        console.log("1. Verify contracts on block explorer");
+        console.log("2. Configure additional roles and permissions");
+        console.log("3. Set up frontend to interact with deployed contracts");
+    }
+}
