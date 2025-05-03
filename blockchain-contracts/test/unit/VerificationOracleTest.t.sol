@@ -38,7 +38,7 @@ contract VerificationOracleTest is Test {
         oracle = VerificationOracle(address(proxy));
     }
 
-    function testInitialization() public {
+    function testInitialization() public view {
         assertEq(oracle.getRequiredVerifications(), 2, "Wrong required verifications");
         assertTrue(oracle.hasRole(oracle.ADMIN_ROLE(), owner), "Owner should have ADMIN_ROLE");
         assertTrue(oracle.hasRole(oracle.UPGRADER_ROLE(), owner), "Owner should have UPGRADER_ROLE");
