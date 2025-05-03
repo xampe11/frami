@@ -58,7 +58,7 @@ contract ProjectNFTTest is Test {
         nft = ProjectNFT(address(proxy));
     }
 
-    function testInitialization() public {
+    function testInitialization() public view {
         assertEq(nft.getPlatformRegistry(), registryAddr, "Wrong registry address");
         assertEq(nft.name(), "Real World Project Investment", "Wrong token name");
         assertEq(nft.symbol(), "RWPI", "Wrong token symbol");
