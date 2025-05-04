@@ -19,6 +19,27 @@ contract MockVerificationOracle {
     }
 }
 
+contract MockRegistry {
+    mapping(address => bool) public registeredFactories;
+
+    function registerFactory(address factory) external {
+        registeredFactories[factory] = true;
+    }
+
+    function isFactoryRegistered(address factory) external view returns (bool) {
+        return registeredFactories[factory];
+    }
+
+    // Add any other functions your Project contract might call during initialization
+}
+
+enum ProjectState {
+    Active,
+    Successful,
+    Failed,
+    Cancelled
+}
+
 contract ProjectTest is Test {
     Project public implementation;
     Project public project;
@@ -60,8 +81,17 @@ contract ProjectTest is Test {
         MockVerificationOracle mockOracle = new MockVerificationOracle();
         oracle = address(mockOracle);
 
+        // Deploy a mock registry that handles isFactoryRegistered calls
+        MockRegistry mockRegistry = new MockRegistry();
+        // Register the test contract as a factory so initialization succeeds
+        mockRegistry.registerFactory(address(this));
+        registry = address(mockRegistry);
+
         // Deploy implementation
         implementation = new Project();
+
+        // Empty team members array
+        address[] memory teamMembers = new address[](0);
 
         // Prepare initialization data
         bytes memory data = abi.encodeWithSelector(
@@ -76,7 +106,7 @@ contract ProjectTest is Test {
             treasury,
             oracle,
             registry,
-            new address[](0) // Empty team members array
+            teamMembers
         );
 
         // Deploy proxy
@@ -90,7 +120,7 @@ contract ProjectTest is Test {
         vm.deal(investor2, 10 ether);
     }
 
-    function testInitialization() public {
+    function testInitialization() public view {
         (
             string memory name,
             string memory description,
@@ -236,16 +266,36 @@ contract ProjectTest is Test {
         // Move time forward
         vm.warp(block.timestamp + duration + 1);
 
-        // Check and update state
-        vm.expectEmit(true, false, false, false);
-        emit ProjectStateChanged(uint256(1));
+        // Start recording events
+        vm.recordLogs();
 
         Project.State newState = project.checkAndUpdateState();
 
+        // Get the recorded logs
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
         assertEq(uint256(newState), uint256(1), "Project should be Successful");
+
+        // Verify event emission
+        bool foundEvent = false;
+        bytes32 expectedEventSignature = keccak256("ProjectStateChanged(uint8)");
+
+        for (uint256 i = 0; i < logs.length; i++) {
+            // Check if this log is the event we're looking for
+            if (logs[i].topics[0] == expectedEventSignature) {
+                // It's our event, now decode the parameters
+                // The event parameter (uint8 newState) is in logs[i].data
+                uint8 emittedState = uint8(uint256(bytes32(logs[i].data)));
+                assertEq(emittedState, uint8(ProjectState.Successful), "Event emitted with wrong state");
+                foundEvent = true;
+                break;
+            }
+        }
+
+        assertTrue(foundEvent, "ProjectStateChanged event not emitted");
     }
 
-    function testFailedFunding() public {
+    function test_RevertWhen_FundingFails() public {
         // Invest less than goal
         vm.prank(investor1);
         project.invest{value: fundingGoal / 2}();
@@ -253,13 +303,33 @@ contract ProjectTest is Test {
         // Move time forward
         vm.warp(block.timestamp + duration + 1);
 
-        // Check and update state
-        vm.expectEmit(true, false, false, false);
-        emit ProjectStateChanged(uint256(2));
+        // Start recording events
+        vm.recordLogs();
 
         Project.State newState = project.checkAndUpdateState();
 
+        // Get the recorded logs
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
         assertEq(uint256(newState), uint256(2), "Project should be Failed");
+
+        // Verify event emission
+        bool foundEvent = false;
+        bytes32 expectedEventSignature = keccak256("ProjectStateChanged(uint8)");
+
+        for (uint256 i = 0; i < logs.length; i++) {
+            // Check if this log is the event we're looking for
+            if (logs[i].topics[0] == expectedEventSignature) {
+                // It's our event, now decode the parameters
+                // The event parameter (uint8 newState) is in logs[i].data
+                uint8 emittedState = uint8(uint256(bytes32(logs[i].data)));
+                assertEq(emittedState, uint8(ProjectState.Failed), "Event emitted with wrong state");
+                foundEvent = true;
+                break;
+            }
+        }
+
+        assertTrue(foundEvent, "ProjectStateChanged event not emitted");
     }
 
     function testFlexibleFundingSuccess() public {
@@ -407,16 +477,44 @@ contract ProjectTest is Test {
         vm.prank(investor1);
         project.invest{value: 1 ether}();
 
+        // Start recording events
+        vm.recordLogs();
+
+        // Get the current project state
+        Project.State stateBefore = project.getProjectState();
+
         // Cancel project
         vm.prank(creator);
-        vm.expectEmit(true, false, false, false);
-        emit ProjectStateChanged(uint256(3));
 
         project.cancelProject();
+
+        // Get the recorded logs
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        // Get the current project state after cancel
+        Project.State stateAfter = project.getProjectState();
 
         // Verify state
         (,,,,,, Project.State projectState,) = project.getProjectDetails();
         assertEq(uint256(projectState), uint256(3), "Project should be Cancelled");
+        assertFalse(uint256(stateBefore) == uint256(stateAfter), "State should have changed");
+
+        // Verify event emission
+        bool foundEvent = false;
+        bytes32 expectedEventSignature = keccak256("ProjectStateChanged(uint8)");
+
+        for (uint256 i = 0; i < logs.length; i++) {
+            // Check if this log is the event we're looking for
+            if (logs[i].topics[0] == expectedEventSignature) {
+                // It's our event, now decode the parameters
+                uint8 emittedState = uint8(uint256(bytes32(logs[i].data)));
+                assertEq(emittedState, uint8(ProjectState.Cancelled), "Event emitted with wrong state");
+                foundEvent = true;
+                break;
+            }
+        }
+
+        assertTrue(foundEvent, "ProjectStateChanged event not emitted");
 
         // Try to invest after cancellation
         vm.prank(investor2);

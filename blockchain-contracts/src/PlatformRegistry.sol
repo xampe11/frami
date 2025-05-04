@@ -250,6 +250,13 @@ contract PlatformRegistry is
     }
 
     /**
+     * @dev Returns if the project factory is registered
+     */
+    function isFactoryRegistered(address factory) external view returns (bool) {
+        return factory == projectFactory;
+    }
+
+    /**
      * @dev Returns if a token is supported
      */
     function isSupportedToken(address token) external view returns (bool) {

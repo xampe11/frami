@@ -2,6 +2,7 @@
 pragma solidity 0.8.28;
 
 import "forge-std/Test.sol";
+import "forge-std/console.sol";
 import {ERC1967Proxy} from "../../src/proxy/ERC1967Proxy.sol";
 import {PlatformRegistry} from "../../src/PlatformRegistry.sol";
 import {Project} from "../../src/Project.sol";
@@ -309,7 +310,7 @@ contract IntegrationTest is Test {
         assertEq(treasury.balance, treasuryBalanceBefore + platformFee, "Treasury should receive fee");
     }
 
-    function testFailedProjectRefunds() public {
+    function test_RevertWhen_FailedProjectRefunds() public {
         // Create project with high funding goal
         vm.startPrank(creator);
         address[] memory teamMembers = new address[](0);

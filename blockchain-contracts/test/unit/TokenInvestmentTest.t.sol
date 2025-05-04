@@ -114,8 +114,12 @@ contract MockProject {
         state = State(_state);
     }
 
-    function isFlexibleFunding() external view returns (bool) {
+    function getIsFlexibleFunding() external view returns (bool) {
         return isFlexibleFundingValue;
+    }
+
+    function getProjectState() external view returns (uint8) {
+        return uint8(state);
     }
 }
 
@@ -152,6 +156,7 @@ contract TokenInvestmentTest is Test {
         // Create mock project
         mockProject = new MockProject(false); // all-or-nothing funding
         project = address(mockProject);
+        MockRegistry(registry).registerProject(project);
 
         // Create test token
         token = new MockERC20("Test Token", "TEST");
@@ -325,6 +330,13 @@ contract TokenInvestmentTest is Test {
     }
 
     function testClaimRefundForCancelledProject() public {
+        // Create a mock project first
+        mockProject = new MockProject(false); // all-or-nothing funding
+        project = address(mockProject);
+
+        // Make sure to register the project in the mock registry
+        MockRegistry(registry).registerProject(project);
+
         // Invest
         uint256 investAmount = 10 ether;
         vm.prank(investor1);

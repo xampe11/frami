@@ -119,20 +119,35 @@ contract VerificationOracleTest is Test {
     function testUpgrade() public {
         // Deploy new implementation
         VerificationOracle newImplementation = new VerificationOracle();
+        address newImplAddress = address(newImplementation);
+
+        // Start recording logs
+        vm.recordLogs();
 
         // Upgrade
         oracle.upgradeToAndCall(address(newImplementation), "");
 
-        // Verify upgrade successful
-        address implementationAddress;
-        bytes32 slot = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
-        assembly {
-            implementationAddress := sload(slot)
+        // Get the recorded logs
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        // Define the expected event signature
+        bytes32 upgradeEventSignature = keccak256("Upgraded(address)");
+
+        // Find the Upgraded event and verify the implementation address
+        bool foundEvent = false;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].topics[0] == upgradeEventSignature) {
+                // The address parameter is in the second topic
+                address upgradedAddress = address(uint160(uint256(logs[i].topics[1])));
+                assertEq(upgradedAddress, newImplAddress, "Upgraded to wrong implementation");
+                foundEvent = true;
+                break;
+            }
         }
 
-        assertEq(implementationAddress, address(newImplementation), "Implementation not updated");
+        assertTrue(foundEvent, "Upgraded event not emitted");
 
-        // Verify state preserved
+        // Verify state preservation
         assertEq(oracle.getRequiredVerifications(), 2, "State not preserved after upgrade");
     }
 }

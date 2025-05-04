@@ -23,11 +23,11 @@ interface IVerificationOracle {
 interface IProjectFactoryRegistry {
     function isFactoryRegistered(address factory) external view returns (bool);
 }
+
 /**
  * @title ProjectStorage
  * @dev Storage contract for Project
  */
-
 contract ProjectStorage {
     // Project configuration
     string internal _name;

@@ -47,11 +47,11 @@ interface IProjectFactoryRegistry {
 interface ITokenRegistry {
     function isSupportedToken(address token) external view returns (bool);
 }
-
 /**
  * @title IERC20
  * @dev Simplified ERC20 interface
  */
+
 interface IERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     function transfer(address recipient, uint256 amount) external returns (bool);
