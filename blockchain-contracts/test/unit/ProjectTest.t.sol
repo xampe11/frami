@@ -4,7 +4,6 @@ pragma solidity 0.8.28;
 import "forge-std/Test.sol";
 import {ERC1967Proxy} from "../../src/proxy/ERC1967Proxy.sol";
 import {Project} from "../../src/Project.sol";
-import {TokenInvestment} from "../../src/TokenInvestment.sol";
 import {VerificationOracle} from "../../src/VerificationOracle.sol";
 
 contract MockVerificationOracle {

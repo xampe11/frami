@@ -10,17 +10,89 @@ import {VerificationOracle} from "../../src/VerificationOracle.sol";
 import {ProjectFactory} from "../../src/ProjectFactory.sol";
 import {ProjectNFT} from "../../src/ProjectNFT.sol";
 
+// Mock ERC20 for testing
+contract MockERC20 {
+    string public name;
+    string public symbol;
+    uint8 public decimals = 18;
+
+    mapping(address => uint256) private _balances;
+    mapping(address => mapping(address => uint256)) private _allowances;
+    uint256 private _totalSupply;
+
+    constructor(string memory name_, string memory symbol_) {
+        name = name_;
+        symbol = symbol_;
+    }
+
+    function mint(address account, uint256 amount) external {
+        _mint(account, amount);
+    }
+
+    function _mint(address account, uint256 amount) internal {
+        require(account != address(0), "ERC20: mint to the zero address");
+
+        _totalSupply += amount;
+        _balances[account] += amount;
+    }
+
+    function balanceOf(address account) external view returns (uint256) {
+        return _balances[account];
+    }
+
+    function transfer(address recipient, uint256 amount) external returns (bool) {
+        _transfer(msg.sender, recipient, amount);
+        return true;
+    }
+
+    function _transfer(address sender, address recipient, uint256 amount) internal {
+        require(sender != address(0), "ERC20: transfer from the zero address");
+        require(recipient != address(0), "ERC20: transfer to the zero address");
+
+        _balances[sender] -= amount;
+        _balances[recipient] += amount;
+    }
+
+    function approve(address spender, uint256 amount) external returns (bool) {
+        _approve(msg.sender, spender, amount);
+        return true;
+    }
+
+    function _approve(address owner, address spender, uint256 amount) internal {
+        require(owner != address(0), "ERC20: approve from the zero address");
+        require(spender != address(0), "ERC20: approve to the zero address");
+
+        _allowances[owner][spender] = amount;
+    }
+
+    function allowance(address owner, address spender) external view returns (uint256) {
+        return _allowances[owner][spender];
+    }
+
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool) {
+        _transfer(sender, recipient, amount);
+
+        uint256 currentAllowance = _allowances[sender][msg.sender];
+        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
+        _approve(sender, msg.sender, currentAllowance - amount);
+
+        return true;
+    }
+}
+
 contract IntegrationTest is Test {
     // Proxies
     ERC1967Proxy public registryProxy;
     ERC1967Proxy public oracleProxy;
     ERC1967Proxy public factoryProxy;
+    ERC1967Proxy public tokenInvestmentProxy;
     ERC1967Proxy public nftProxy;
 
     // Implementation contracts (wrapped proxies)
     PlatformRegistry public registry;
     VerificationOracle public oracle;
     ProjectFactory public factory;
+    TokenInvestment public tokenInvestment;
     ProjectNFT public nft;
 
     // Implementation addresses
@@ -28,6 +100,7 @@ contract IntegrationTest is Test {
     address public oracleImpl;
     address public factoryImpl;
     address public projectImpl;
+    address public tokenInvestmentImpl;
     address public nftImpl;
 
     // Test accounts
@@ -41,6 +114,9 @@ contract IntegrationTest is Test {
     // Created project
     address public projectAddress;
     Project public project;
+
+    // Test token
+    MockERC20 public token;
 
     function setUp() public {
         // Setup accounts
@@ -69,8 +145,14 @@ contract IntegrationTest is Test {
         ProjectFactory factoryImplementation = new ProjectFactory();
         factoryImpl = address(factoryImplementation);
 
+        TokenInvestment tokenInvestmentImplementation = new TokenInvestment();
+        tokenInvestmentImpl = address(tokenInvestmentImplementation);
+
         ProjectNFT nftImplementation = new ProjectNFT();
         nftImpl = address(nftImplementation);
+
+        // Deploy test ERC20 token
+        token = new MockERC20("Test Token", "TEST");
 
         // Deploy VerificationOracle proxy
         bytes memory oracleData = abi.encodeWithSelector(
@@ -99,12 +181,8 @@ contract IntegrationTest is Test {
         registry = PlatformRegistry(address(registryProxy));
 
         // Deploy ProjectFactory proxy
-        bytes memory factoryData = abi.encodeWithSelector(
-            ProjectFactory.initialize.selector,
-            owner,
-            address(registryProxy),
-            projectImpl
-        );
+        bytes memory factoryData =
+            abi.encodeWithSelector(ProjectFactory.initialize.selector, owner, address(registryProxy), projectImpl);
 
         factoryProxy = new ERC1967Proxy(factoryImpl, factoryData);
         factory = ProjectFactory(address(factoryProxy));
@@ -112,12 +190,15 @@ contract IntegrationTest is Test {
         // Update registry with factory
         registry.updateProjectFactory(address(factoryProxy));
 
+        // Deploy TokenInvestment proxy
+        bytes memory tokenInvestmentData =
+            abi.encodeWithSelector(TokenInvestment.initialize.selector, owner, address(registryProxy));
+
+        tokenInvestmentProxy = new ERC1967Proxy(tokenInvestmentImpl, tokenInvestmentData);
+        tokenInvestment = TokenInvestment(address(tokenInvestmentProxy));
+
         // Deploy ProjectNFT proxy
-        bytes memory nftData = abi.encodeWithSelector(
-            ProjectNFT.initialize.selector,
-            owner,
-            address(registryProxy)
-        );
+        bytes memory nftData = abi.encodeWithSelector(ProjectNFT.initialize.selector, owner, address(registryProxy));
 
         nftProxy = new ERC1967Proxy(nftImpl, nftData);
         nft = ProjectNFT(address(nftProxy));
@@ -125,6 +206,19 @@ contract IntegrationTest is Test {
         // Set up roles
         registry.grantProjectCreatorRole(creator);
         factory.grantRole(factory.ADMIN_ROLE(), address(registryProxy));
+
+        // Add supported token
+        registry.addSupportedToken(address(token));
+
+        // Mint tokens for investors
+        token.mint(investor1, 100 ether);
+        token.mint(investor2, 100 ether);
+
+        // Approve token spending
+        vm.prank(investor1);
+        token.approve(address(tokenInvestment), 100 ether);
+        vm.prank(investor2);
+        token.approve(address(tokenInvestment), 100 ether);
     }
 
     function testEndToEndProjectLifecycle() public {
@@ -142,10 +236,7 @@ contract IntegrationTest is Test {
         vm.stopPrank();
 
         // Verify project was created
-        assertTrue(
-            registry.isProjectRegistered(projectAddress),
-            "Project should be registered"
-        );
+        assertTrue(registry.isProjectRegistered(projectAddress), "Project should be registered");
         project = Project(payable(projectAddress));
 
         // Step 2: Authorize project for NFTs
@@ -153,12 +244,7 @@ contract IntegrationTest is Test {
 
         // Step 3: Set up NFT tier
         vm.prank(projectAddress);
-        nft.createTier(
-            "Gold Investor",
-            "Premium access and rewards",
-            5 ether,
-            "ipfs://QmTestURI"
-        );
+        nft.createTier("Gold Investor", "Premium access and rewards", 5 ether, "ipfs://QmTestURI");
 
         // Step 4: Create milestones
         vm.startPrank(creator);
@@ -174,47 +260,39 @@ contract IntegrationTest is Test {
         vm.prank(investor1);
         project.invest{value: 6 ether}();
 
-        // Additional investment to reach funding goal
+        // Step 6: Invest with tokens
         vm.prank(investor2);
-        project.invest{value: 5 ether}();
+        tokenInvestment.investWithToken(projectAddress, address(token), 5 ether);
 
-        // Step 6: Mint NFT for investor
+        // Step 7: Mint NFT for investor
         vm.prank(projectAddress);
         uint256 tokenId = nft.mintInvestorNFT(investor1, 0);
 
         // Verify NFT ownership
-        assertEq(
-            nft.ownerOf(tokenId),
-            investor1,
-            "Investor should own the NFT"
-        );
+        assertEq(nft.ownerOf(tokenId), investor1, "Investor should own the NFT");
 
-        // Step 7: Move time forward to end funding period
+        // Step 8: Move time forward to end funding period
         vm.warp(block.timestamp + 31 days);
 
-        // Step 8: Update project state
+        // Step 9: Update project state
         project.checkAndUpdateState();
 
         // Verify project state
-        assertEq(
-            uint8(project.getProjectState()),
-            1,
-            "Project should be Successful"
-        );
+        assertEq(uint8(project.getProjectState()), 1, "Project should be Successful");
 
-        // Step 9: Verify first milestone
+        // Step 10: Verify first milestone
         vm.prank(verifier);
         oracle.submitVerification(projectAddress, 0, true);
 
-        // Step 10: Submit milestone completion
+        // Step 11: Submit milestone completion
         vm.prank(creator);
         project.submitMilestoneCompletion(0);
 
-        // Step 11: Vote on milestone
+        // Step 12: Vote on milestone
         vm.prank(investor1);
         project.voteMilestone(0);
 
-        // Step 12: Release funds for milestone
+        // Step 13: Release funds for milestone
         uint256 creatorBalanceBefore = creator.balance;
         uint256 treasuryBalanceBefore = treasury.balance;
 
@@ -222,22 +300,13 @@ contract IntegrationTest is Test {
         project.releaseMilestoneFunds(0);
 
         // Calculate expected amounts
-        uint256 totalFunding = 11 ether; // 6 ETH + 5 ETH
-        uint256 milestoneAmount = (totalFunding * 3000) / 10000; // 30% of funds
+        uint256 milestoneAmount = (6 ether * 3000) / 10000; // 30% of ETH funds
         uint256 platformFee = (milestoneAmount * 500) / 10000; // 5% fee
         uint256 creatorAmount = milestoneAmount - platformFee;
 
         // Verify balances
-        assertEq(
-            creator.balance,
-            creatorBalanceBefore + creatorAmount,
-            "Creator should receive correct amount"
-        );
-        assertEq(
-            treasury.balance,
-            treasuryBalanceBefore + platformFee,
-            "Treasury should receive fee"
-        );
+        assertEq(creator.balance, creatorBalanceBefore + creatorAmount, "Creator should receive correct amount");
+        assertEq(treasury.balance, treasuryBalanceBefore + platformFee, "Treasury should receive fee");
     }
 
     function test_RevertWhen_FailedProjectRefunds() public {
@@ -261,7 +330,7 @@ contract IntegrationTest is Test {
         project.invest{value: 2 ether}();
 
         vm.prank(investor2);
-        project.invest{value: 3 ether}();
+        tokenInvestment.investWithToken(projectAddress, address(token), 3 ether);
 
         // Fast forward time
         vm.warp(block.timestamp + 31 days);
@@ -270,11 +339,7 @@ contract IntegrationTest is Test {
         project.checkAndUpdateState();
 
         // Verify project failed
-        assertEq(
-            uint8(project.getProjectState()),
-            2,
-            "Project should be Failed"
-        );
+        assertEq(uint8(project.getProjectState()), 2, "Project should be Failed");
 
         // Claim ETH refund
         uint256 investor1BalanceBefore = investor1.balance;
@@ -282,11 +347,15 @@ contract IntegrationTest is Test {
         vm.prank(investor1);
         project.claimRefund();
 
-        assertEq(
-            investor1.balance,
-            investor1BalanceBefore + 2 ether,
-            "Investor should receive full refund"
-        );
+        assertEq(investor1.balance, investor1BalanceBefore + 2 ether, "Investor should receive full refund");
+
+        // Claim token refund
+        uint256 tokenBalanceBefore = token.balanceOf(investor2);
+
+        vm.prank(investor2);
+        tokenInvestment.claimTokenRefund(projectAddress, address(token));
+
+        assertEq(token.balanceOf(investor2), tokenBalanceBefore + 3 ether, "Investor should receive full token refund");
     }
 
     function testFlexibleFunding() public {
@@ -319,11 +388,7 @@ contract IntegrationTest is Test {
         project.checkAndUpdateState();
 
         // Verify project successful despite not meeting goal
-        assertEq(
-            uint8(project.getProjectState()),
-            1,
-            "Flexible funding project should be Successful"
-        );
+        assertEq(uint8(project.getProjectState()), 1, "Flexible funding project should be Successful");
 
         // Try to claim refund - should fail
         vm.prank(investor1);
@@ -349,10 +414,7 @@ contract IntegrationTest is Test {
         project.releaseMilestoneFunds(0);
 
         // Verify creator received funds
-        assertTrue(
-            creator.balance > creatorBalanceBefore,
-            "Creator should receive funds"
-        );
+        assertTrue(creator.balance > creatorBalanceBefore, "Creator should receive funds");
     }
 
     function testCancelledProject() public {
@@ -376,18 +438,14 @@ contract IntegrationTest is Test {
         project.invest{value: 3 ether}();
 
         vm.prank(investor2);
-        project.invest{value: 4 ether}();
+        tokenInvestment.investWithToken(projectAddress, address(token), 4 ether);
 
         // Cancel project
         vm.prank(creator);
         project.cancelProject();
 
         // Verify project state
-        assertEq(
-            uint8(project.getProjectState()),
-            3,
-            "Project should be Cancelled"
-        );
+        assertEq(uint8(project.getProjectState()), 3, "Project should be Cancelled");
 
         // Try to invest after cancellation
         vm.prank(investor1);
@@ -405,6 +463,18 @@ contract IntegrationTest is Test {
             investor1BalanceBefore + 3 ether,
             "Investor should receive full refund after cancellation"
         );
+
+        // Claim token refund
+        uint256 tokenBalanceBefore = token.balanceOf(investor2);
+
+        vm.prank(investor2);
+        tokenInvestment.claimTokenRefund(projectAddress, address(token));
+
+        assertEq(
+            token.balanceOf(investor2),
+            tokenBalanceBefore + 4 ether,
+            "Investor should receive full token refund after cancellation"
+        );
     }
 
     function testProjectUpgrades() public {
@@ -412,17 +482,9 @@ contract IntegrationTest is Test {
         vm.startPrank(creator);
         address[] memory teamMembers = new address[](0);
         projectAddress = registry.createProject(
-            "Upgradeable Project",
-            "A project that tests upgrades",
-            10 ether,
-            30 days,
-            false,
-            teamMembers
+            "Upgradeable Project", "A project that tests upgrades", 10 ether, 30 days, false, teamMembers
         );
         vm.stopPrank();
-
-        // Initialize the project variable
-        project = Project(payable(projectAddress));
 
         // Make investment
         vm.prank(investor1);
@@ -431,32 +493,23 @@ contract IntegrationTest is Test {
         // Deploy new implementation versions
         PlatformRegistry newRegistryImpl = new PlatformRegistry();
         VerificationOracle newOracleImpl = new VerificationOracle();
+        TokenInvestment newTokenInvestmentImpl = new TokenInvestment();
         ProjectNFT newNftImpl = new ProjectNFT();
 
         // Upgrade contracts
         registry.upgradeToAndCall(address(newRegistryImpl), "");
         oracle.upgradeToAndCall(address(newOracleImpl), "");
+        tokenInvestment.upgradeToAndCall(address(newTokenInvestmentImpl), "");
         nft.upgradeToAndCall(address(newNftImpl), "");
 
         // Verify state preserved and functionality continues
-        assertTrue(
-            registry.isProjectRegistered(projectAddress),
-            "Registry should still have project registered"
-        );
-        assertEq(
-            project.getInvestmentAmount(investor1),
-            5 ether,
-            "Investment record should be preserved"
-        );
+        assertTrue(registry.isProjectRegistered(projectAddress), "Registry should still have project registered");
+        assertEq(project.getInvestmentAmount(investor1), 5 ether, "Investment record should be preserved");
 
         // Continue with normal flow after upgrades
         vm.warp(block.timestamp + 31 days);
         project.checkAndUpdateState();
-        assertEq(
-            uint8(project.getProjectState()),
-            2,
-            "Project should be Failed"
-        );
+        assertEq(uint8(project.getProjectState()), 2, "Project should be Failed");
 
         // Claim refund after upgrade
         uint256 investor1BalanceBefore = investor1.balance;
@@ -464,10 +517,6 @@ contract IntegrationTest is Test {
         vm.prank(investor1);
         project.claimRefund();
 
-        assertEq(
-            investor1.balance,
-            investor1BalanceBefore + 5 ether,
-            "Refund should work after upgrades"
-        );
+        assertEq(investor1.balance, investor1BalanceBefore + 5 ether, "Refund should work after upgrades");
     }
 }

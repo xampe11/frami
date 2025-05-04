@@ -7,7 +7,6 @@ import {ProxyAdmin} from "../src/proxy/ProxyAdmin.sol";
 import {PlatformRegistry} from "../src/PlatformRegistry.sol";
 import {Project} from "../src/Project.sol";
 import {VerificationOracle} from "../src/VerificationOracle.sol";
-import {TokenInvestment} from "../src/TokenInvestment.sol";
 import {ProjectFactory} from "../src/ProjectFactory.sol";
 import {ProjectNFT} from "../src/ProjectNFT.sol";
 
@@ -34,9 +33,6 @@ contract DeployUpgradeableScript is Script {
 
         Project projectImpl = new Project();
         console.log("Project implementation deployed at:", address(projectImpl));
-
-        TokenInvestment tokenInvestmentImpl = new TokenInvestment();
-        console.log("TokenInvestment implementation deployed at:", address(tokenInvestmentImpl));
 
         ProjectNFT projectNFTImpl = new ProjectNFT();
         console.log("ProjectNFT implementation deployed at:", address(projectNFTImpl));
@@ -88,16 +84,6 @@ contract DeployUpgradeableScript is Script {
         ERC1967Proxy projectNFTProxy = new ERC1967Proxy(address(projectNFTImpl), projectNFTData);
         console.log("ProjectNFT proxy deployed at:", address(projectNFTProxy));
 
-        // Deploy Token Investment proxy
-        bytes memory tokenInvestmentData = abi.encodeWithSelector(
-            TokenInvestment.initialize.selector,
-            deployer, // initialOwner
-            address(platformRegistryProxy) // registry address
-        );
-
-        ERC1967Proxy tokenInvestmentProxy = new ERC1967Proxy(address(tokenInvestmentImpl), tokenInvestmentData);
-        console.log("TokenInvestment proxy deployed at:", address(tokenInvestmentProxy));
-
         // Update registry with factory address
         PlatformRegistry platformRegistry = PlatformRegistry(address(platformRegistryProxy));
         platformRegistry.updateProjectFactory(address(projectFactoryProxy));
@@ -114,11 +100,6 @@ contract DeployUpgradeableScript is Script {
         ProjectFactory projectFactory = ProjectFactory(address(projectFactoryProxy));
         projectFactory.grantRole(projectFactory.ADMIN_ROLE(), address(platformRegistryProxy));
         console.log("Granted ADMIN_ROLE to PlatformRegistry in ProjectFactory");
-
-        // Add a supported token in the registry for testing (this could be any ERC20 token)
-        address testToken = address(0x1); // Replace with an actual token in production
-        platformRegistry.addSupportedToken(testToken);
-        console.log("Added supported token to registry:", testToken);
 
         // Optional: Grant additional roles to deployer or other addresses
         platformRegistry.grantProjectCreatorRole(deployer);

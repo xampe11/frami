@@ -42,11 +42,12 @@ contract PlatformRegistryStorage {
     mapping(address => bool) internal _registeredProjects;
     address[] internal _allProjects;
 
-    // Supported funding tokens
-    mapping(address => bool) internal _supportedTokens;
-
     // Implementation version
     string internal _version;
+
+        // For future token support - keeping storage slots reserved
+    // This ensures that when we add token support later, we won't have storage collision issues
+    mapping(address => bool) internal _reservedTokenSlot;
 }
 /**
  * @title PlatformRegistry
@@ -185,20 +186,6 @@ contract PlatformRegistry is
         _verificationOracle = newOracle;
     }
 
-    /**
-     * @dev Adds a supported token
-     */
-    function addSupportedToken(address token) external onlyRole(ADMIN_ROLE) {
-        require(token != address(0), "Invalid token address");
-        _supportedTokens[token] = true;
-    }
-
-    /**
-     * @dev Removes a supported token
-     */
-    function removeSupportedToken(address token) external onlyRole(ADMIN_ROLE) {
-        _supportedTokens[token] = false;
-    }
 
     /**
      * @dev Pauses the platform
@@ -254,13 +241,6 @@ contract PlatformRegistry is
      */
     function isFactoryRegistered(address factory) external view returns (bool) {
         return factory == projectFactory;
-    }
-
-    /**
-     * @dev Returns if a token is supported
-     */
-    function isSupportedToken(address token) external view returns (bool) {
-        return _supportedTokens[token];
     }
 
     /**

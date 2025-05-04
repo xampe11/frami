@@ -6,7 +6,6 @@ import {ERC1967Proxy} from "../../src/proxy/ERC1967Proxy.sol";
 import {PlatformRegistry} from "../../src/PlatformRegistry.sol";
 import {Project} from "../../src/Project.sol";
 import {VerificationOracle} from "../../src/VerificationOracle.sol";
-import {TokenInvestment} from "../../src/TokenInvestment.sol";
 import {ProjectFactory} from "../../src/ProjectFactory.sol";
 import {ProjectNFT} from "../../src/ProjectNFT.sol";
 
@@ -82,17 +81,6 @@ contract PlatformRegistryTest is Test {
         vm.prank(user1);
         vm.expectRevert();
         registry.updatePlatformFee(newFee);
-    }
-
-    function testTokenSupport() public {
-        address token = makeAddr("token");
-        assertFalse(registry.isSupportedToken(token), "Token should not be supported initially");
-
-        registry.addSupportedToken(token);
-        assertTrue(registry.isSupportedToken(token), "Token should be supported after adding");
-
-        registry.removeSupportedToken(token);
-        assertFalse(registry.isSupportedToken(token), "Token should not be supported after removal");
     }
 
     function testUpdateOracle() public {
