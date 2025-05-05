@@ -1,11 +1,17 @@
+// app.tsx - Main application file
+import '@rainbow-me/rainbowkit/styles.css';
+import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { WagmiProvider } from 'wagmi';
+import { mainnet, polygon } from 'wagmi/chains';
+import { http } from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect } from "react";
-import { apiRequest } from "./lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { WalletProvider } from "@/contexts/wallet-context";
+import { apiRequest } from "@/lib/queryClient";
 
 import Home from "@/pages/home";
 import Discover from "@/pages/discover";
@@ -15,6 +21,38 @@ import NotFound from "@/pages/not-found";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { useMediaQuery } from "@/hooks/use-mobile";
+
+// Get environment variables with fallback
+const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID || 'your-project-id';
+
+// Create a client for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Set up a default query function that will be used for all queries
+      // that don't explicitly provide a queryFn
+      queryFn: async ({ queryKey }) => {
+        // Assuming queryKey[0] is the API endpoint
+        if (typeof queryKey[0] === 'string' && queryKey[0].startsWith('/')) {
+          const response = await apiRequest("GET", queryKey[0]);
+          return response.json();
+        }
+        throw new Error(`Invalid queryKey: ${JSON.stringify(queryKey)}`);
+      },
+    },
+  },
+});
+
+// Create Wagmi config with RainbowKit
+const config = getDefaultConfig({
+  appName: 'Real World Projects',
+  projectId: projectId,
+  chains: [mainnet, polygon],
+  transports: {
+    [mainnet.id]: http(),
+    [polygon.id]: http(),
+  },
+});
 
 function Router() {
   const { toast } = useToast();
@@ -47,7 +85,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/discover" component={Discover} />
           <Route path="/projects/:slug" component={Project} />
-          <Route path="/create" component={CreateProject} />
+          <Route path="/create-project" component={CreateProject} />
           <Route component={NotFound} />
         </Switch>
       </main>
@@ -58,12 +96,18 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider>
+          <WalletProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </WalletProvider>
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 

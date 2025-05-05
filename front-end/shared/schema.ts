@@ -1,4 +1,12 @@
-import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  doublePrecision,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -37,15 +45,17 @@ export const projects = pgTable("projects", {
   description: text("description").notNull(),
   story: text("story").notNull(),
   thumbnailUrl: text("thumbnail_url").notNull(),
-  goalAmount: doublePrecision("goal_amount").notNull(),
-  raisedAmount: doublePrecision("raised_amount").default(0).notNull(),
-  creatorId: integer("creator_id").notNull(),
+  fundingGoal: doublePrecision("funding_goal").notNull(),
+  currentFunding: doublePrecision("current_funding").default(0).notNull(),
+  fundingCurrency: text("funding_currency").notNull(),
+  shortDescription: text("short_description").notNull(),
+  creatorId: text("creator_id").notNull(),
   categoryId: integer("category_id").notNull(),
   slug: text("slug").notNull().unique(),
   featured: boolean("featured").default(false).notNull(),
   trending: boolean("trending").default(false).notNull(),
-  daysLeft: integer("days_left").notNull(),
-  backers: integer("backers").default(0).notNull(),
+  daysRemaining: integer("days_remaining").notNull(),
+  backerCount: integer("backer_count").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -67,7 +77,9 @@ export const projectUpdates = pgTable("project_updates", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertProjectUpdateSchema = createInsertSchema(projectUpdates).omit({
+export const insertProjectUpdateSchema = createInsertSchema(
+  projectUpdates
+).omit({
   id: true,
   createdAt: true,
 });

@@ -1,3 +1,4 @@
+// ProjectPage.tsx - With fixed property names and wallet handling
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -17,7 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { AlertCircle, Clock, Users, ChevronLeft, Share2, Heart, AlertTriangle } from "lucide-react";
-import { useWallet } from "@/context/wallet-context";
+import { useWallet } from "@/contexts/wallet-context";
 import gsap from "gsap";
 
 const ProjectPage = () => {
@@ -67,40 +68,64 @@ const ProjectPage = () => {
     );
   }
   
+  // Fix property names to match your Project type
+  const fundingCurrency = project.fundingCurrency || "ETH";
+  const backerCount = project.backerCount || 0;
+  const daysRemaining = project.daysRemaining || 30;
+  
   const fundingPercentage = Math.min(
     Math.round((project.currentFunding / project.fundingGoal) * 100),
     100
   );
   
   const handleBackProject = async () => {
-    if (!isConnected) {
-      await connect();
-      return;
-    }
-    
-    if (amount <= 0) {
+    try {
+      if (!isConnected) {
+        console.log("Connecting wallet before backing project");
+        await connect();
+        
+        // Since state updates are asynchronous, return early and let UI update
+        toast({
+          title: "Wallet connected",
+          description: "Now you can back this project",
+        });
+        return;
+      }
+      
+      if (amount <= 0) {
+        toast({
+          title: "Invalid amount",
+          description: "Please enter a valid amount to contribute",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       toast({
-        title: "Invalid amount",
-        description: "Please enter a valid amount to contribute",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    toast({
-      title: "Processing contribution",
-      description: "Connecting to blockchain...",
-    });
-    
-    // Simulate blockchain transaction time
-    setTimeout(() => {
-      toast({
-        title: "Contribution successful!",
-        description: `You've contributed ${amount} ${project.fundingCurrency} to this project.`,
+        title: "Processing contribution",
+        description: "Connecting to blockchain...",
       });
       
-      // Note: In a real implementation, we would make an API call to update the project
-    }, 2000);
+      console.log("Processing contribution of", amount, fundingCurrency);
+      console.log("Current wallet address:", address);
+      
+      // Simulate blockchain transaction time
+      setTimeout(() => {
+        toast({
+          title: "Contribution successful!",
+          description: `You've contributed ${amount} ${fundingCurrency} to this project.`,
+        });
+        
+        // Note: In a real implementation, we would make an API call to update the project
+      }, 2000);
+    } catch (error) {
+      console.error("Error backing project:", error);
+      toast({
+        title: "Failed to process contribution",
+        description: "There was an error connecting to your wallet. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
   
   return (
@@ -130,7 +155,7 @@ const ProjectPage = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <h1 className="text-2xl md:text-3xl font-bold mb-2">{project.title}</h1>
-                    <p className="text-gray-600 mb-6">{project.shortDescription}</p>
+                    <p className="text-gray-600 mb-6">{project.shortDescription || project.description.substring(0, 120) + '...'}</p>
                   </div>
                   <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
                     {project.categoryId}
@@ -160,7 +185,7 @@ const ProjectPage = () => {
                   <TabsContent value="backers" className="project-content">
                     <div className="flex items-center justify-center bg-gray-50 rounded-lg p-8">
                       <Users className="h-6 w-6 text-gray-500 mr-3" />
-                      <p className="text-lg font-medium">{project.backerCount} backers have contributed so far</p>
+                      <p className="text-lg font-medium">{backerCount} backers have contributed so far</p>
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -182,7 +207,7 @@ const ProjectPage = () => {
                   <div className="flex justify-between text-sm mb-2">
                     <span className="font-medium">{fundingPercentage}% funded</span>
                     <span className="font-medium text-amber-600">
-                      {project.currentFunding} {project.fundingCurrency} of {project.fundingGoal} {project.fundingCurrency}
+                      {project.currentFunding} {fundingCurrency} of {project.fundingGoal} {fundingCurrency}
                     </span>
                   </div>
                   <Progress value={fundingPercentage} className="h-2" />
@@ -191,11 +216,11 @@ const ProjectPage = () => {
                 <div className="flex justify-between text-sm text-gray-500">
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-1" />
-                    <span>{project.backerCount} backers</span>
+                    <span>{backerCount} backers</span>
                   </div>
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-1" />
-                    <span>{project.daysRemaining} days left</span>
+                    <span>{daysRemaining} days left</span>
                   </div>
                 </div>
                 
@@ -204,7 +229,7 @@ const ProjectPage = () => {
                 <div className="space-y-4">
                   <div>
                     <label htmlFor="amount" className="block text-sm font-medium mb-1">
-                      Contribution Amount ({project.fundingCurrency})
+                      Contribution Amount ({fundingCurrency})
                     </label>
                     <input
                       type="number"

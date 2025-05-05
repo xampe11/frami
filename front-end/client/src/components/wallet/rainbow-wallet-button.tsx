@@ -8,7 +8,6 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Wallet, LogOut, ExternalLink, Copy, ChevronDown } from "lucide-react";
-import { shortenAddress } from '../../lib/rainbowkit-config';
 
 export default function RainbowWalletButton() {
   return (
@@ -70,14 +69,14 @@ export default function RainbowWalletButton() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
                       <Wallet className="mr-2 h-4 w-4" />
-                      {shortenAddress(account.address)}
+                      {account.address}
                       <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="flex flex-col space-y-1 p-2">
                       <p className="text-xs text-slate-500">Connected to {chain.name}</p>
-                      <p className="font-medium">{shortenAddress(account.address, 8)}</p>
+                      <p className="font-medium">{account.address}</p>
                       <p className="text-sm text-slate-600">
                         {account.displayBalance
                           ? `${account.displayBalance}`
@@ -94,8 +93,7 @@ export default function RainbowWalletButton() {
                     <DropdownMenuItem onClick={() => {
                       // Try to use the chain's block explorer if available
                       try {
-                        const explorerUrl = chain.blockExplorers?.default?.url || 
-                          `https://etherscan.io`;
+                        const explorerUrl = `https://etherscan.io`;
                         window.open(`${explorerUrl}/address/${account.address}`, '_blank');
                       } catch (error) {
                         // Fallback to Etherscan
