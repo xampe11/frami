@@ -6,26 +6,22 @@ import "forge-std/console.sol";
 import {ERC1967Proxy} from "../../src/proxy/ERC1967Proxy.sol";
 import {PlatformRegistry} from "../../src/PlatformRegistry.sol";
 import {Project} from "../../src/Project.sol";
-import {VerificationOracle} from "../../src/VerificationOracle.sol";
 import {ProjectFactory} from "../../src/ProjectFactory.sol";
 import {ProjectNFT} from "../../src/ProjectNFT.sol";
 
 contract IntegrationTest is Test {
     // Proxies
     ERC1967Proxy public registryProxy;
-    ERC1967Proxy public oracleProxy;
     ERC1967Proxy public factoryProxy;
     ERC1967Proxy public nftProxy;
 
     // Implementation contracts (wrapped proxies)
     PlatformRegistry public registry;
-    VerificationOracle public oracle;
     ProjectFactory public factory;
     ProjectNFT public nft;
 
     // Implementation addresses
     address public registryImpl;
-    address public oracleImpl;
     address public factoryImpl;
     address public projectImpl;
     address public nftImpl;
@@ -57,9 +53,6 @@ contract IntegrationTest is Test {
         vm.deal(investor2, 20 ether);
 
         // Deploy implementations
-        VerificationOracle oracleImplementation = new VerificationOracle();
-        oracleImpl = address(oracleImplementation);
-
         PlatformRegistry registryImplementation = new PlatformRegistry();
         registryImpl = address(registryImplementation);
 
@@ -72,26 +65,12 @@ contract IntegrationTest is Test {
         ProjectNFT nftImplementation = new ProjectNFT();
         nftImpl = address(nftImplementation);
 
-        // Deploy VerificationOracle proxy
-        bytes memory oracleData = abi.encodeWithSelector(
-            VerificationOracle.initialize.selector,
-            owner,
-            1 // required verifications
-        );
-
-        oracleProxy = new ERC1967Proxy(oracleImpl, oracleData);
-        oracle = VerificationOracle(address(oracleProxy));
-
-        // Add verifier
-        oracle.addVerifier(verifier);
-
         // Deploy PlatformRegistry proxy
         bytes memory registryData = abi.encodeWithSelector(
             PlatformRegistry.initialize.selector,
             owner,
             500, // 5% platform fee
             treasury,
-            address(oracleProxy),
             address(0) // factory address to be set later
         );
 
@@ -99,12 +78,8 @@ contract IntegrationTest is Test {
         registry = PlatformRegistry(address(registryProxy));
 
         // Deploy ProjectFactory proxy
-        bytes memory factoryData = abi.encodeWithSelector(
-            ProjectFactory.initialize.selector,
-            owner,
-            address(registryProxy),
-            projectImpl
-        );
+        bytes memory factoryData =
+            abi.encodeWithSelector(ProjectFactory.initialize.selector, owner, address(registryProxy), projectImpl);
 
         factoryProxy = new ERC1967Proxy(factoryImpl, factoryData);
         factory = ProjectFactory(address(factoryProxy));
@@ -113,11 +88,7 @@ contract IntegrationTest is Test {
         registry.updateProjectFactory(address(factoryProxy));
 
         // Deploy ProjectNFT proxy
-        bytes memory nftData = abi.encodeWithSelector(
-            ProjectNFT.initialize.selector,
-            owner,
-            address(registryProxy)
-        );
+        bytes memory nftData = abi.encodeWithSelector(ProjectNFT.initialize.selector, owner, address(registryProxy));
 
         nftProxy = new ERC1967Proxy(nftImpl, nftData);
         nft = ProjectNFT(address(nftProxy));
@@ -142,10 +113,7 @@ contract IntegrationTest is Test {
         vm.stopPrank();
 
         // Verify project was created
-        assertTrue(
-            registry.isProjectRegistered(projectAddress),
-            "Project should be registered"
-        );
+        assertTrue(registry.isProjectRegistered(projectAddress), "Project should be registered");
         project = Project(payable(projectAddress));
 
         // Step 2: Authorize project for NFTs
@@ -153,12 +121,7 @@ contract IntegrationTest is Test {
 
         // Step 3: Set up NFT tier
         vm.prank(projectAddress);
-        nft.createTier(
-            "Gold Investor",
-            "Premium access and rewards",
-            5 ether,
-            "ipfs://QmTestURI"
-        );
+        nft.createTier("Gold Investor", "Premium access and rewards", 5 ether, "ipfs://QmTestURI");
 
         // Step 4: Create milestones
         vm.startPrank(creator);
@@ -183,11 +146,7 @@ contract IntegrationTest is Test {
         uint256 tokenId = nft.mintInvestorNFT(investor1, 0);
 
         // Verify NFT ownership
-        assertEq(
-            nft.ownerOf(tokenId),
-            investor1,
-            "Investor should own the NFT"
-        );
+        assertEq(nft.ownerOf(tokenId), investor1, "Investor should own the NFT");
 
         // Step 7: Move time forward to end funding period
         vm.warp(block.timestamp + 31 days);
@@ -196,25 +155,17 @@ contract IntegrationTest is Test {
         project.checkAndUpdateState();
 
         // Verify project state
-        assertEq(
-            uint8(project.getProjectState()),
-            1,
-            "Project should be Successful"
-        );
+        assertEq(uint8(project.getProjectState()), 1, "Project should be Successful");
 
-        // Step 9: Verify first milestone
-        vm.prank(verifier);
-        oracle.submitVerification(projectAddress, 0, true);
-
-        // Step 10: Submit milestone completion
+        // Step 9: Submit milestone completion
         vm.prank(creator);
         project.submitMilestoneCompletion(0);
 
-        // Step 11: Vote on milestone
+        // Step 10: Vote on milestone
         vm.prank(investor1);
         project.voteMilestone(0);
 
-        // Step 12: Release funds for milestone
+        // Step 11: Release funds for milestone
         uint256 creatorBalanceBefore = creator.balance;
         uint256 treasuryBalanceBefore = treasury.balance;
 
@@ -228,16 +179,8 @@ contract IntegrationTest is Test {
         uint256 creatorAmount = milestoneAmount - platformFee;
 
         // Verify balances
-        assertEq(
-            creator.balance,
-            creatorBalanceBefore + creatorAmount,
-            "Creator should receive correct amount"
-        );
-        assertEq(
-            treasury.balance,
-            treasuryBalanceBefore + platformFee,
-            "Treasury should receive fee"
-        );
+        assertEq(creator.balance, creatorBalanceBefore + creatorAmount, "Creator should receive correct amount");
+        assertEq(treasury.balance, treasuryBalanceBefore + platformFee, "Treasury should receive fee");
     }
 
     function test_RevertWhen_FailedProjectRefunds() public {
@@ -270,11 +213,7 @@ contract IntegrationTest is Test {
         project.checkAndUpdateState();
 
         // Verify project failed
-        assertEq(
-            uint8(project.getProjectState()),
-            2,
-            "Project should be Failed"
-        );
+        assertEq(uint8(project.getProjectState()), 2, "Project should be Failed");
 
         // Claim ETH refund
         uint256 investor1BalanceBefore = investor1.balance;
@@ -282,11 +221,7 @@ contract IntegrationTest is Test {
         vm.prank(investor1);
         project.claimRefund();
 
-        assertEq(
-            investor1.balance,
-            investor1BalanceBefore + 2 ether,
-            "Investor should receive full refund"
-        );
+        assertEq(investor1.balance, investor1BalanceBefore + 2 ether, "Investor should receive full refund");
     }
 
     function testFlexibleFunding() public {
@@ -319,20 +254,12 @@ contract IntegrationTest is Test {
         project.checkAndUpdateState();
 
         // Verify project successful despite not meeting goal
-        assertEq(
-            uint8(project.getProjectState()),
-            1,
-            "Flexible funding project should be Successful"
-        );
+        assertEq(uint8(project.getProjectState()), 1, "Flexible funding project should be Successful");
 
         // Try to claim refund - should fail
         vm.prank(investor1);
         vm.expectRevert("Refunds not available");
         project.claimRefund();
-
-        // Submit milestone verification
-        vm.prank(verifier);
-        oracle.submitVerification(projectAddress, 0, true);
 
         // Submit milestone completion
         vm.prank(creator);
@@ -349,10 +276,7 @@ contract IntegrationTest is Test {
         project.releaseMilestoneFunds(0);
 
         // Verify creator received funds
-        assertTrue(
-            creator.balance > creatorBalanceBefore,
-            "Creator should receive funds"
-        );
+        assertTrue(creator.balance > creatorBalanceBefore, "Creator should receive funds");
     }
 
     function testCancelledProject() public {
@@ -383,11 +307,7 @@ contract IntegrationTest is Test {
         project.cancelProject();
 
         // Verify project state
-        assertEq(
-            uint8(project.getProjectState()),
-            3,
-            "Project should be Cancelled"
-        );
+        assertEq(uint8(project.getProjectState()), 3, "Project should be Cancelled");
 
         // Try to invest after cancellation
         vm.prank(investor1);
@@ -412,12 +332,7 @@ contract IntegrationTest is Test {
         vm.startPrank(creator);
         address[] memory teamMembers = new address[](0);
         projectAddress = registry.createProject(
-            "Upgradeable Project",
-            "A project that tests upgrades",
-            10 ether,
-            30 days,
-            false,
-            teamMembers
+            "Upgradeable Project", "A project that tests upgrades", 10 ether, 30 days, false, teamMembers
         );
         vm.stopPrank();
 
@@ -430,33 +345,20 @@ contract IntegrationTest is Test {
 
         // Deploy new implementation versions
         PlatformRegistry newRegistryImpl = new PlatformRegistry();
-        VerificationOracle newOracleImpl = new VerificationOracle();
         ProjectNFT newNftImpl = new ProjectNFT();
 
         // Upgrade contracts
         registry.upgradeToAndCall(address(newRegistryImpl), "");
-        oracle.upgradeToAndCall(address(newOracleImpl), "");
         nft.upgradeToAndCall(address(newNftImpl), "");
 
         // Verify state preserved and functionality continues
-        assertTrue(
-            registry.isProjectRegistered(projectAddress),
-            "Registry should still have project registered"
-        );
-        assertEq(
-            project.getInvestmentAmount(investor1),
-            5 ether,
-            "Investment record should be preserved"
-        );
+        assertTrue(registry.isProjectRegistered(projectAddress), "Registry should still have project registered");
+        assertEq(project.getInvestmentAmount(investor1), 5 ether, "Investment record should be preserved");
 
         // Continue with normal flow after upgrades
         vm.warp(block.timestamp + 31 days);
         project.checkAndUpdateState();
-        assertEq(
-            uint8(project.getProjectState()),
-            2,
-            "Project should be Failed"
-        );
+        assertEq(uint8(project.getProjectState()), 2, "Project should be Failed");
 
         // Claim refund after upgrade
         uint256 investor1BalanceBefore = investor1.balance;
@@ -464,10 +366,6 @@ contract IntegrationTest is Test {
         vm.prank(investor1);
         project.claimRefund();
 
-        assertEq(
-            investor1.balance,
-            investor1BalanceBefore + 5 ether,
-            "Refund should work after upgrades"
-        );
+        assertEq(investor1.balance, investor1BalanceBefore + 5 ether, "Refund should work after upgrades");
     }
 }

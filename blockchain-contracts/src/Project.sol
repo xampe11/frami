@@ -7,14 +7,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-/**
- * @title IVerificationOracle
- * @dev Interface for the verification oracle
- */
-
-interface IVerificationOracle {
-    function verifyMilestone(address project, uint256 milestoneId) external view returns (bool);
-}
 
 /**
  * @title IProjectFactoryRegistry
@@ -39,7 +31,6 @@ contract ProjectStorage {
     uint256 internal _platformFeePercentage;
     address internal _platformTreasury;
     address internal _platformRegistry;
-    address internal _verificationOracle;
 
     // Project state
     enum State {
@@ -125,7 +116,6 @@ contract Project is
         bool isFlexibleFunding,
         uint256 platformFeePercentage,
         address platformTreasury,
-        address verificationOracle,
         address platformRegistry,
         address[] memory teamMembers
     ) external initializer {
@@ -149,7 +139,6 @@ contract Project is
         _isFlexibleFunding = isFlexibleFunding;
         _platformFeePercentage = platformFeePercentage;
         _platformTreasury = platformTreasury;
-        _verificationOracle = verificationOracle;
         _platformRegistry = platformRegistry;
         _state = State.Active;
 
@@ -246,9 +235,6 @@ contract Project is
         require(milestoneId < _milestoneCount, "Invalid milestone");
         require(!_milestones[milestoneId].completed, "Already completed");
         require(_state == State.Successful, "Project not successful");
-
-        bool verified = IVerificationOracle(_verificationOracle).verifyMilestone(address(this), milestoneId);
-        require(verified, "Milestone verification failed");
 
         _milestones[milestoneId].completed = true;
 

@@ -23,7 +23,6 @@ interface IProjectFactory {
         bool isFlexibleFunding,
         uint256 platformFeePercentage,
         address platformTreasury,
-        address verificationOracle,
         address[] memory teamMembers
     ) external returns (address);
 }
@@ -36,7 +35,6 @@ contract PlatformRegistryStorage {
     // Platform configuration
     uint256 internal _platformFeePercentage;
     address internal _platformTreasury;
-    address internal _verificationOracle;
 
     // Project tracking
     mapping(address => bool) internal _registeredProjects;
@@ -45,7 +43,7 @@ contract PlatformRegistryStorage {
     // Implementation version
     string internal _version;
 
-        // For future token support - keeping storage slots reserved
+    // For future token support - keeping storage slots reserved
     // This ensures that when we add token support later, we won't have storage collision issues
     mapping(address => bool) internal _reservedTokenSlot;
 }
@@ -87,13 +85,10 @@ contract PlatformRegistry is
     /**
      * @dev Initializes the contract with initial values
      */
-    function initialize(
-        address initialOwner,
-        uint256 initialFee,
-        address treasury,
-        address oracle,
-        address initialFactory
-    ) external initializer {
+    function initialize(address initialOwner, uint256 initialFee, address treasury, address initialFactory)
+        external
+        initializer
+    {
         __Ownable_init(initialOwner);
         __Pausable_init();
         __AccessControl_init();
@@ -101,7 +96,6 @@ contract PlatformRegistry is
 
         _platformFeePercentage = initialFee;
         _platformTreasury = treasury;
-        _verificationOracle = oracle;
         projectFactory = initialFactory;
         _version = "1.0.0";
 
@@ -137,7 +131,6 @@ contract PlatformRegistry is
             _isFlexibleFunding,
             _platformFeePercentage,
             _platformTreasury,
-            _verificationOracle,
             _teamMembers
         );
 
@@ -179,15 +172,6 @@ contract PlatformRegistry is
     }
 
     /**
-     * @dev Updates the verification oracle address
-     */
-    function updateVerificationOracle(address newOracle) external onlyRole(ADMIN_ROLE) {
-        require(newOracle != address(0), "Invalid oracle address");
-        _verificationOracle = newOracle;
-    }
-
-
-    /**
      * @dev Pauses the platform
      */
     function pausePlatform() external onlyRole(ADMIN_ROLE) {
@@ -221,17 +205,10 @@ contract PlatformRegistry is
     function platformTreasury() external view returns (address) {
         return _platformTreasury;
     }
-
-    /**
-     * @dev Returns the verification oracle address
-     */
-    function verificationOracle() external view returns (address) {
-        return _verificationOracle;
-    }
-
     /**
      * @dev Returns if a project is registered
      */
+
     function isProjectRegistered(address project) external view returns (bool) {
         return _registeredProjects[project];
     }

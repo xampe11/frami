@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import {ERC1967Proxy} from "./proxy/ERC1967Proxy.sol";
 
 /**
  * @title IProject
@@ -22,7 +23,6 @@ interface IProject {
         bool isFlexibleFunding,
         uint256 platformFeePercentage,
         address platformTreasury,
-        address verificationOracle,
         address platformRegistry,
         address[] memory teamMembers
     ) external;
@@ -105,7 +105,6 @@ contract ProjectFactory is
         bool isFlexibleFunding,
         uint256 platformFeePercentage,
         address platformTreasury,
-        address verificationOracle,
         address[] memory teamMembers
     ) external returns (address) {
         // Only the platform registry can create projects
@@ -123,7 +122,6 @@ contract ProjectFactory is
             isFlexibleFunding,
             platformFeePercentage,
             platformTreasury,
-            verificationOracle,
             _platformRegistry,
             teamMembers
         );
@@ -182,31 +180,8 @@ contract ProjectFactory is
      * @dev Deploys a minimal proxy contract (EIP-1167) pointing to implementation
      */
     function _deployProjectProxy(address implementation, bytes memory initData) internal returns (address) {
-        // Use Create2 for deterministic addresses
-        bytes32 salt = keccak256(abi.encodePacked(block.timestamp, _createdProjects.length));
-
-        // Create minimal proxy using the Clone pattern
-        address instance = _createClone(implementation, salt);
-
-        // Initialize the proxy
-        (bool success,) = instance.call(initData);
-        require(success, "Project initialization failed");
-
-        return instance;
-    }
-
-    /**
-     * @dev Creates a clone of the implementation contract
-     */
-    function _createClone(address implementation, bytes32 salt) internal returns (address instance) {
-        assembly {
-            let ptr := mload(0x40)
-            mstore(ptr, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
-            mstore(add(ptr, 0x14), shl(0x60, implementation))
-            mstore(add(ptr, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
-            instance := create2(0, ptr, 0x37, salt)
-        }
-        require(instance != address(0), "Create2 failed");
+        ERC1967Proxy proxy = new ERC1967Proxy(implementation, initData);
+        return address(proxy);
     }
 
     /**

@@ -4,19 +4,6 @@ pragma solidity 0.8.28;
 import "forge-std/Test.sol";
 import {ERC1967Proxy} from "../../src/proxy/ERC1967Proxy.sol";
 import {Project} from "../../src/Project.sol";
-import {VerificationOracle} from "../../src/VerificationOracle.sol";
-
-contract MockVerificationOracle {
-    mapping(address => mapping(uint256 => bool)) private verifications;
-
-    function setVerification(address project, uint256 milestoneId, bool status) external {
-        verifications[project][milestoneId] = status;
-    }
-
-    function verifyMilestone(address project, uint256 milestoneId) external view returns (bool) {
-        return verifications[project][milestoneId];
-    }
-}
 
 contract MockRegistry {
     mapping(address => bool) public registeredFactories;
@@ -71,14 +58,9 @@ contract ProjectTest is Test {
         owner = address(this);
         creator = makeAddr("creator");
         treasury = makeAddr("treasury");
-        oracle = makeAddr("oracle");
         registry = makeAddr("registry");
         investor1 = makeAddr("investor1");
         investor2 = makeAddr("investor2");
-
-        // Deploy mock verification oracle
-        MockVerificationOracle mockOracle = new MockVerificationOracle();
-        oracle = address(mockOracle);
 
         // Deploy a mock registry that handles isFactoryRegistered calls
         MockRegistry mockRegistry = new MockRegistry();
@@ -103,7 +85,6 @@ contract ProjectTest is Test {
             isFlexibleFunding,
             platformFee,
             treasury,
-            oracle,
             registry,
             teamMembers
         );
@@ -343,7 +324,6 @@ contract ProjectTest is Test {
             true, // flexible funding
             platformFee,
             treasury,
-            oracle,
             registry,
             new address[](0)
         );
@@ -376,9 +356,6 @@ contract ProjectTest is Test {
         // Move time forward and mark project as successful
         vm.warp(block.timestamp + duration + 1);
         project.checkAndUpdateState();
-
-        // Set mock verification to true
-        MockVerificationOracle(oracle).setVerification(address(project), 0, true);
 
         // Submit milestone completion
         vm.prank(creator);
@@ -449,7 +426,6 @@ contract ProjectTest is Test {
             true, // flexible funding
             platformFee,
             treasury,
-            oracle,
             registry,
             new address[](0)
         );

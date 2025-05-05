@@ -5,7 +5,6 @@ import "forge-std/Test.sol";
 import {ERC1967Proxy} from "../../src/proxy/ERC1967Proxy.sol";
 import {PlatformRegistry} from "../../src/PlatformRegistry.sol";
 import {Project} from "../../src/Project.sol";
-import {VerificationOracle} from "../../src/VerificationOracle.sol";
 import {ProjectFactory} from "../../src/ProjectFactory.sol";
 import {ProjectNFT} from "../../src/ProjectNFT.sol";
 
@@ -26,7 +25,6 @@ contract PlatformRegistryTest is Test {
     function setUp() public {
         owner = address(this);
         treasury = makeAddr("treasury");
-        oracle = makeAddr("oracle");
         factory = makeAddr("factory");
         user1 = makeAddr("user1");
         user2 = makeAddr("user2");
@@ -40,7 +38,6 @@ contract PlatformRegistryTest is Test {
             owner,
             500, // 5% platform fee
             treasury,
-            oracle,
             factory
         );
 
@@ -58,7 +55,6 @@ contract PlatformRegistryTest is Test {
     function testInitialization() public view {
         assertEq(registry.platformFeePercentage(), 500, "Wrong platform fee");
         assertEq(registry.platformTreasury(), treasury, "Wrong treasury address");
-        assertEq(registry.verificationOracle(), oracle, "Wrong oracle address");
         assertEq(registry.projectFactory(), factory, "Wrong factory address");
         assertTrue(registry.hasRole(registry.ADMIN_ROLE(), owner), "Owner should have ADMIN_ROLE");
         assertTrue(registry.hasRole(registry.UPGRADER_ROLE(), owner), "Owner should have UPGRADER_ROLE");
@@ -81,12 +77,6 @@ contract PlatformRegistryTest is Test {
         vm.prank(user1);
         vm.expectRevert();
         registry.updatePlatformFee(newFee);
-    }
-
-    function testUpdateOracle() public {
-        address newOracle = makeAddr("newOracle");
-        registry.updateVerificationOracle(newOracle);
-        assertEq(registry.verificationOracle(), newOracle, "Oracle not updated");
     }
 
     function testUpdateTreasury() public {

@@ -6,7 +6,6 @@ import {ERC1967Proxy} from "../src/proxy/ERC1967Proxy.sol";
 import {ProxyAdmin} from "../src/proxy/ProxyAdmin.sol";
 import {PlatformRegistry} from "../src/PlatformRegistry.sol";
 import {Project} from "../src/Project.sol";
-import {VerificationOracle} from "../src/VerificationOracle.sol";
 import {ProjectFactory} from "../src/ProjectFactory.sol";
 import {ProjectNFT} from "../src/ProjectNFT.sol";
 
@@ -25,9 +24,6 @@ contract DeployUpgradeableScript is Script {
         PlatformRegistry platformRegistryImpl = new PlatformRegistry();
         console.log("PlatformRegistry implementation deployed at:", address(platformRegistryImpl));
 
-        VerificationOracle verificationOracleImpl = new VerificationOracle();
-        console.log("VerificationOracle implementation deployed at:", address(verificationOracleImpl));
-
         ProjectFactory projectFactoryImpl = new ProjectFactory();
         console.log("ProjectFactory implementation deployed at:", address(projectFactoryImpl));
 
@@ -36,16 +32,6 @@ contract DeployUpgradeableScript is Script {
 
         ProjectNFT projectNFTImpl = new ProjectNFT();
         console.log("ProjectNFT implementation deployed at:", address(projectNFTImpl));
-
-        // Deploy Verification Oracle proxy first
-        bytes memory verificationOracleData = abi.encodeWithSelector(
-            VerificationOracle.initialize.selector,
-            deployer, // initialOwner
-            2 // requiredVerifications
-        );
-
-        ERC1967Proxy verificationOracleProxy = new ERC1967Proxy(address(verificationOracleImpl), verificationOracleData);
-        console.log("VerificationOracle proxy deployed at:", address(verificationOracleProxy));
 
         // Treasury address - you can use a separate address in production
         address treasury = deployer;
@@ -56,7 +42,6 @@ contract DeployUpgradeableScript is Script {
             deployer, // initialOwner
             500, // 5% platform fee
             treasury, // treasury address
-            address(verificationOracleProxy), // oracle address
             address(0) // factory address (will be updated after deployment)
         );
 
@@ -90,11 +75,6 @@ contract DeployUpgradeableScript is Script {
         console.log("Updated PlatformRegistry with ProjectFactory address");
 
         // Grant roles for various contracts
-
-        // Set up the VerificationOracle roles
-        VerificationOracle verificationOracle = VerificationOracle(address(verificationOracleProxy));
-        verificationOracle.grantRole(verificationOracle.VERIFIER_ROLE(), deployer);
-        console.log("Granted VERIFIER_ROLE to deployer in VerificationOracle");
 
         // Grant ProjectFactory registry access
         ProjectFactory projectFactory = ProjectFactory(address(projectFactoryProxy));
