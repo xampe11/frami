@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, Clock, Users, ChevronLeft, Share2, Heart, AlertTriangle } from "lucide-react";
+import { AlertCircle, Clock, Users, ChevronLeft, Share2, Heart, AlertTriangle, FileText } from "lucide-react";
 import { useWallet } from "@/contexts/wallet-context";
 import gsap from "gsap";
 
@@ -195,22 +195,76 @@ const ProjectPage = () => {
                   
                   <TabsContent value="about" className="project-content">
                     <div className="prose dark:prose-invert max-w-none">
-                      <p className="dark:text-gray-300">{project.description}</p>
+                      <h3 className="text-xl font-semibold mb-4 dark:text-white">About this project</h3>
+                      <p className="dark:text-gray-300 mb-6">{project.description}</p>
+                      
+                      <h3 className="text-xl font-semibold mb-4 dark:text-white">The story</h3>
+                      {project.story.split('\n\n').map((paragraph, index) => (
+                        <p key={index} className="dark:text-gray-300 mb-4">{paragraph}</p>
+                      ))}
                     </div>
                   </TabsContent>
                   
                   <TabsContent value="updates" className="project-content">
                     <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-8 text-center">
+                      <FileText className="h-12 w-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
                       <h3 className="text-lg font-medium mb-2 dark:text-white">No updates yet</h3>
-                      <p className="text-gray-600 dark:text-gray-300">The creator hasn't posted any updates yet.</p>
+                      <p className="text-gray-600 dark:text-gray-300 mb-2">The creator hasn't posted any updates for this project yet.</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Project updates will appear here once the creator shares progress, milestones, or important announcements.</p>
                     </div>
                   </TabsContent>
                   
                   <TabsContent value="backers" className="project-content">
-                    <div className="flex items-center justify-center bg-gray-50 dark:bg-slate-700 rounded-lg p-8">
-                      <Users className="h-6 w-6 text-gray-500 dark:text-gray-400 mr-3" />
-                      <p className="text-lg font-medium dark:text-white">{backerCount} backers have contributed so far</p>
-                    </div>
+                    {backerCount > 0 ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-center bg-gray-50 dark:bg-slate-700 rounded-lg p-6">
+                          <Users className="h-6 w-6 text-gray-500 dark:text-gray-400 mr-3" />
+                          <p className="text-lg font-medium dark:text-white">{backerCount} backers have contributed so far</p>
+                        </div>
+                        
+                        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-100 dark:border-slate-700 divide-y divide-gray-100 dark:divide-slate-700">
+                          {/* This would be a mapped list of backers in a real implementation */}
+                          <div className="p-4 flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">0x...</span>
+                              </div>
+                              <div>
+                                <p className="font-medium dark:text-white">Anonymous Backer</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Backed 3 days ago</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-amber-600 dark:text-amber-500">5 {fundingCurrency}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">First-time backer</p>
+                            </div>
+                          </div>
+                          
+                          <div className="p-4 flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">0x...</span>
+                              </div>
+                              <div>
+                                <p className="font-medium dark:text-white">Blockchain Enthusiast</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Backed 5 days ago</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-amber-600 dark:text-amber-500">20 {fundingCurrency}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Backed 5 projects</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-8 text-center">
+                        <Users className="h-12 w-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+                        <h3 className="text-lg font-medium mb-2 dark:text-white">No backers yet</h3>
+                        <p className="text-gray-600 dark:text-gray-300 mb-2">Be the first to back this project!</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Connect your wallet and contribute to help bring this project to life.</p>
+                      </div>
+                    )}
                   </TabsContent>
                 </Tabs>
               </div>
@@ -237,7 +291,22 @@ const ProjectPage = () => {
                   <Progress value={fundingPercentage} className="h-2" />
                 </div>
                 
-                <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Raised so far</div>
+                    <div className="font-semibold text-lg dark:text-white">
+                      {project.currentFunding} {fundingCurrency}
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Funding goal</div>
+                    <div className="font-semibold text-lg dark:text-white">
+                      {project.fundingGoal} {fundingCurrency}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-2">
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-1" />
                     <span>{backerCount} backers</span>
