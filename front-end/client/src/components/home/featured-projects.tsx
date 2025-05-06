@@ -180,7 +180,7 @@ export default function FeaturedProjects() {
         >
           {featuredProjects.length > 0 ? (
             featuredProjects.map((project: Project) => (
-              <div key={project.id} className="min-w-[320px] md:min-w-[380px] max-w-[400px] h-auto flex-shrink-0">
+              <div key={project.id} className="min-w-[320px] md:min-w-[380px] max-w-[400px] flex-shrink-0">
                 <FeaturedProjectCard project={project} />
               </div>
             ))

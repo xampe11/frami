@@ -58,7 +58,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
           <img 
             src={project.thumbnailUrl || "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"} 
             alt={project.title} 
-            className="featured-project-img w-full h-64 object-cover"
+            className="featured-project-img w-full h-56 object-cover"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
@@ -80,8 +80,8 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
         </div>
       </Link>
       
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
+      <div className="p-5">
+        <div className="flex justify-between items-start mb-3">
           <div>
             {category && (
               <span className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-light text-xs px-3 py-1 rounded-full uppercase font-bold">
@@ -89,7 +89,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
               </span>
             )}
             <Link href={`/projects/${project.slug}`}>
-              <h3 className="text-xl font-bold mt-2 mb-1 font-inter hover:text-primary transition-colors text-black dark:text-white">
+              <h3 className="text-lg font-bold mt-1 mb-1 font-inter hover:text-primary transition-colors text-black dark:text-white line-clamp-1">
                 {project.title}
               </h3>
             </Link>
@@ -105,15 +105,16 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
           </Button>
         </div>
         
-        <p className="text-slate dark:text-slate-300 mb-4 line-clamp-2">
+        <p className="text-slate dark:text-slate-300 mb-3 line-clamp-2 text-sm">
           {project.description}
         </p>
         
-        <div className="mb-4">
+        <div className="mb-3">
           <ProjectProgress 
             raisedAmount={project.currentFunding}
             goalAmount={project.fundingGoal} 
             showAmounts
+            size="sm"
           />
         </div>
         
