@@ -13,12 +13,12 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, color, title, description }: FeatureCardProps) {
   return (
-    <div className="bg-gray-50 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-      <div className={`bg-${color}/20 w-14 h-14 flex items-center justify-center rounded-full mb-4`}>
+    <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+      <div className={`bg-${color}/20 dark:bg-${color}/10 w-14 h-14 flex items-center justify-center rounded-full mb-4`}>
         {icon}
       </div>
-      <h3 className="text-xl font-bold font-inter mb-3 text-slate-800">{title}</h3>
-      <p className="text-slate-600">{description}</p>
+      <h3 className="text-xl font-bold font-inter mb-3 text-slate-800 dark:text-white">{title}</h3>
+      <p className="text-slate-600 dark:text-slate-300">{description}</p>
     </div>
   );
 }
@@ -50,11 +50,11 @@ export default function BlockchainFeatures() {
   ];
 
   return (
-    <section ref={sectionRef} className="py-16 bg-white text-slate-800">
+    <section ref={sectionRef} className="py-16 bg-white dark:bg-slate-900 text-slate-800 dark:text-white">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold font-inter mb-4">Why Blockchain Crowdfunding?</h2>
-          <p className="text-slate-600 max-w-2xl mx-auto font-medium">
+          <h2 className="text-3xl font-bold font-inter mb-4 dark:text-white">Why Blockchain Crowdfunding?</h2>
+          <p className="text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-medium">
             Our platform leverages blockchain technology to provide unmatched transparency, 
             security, and global accessibility for all your projects.
           </p>

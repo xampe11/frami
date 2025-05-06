@@ -15,7 +15,7 @@ export default function CategoryNavigation() {
   useGsapReveal(sectionRef);
   
   // Fetch categories
-  const { data: categories, isLoading } = useQuery({
+  const { data: categories = [], isLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
   });
 
@@ -40,15 +40,15 @@ export default function CategoryNavigation() {
 
   if (isLoading) {
     return (
-      <section className="py-8 bg-white">
+      <section className="py-8 bg-white dark:bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center mb-6">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-8 w-48 dark:bg-slate-700" />
+            <Skeleton className="h-6 w-32 dark:bg-slate-700" />
           </div>
           <div className="flex overflow-x-auto pb-4 space-x-3">
             {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-24 rounded-full" />
+              <Skeleton key={i} className="h-10 w-24 rounded-full dark:bg-slate-700" />
             ))}
           </div>
         </div>
@@ -57,10 +57,10 @@ export default function CategoryNavigation() {
   }
 
   return (
-    <section ref={sectionRef} className="py-8 bg-white">
+    <section ref={sectionRef} className="py-8 bg-white dark:bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold font-inter">Explore Categories</h2>
+          <h2 className="text-2xl font-bold font-inter dark:text-white">Explore Categories</h2>
           <Link 
             href="/explore" 
             className="text-primary font-medium text-sm flex items-center hover:underline"
@@ -76,21 +76,25 @@ export default function CategoryNavigation() {
             size="sm"
             className={cn(
               "whitespace-nowrap rounded-full text-sm font-medium transition",
-              activeCategory === "all" ? "bg-primary text-white" : "bg-gray-100 hover:bg-gray-200"
+              activeCategory === "all" 
+                ? "bg-primary text-white" 
+                : "bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
             )}
             onClick={() => handleCategoryClick("all")}
           >
             All Projects
           </Button>
           
-          {categories?.map((category: Category) => (
+          {categories.map((category: Category) => (
             <Button
               key={category.id}
               variant={activeCategory === category.slug ? "default" : "outline"}
               size="sm"
               className={cn(
                 "whitespace-nowrap rounded-full text-sm font-medium transition flex items-center",
-                activeCategory === category.slug ? "bg-primary text-white" : "bg-gray-100 hover:bg-gray-200"
+                activeCategory === category.slug 
+                  ? "bg-primary text-white" 
+                  : "bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
               )}
               onClick={() => handleCategoryClick(category.slug)}
             >
