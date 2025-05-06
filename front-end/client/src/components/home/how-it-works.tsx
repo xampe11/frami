@@ -14,14 +14,14 @@ interface StepCardProps {
 function StepCard({ number, icon, title, description }: StepCardProps) {
   return (
     <div className="text-center">
-      <div className="bg-primary/10 w-16 h-16 flex items-center justify-center rounded-full mx-auto mb-4 relative">
+      <div className="bg-primary/10 dark:bg-primary/20 w-16 h-16 flex items-center justify-center rounded-full mx-auto mb-4 relative">
         <span className="absolute -top-2 -right-2 bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold">
           {number}
         </span>
         {icon}
       </div>
-      <h3 className="text-lg font-bold font-inter mb-2">{title}</h3>
-      <p className="text-slate text-sm">{description}</p>
+      <h3 className="text-lg font-bold font-inter mb-2 dark:text-white">{title}</h3>
+      <p className="text-slate dark:text-slate-300 text-sm">{description}</p>
     </div>
   );
 }
@@ -59,11 +59,11 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section ref={sectionRef} id="how-it-works" className="py-16 bg-light">
+    <section ref={sectionRef} id="how-it-works" className="py-16 bg-light dark:bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold font-inter mb-4">How It Works</h2>
-          <p className="text-slate max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold font-inter mb-4 dark:text-white">How It Works</h2>
+          <p className="text-slate dark:text-slate-300 max-w-2xl mx-auto">
             A simple process to bring your ideas to life with the power of blockchain technology.
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function HowItWorks() {
           <Button 
             asChild
             variant="outline"
-            className="inline-flex items-center bg-white border border-primary text-primary hover:bg-primary hover:text-white font-medium py-3 px-6 rounded-lg transition duration-150"
+            className="inline-flex items-center bg-white dark:bg-slate-800 border border-primary dark:border-primary/70 text-primary dark:text-primary-light hover:bg-primary hover:text-white dark:hover:bg-primary/80 font-medium py-3 px-6 rounded-lg transition duration-150"
           >
             <Link href="/create">
               Start Your Project

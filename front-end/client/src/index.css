@@ -60,6 +60,7 @@
   --dark: 240 23% 14.5%;
   --light: 210 11.1% 96.9%;
   --slate: 240 15.7% 72%;
+  --primary-light: 255 87% 80%;
 }
 
 @layer base {
@@ -69,6 +70,38 @@
 
   body {
     @apply bg-background text-foreground font-['DM_Sans'] antialiased overflow-x-hidden;
+  }
+  
+  /* Ensure all content is visible by default, even before animations */
+  h1, h2, h3, h4, h5, h6, p, button, a, img, div {
+    opacity: 1;
+    transform: none;
+  }
+  
+  /* Preloader and content transitions */
+  .content-visible h1, 
+  .content-visible h2, 
+  .content-visible h3, 
+  .content-visible h4, 
+  .content-visible h5, 
+  .content-visible h6, 
+  .content-visible p, 
+  .content-visible button, 
+  .content-visible a, 
+  .content-visible img, 
+  .content-visible div.animated-element {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  }
+  
+  .fade-out {
+    opacity: 1;
+  }
+  
+  .content-loaded .fade-out {
+    opacity: 0;
+    pointer-events: none;
   }
 
   h1, h2, h3, h4, h5, h6 {

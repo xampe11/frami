@@ -9,66 +9,96 @@ export default function HeroSection() {
   const floatingRef1 = useRef<HTMLDivElement>(null);
   const floatingRef2 = useRef<HTMLDivElement>(null);
   
+  // Make sure all elements are visible immediately
   useEffect(() => {
+    // Ensure all content is visible by default, even before animations load
+    if (textRef.current) {
+      textRef.current.querySelectorAll('h1, p, div').forEach((el) => {
+        (el as HTMLElement).style.opacity = '1';
+        (el as HTMLElement).style.transform = 'none';
+      });
+    }
+    
+    if (imageRef.current) {
+      imageRef.current.style.opacity = '1';
+      imageRef.current.style.transform = 'none';
+    }
+    
+    if (floatingRef1.current && floatingRef2.current) {
+      [floatingRef1.current, floatingRef2.current].forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+      });
+    }
+    
+    // Then initialize the animations
     const initAnimation = async () => {
-      if (typeof window !== "undefined") {
-        const { gsap } = await import("gsap");
-        
-        // Animate text elements
-        if (textRef.current) {
-          gsap.from(textRef.current.querySelectorAll('h1, p, div'), {
-            y: 40,
-            opacity: 0,
-            duration: 0.8,
-            stagger: 0.2,
-            ease: "power2.out"
-          });
-        }
-        
-        // Animate image
-        if (imageRef.current) {
-          gsap.from(imageRef.current, {
-            x: 100,
-            opacity: 0,
-            duration: 1,
-            delay: 0.4,
-            ease: "power2.out"
-          });
-        }
-        
-        // Animate floating elements
-        if (floatingRef1.current && floatingRef2.current) {
-          gsap.from([floatingRef1.current, floatingRef2.current], {
-            y: 20,
-            opacity: 0,
-            duration: 0.6,
-            stagger: 0.2,
-            delay: 1,
-            ease: "power2.out"
-          });
+      try {
+        if (typeof window !== "undefined") {
+          const { gsap } = await import("gsap");
           
-          // Floating animation
-          gsap.to(floatingRef1.current, {
-            y: -10,
-            duration: 2,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut"
-          });
+          // Animate text elements
+          if (textRef.current) {
+            gsap.from(textRef.current.querySelectorAll('h1, p, div'), {
+              y: 20,
+              opacity: 0,
+              duration: 0.7,
+              stagger: 0.1,
+              ease: "power2.out"
+            });
+          }
           
-          gsap.to(floatingRef2.current, {
-            y: -10,
-            duration: 2.5,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            delay: 0.5
-          });
+          // Animate image
+          if (imageRef.current) {
+            gsap.from(imageRef.current, {
+              x: 50,
+              opacity: 0,
+              duration: 0.8,
+              delay: 0.2,
+              ease: "power2.out"
+            });
+          }
+          
+          // Animate floating elements
+          if (floatingRef1.current && floatingRef2.current) {
+            gsap.from([floatingRef1.current, floatingRef2.current], {
+              y: 15,
+              opacity: 0,
+              duration: 0.6,
+              stagger: 0.15,
+              delay: 0.3,
+              ease: "power2.out"
+            });
+            
+            // Floating animation - gentle bobbing
+            gsap.to(floatingRef1.current, {
+              y: -8,
+              duration: 2,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut"
+            });
+            
+            gsap.to(floatingRef2.current, {
+              y: -8,
+              duration: 2.5,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+              delay: 0.3
+            });
+          }
         }
+      } catch (error) {
+        console.error("Error initializing hero animations:", error);
+        // No need for fallback here since we pre-set visibility above
       }
     };
     
-    initAnimation();
+    // Small timeout to prioritize initial content display
+    setTimeout(() => {
+      initAnimation();
+    }, 50);
   }, []);
 
   return (
