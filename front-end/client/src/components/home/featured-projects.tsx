@@ -14,7 +14,7 @@ export default function FeaturedProjects() {
   
   useGsapReveal(sectionRef);
   
-  const { data: featuredProjects, isLoading, error } = useQuery<Project[]>({
+  const { data: featuredProjects = [], isLoading, error } = useQuery<Project[]>({
     queryKey: ['/api/projects/featured'],
     queryFn: async () => {
       console.log('Fetching featured projects...');
@@ -22,7 +22,7 @@ export default function FeaturedProjects() {
       if (!response.ok) throw new Error('Failed to fetch featured projects');
       const data = await response.json();
       console.log('Featured projects data:', data);
-      return data;
+      return data || [];
     },
     retry: 3,
     staleTime: 60000  // 1 minute
@@ -42,7 +42,7 @@ export default function FeaturedProjects() {
 
   useEffect(() => {
     const initAnimation = async () => {
-      if (typeof window !== "undefined" && featuredProjects?.length > 0) {
+      if (typeof window !== "undefined" && featuredProjects && featuredProjects.length > 0) {
         const { gsap } = await import("gsap");
         
         // Animate featured projects
@@ -60,7 +60,7 @@ export default function FeaturedProjects() {
       }
     };
     
-    if (featuredProjects?.length > 0) {
+    if (featuredProjects && featuredProjects.length > 0) {
       initAnimation();
     }
   }, [featuredProjects]);
