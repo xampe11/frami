@@ -481,8 +481,59 @@ export default function CreateProject() {
                   </div>
                 )}
                 
-                {/* Step 6: Funding */}
-                {currentStep === 5 && (
+                {/* Step 3: NFTs */}
+                {currentStep === 2 && (
+                  <div className="bg-white rounded-xl shadow-sm p-8">
+                    <h2 className="text-2xl font-bold mb-6">NFT Rewards</h2>
+                    <p className="text-gray-600 mb-8">
+                      Configure NFT rewards for your project backers.
+                    </p>
+                    
+                    <div className="space-y-6">
+                      <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                        <h3 className="font-semibold mb-2">NFT Rewards</h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                          Create NFT rewards for different tiers of project backers. These digital assets will be minted and transferred to backers when they support your project.
+                        </p>
+                        
+                        <div className="flex items-center gap-2 mb-6">
+                          <HelpCircle size={16} className="text-primary" />
+                          <span className="text-sm text-gray-600">Coming soon: This feature is under development.</span>
+                        </div>
+                        
+                        <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center">
+                          <div className="flex justify-center mb-4">
+                            <FileText size={32} className="text-gray-400" />
+                          </div>
+                          <h4 className="font-medium mb-2">Create NFT Rewards</h4>
+                          <p className="text-sm text-gray-500 mb-4">
+                            You'll be able to define multiple NFT rewards with different traits and funding levels.
+                          </p>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="bg-white"
+                            disabled
+                          >
+                            Add NFT Reward (Coming Soon)
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                        <div className="flex items-start">
+                          <Info className="h-5 w-5 text-yellow-500 mr-2 mt-0.5" />
+                          <p className="text-sm text-yellow-700">
+                            NFT rewards are an optional feature. You can proceed with project creation without configuring NFT rewards.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Step 4: Deadline */}
+                {currentStep === 3 && (
                   <div className="bg-white rounded-xl shadow-sm p-8">
                     <h2 className="text-2xl font-bold mb-6">Funding Details</h2>
                     <p className="text-gray-600 mb-8">
@@ -587,8 +638,8 @@ export default function CreateProject() {
                   </div>
                 )}
                 
-                {/* Step 7: Deploy - Final Step */}
-                {currentStep === 6 && (
+                {/* Step 5: Deploy - Final Step */}
+                {currentStep === 4 && (
                   <div className="bg-white rounded-xl shadow-sm p-8">
                     <h2 className="text-2xl font-bold mb-6">Deploy Your Project</h2>
                     <p className="text-gray-600 mb-8">
