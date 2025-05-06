@@ -376,7 +376,7 @@ export default function Projects() {
               ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
               : 'md:grid-cols-2 lg:grid-cols-3'} gap-6`}>
               {projects
-                ?.filter((p) => p.featured)
+                ?.filter((p) => p.featured === true)
                 .map((project) => (
                   viewMode === 'grid' 
                     ? <ProjectCard key={project.id} project={project} />
@@ -390,7 +390,7 @@ export default function Projects() {
               ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
               : 'md:grid-cols-2 lg:grid-cols-3'} gap-6`}>
               {projects
-                ?.filter((p) => p.trending)
+                ?.filter((p) => p.trending === true)
                 .map((project) => (
                   viewMode === 'grid' 
                     ? <ProjectCard key={project.id} project={project} />
