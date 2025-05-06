@@ -7,7 +7,7 @@ import {
   insertProjectSchema, 
   insertProjectUpdateSchema, 
   insertTransactionSchema 
-} from "@shared/schema";
+} from "../shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -339,8 +339,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Seed data route for development
+  // Seed data routes for development
   if (process.env.NODE_ENV === 'development') {
+    // Add a route to reset the database with our predefined samples
+    app.post("/api/reset", async (_req: Request, res: Response) => {
+      try {
+        // Import the MemStorage class without using dynamic import
+        const { MemStorage } = require('./storage');
+        
+        // Create a new instance of MemStorage which will trigger all the seed methods
+        const newStorage = new MemStorage();
+        
+        // Check if the new instance has data
+        const categories = await newStorage.getCategories();
+        const projects = await newStorage.getProjects();
+        const featured = await newStorage.getFeaturedProjects();
+        
+        console.log('New storage created with: ', {
+          categories: categories.length,
+          projects: projects.length,
+          featured: featured.length
+        });
+        
+        // Replace our global storage with the new instance
+        Object.assign(storage, newStorage);
+        
+        // Verify reset was successful
+        const categoriesCount = (await storage.getCategories()).length;
+        const projectsCount = (await storage.getProjects()).length;
+        const featuredCount = (await storage.getFeaturedProjects()).length;
+        
+        res.json({
+          message: "Database reset successfully with sample blockchain projects",
+          stats: {
+            categories: categoriesCount,
+            projects: projectsCount,
+            featuredProjects: featuredCount
+          }
+        });
+      } catch (error) {
+        console.error("Reset error:", error);
+        res.status(500).json({ 
+          message: "Failed to reset database",
+          error: error instanceof Error ? error.message : "Unknown error"
+        });
+      }
+    });
+    
+    // Original seed route
     app.post("/api/seed", async (_req: Request, res: Response) => {
       try {
         // Create a demo user
@@ -369,18 +415,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: "A platform for artists to sell their work directly to collectors using NFT technology, eliminating middlemen and ensuring proper attribution and royalties.",
           story: "The art world has long been plagued by issues of forgery, attribution disputes, and unfair compensation to artists. Our decentralized art marketplace leverages blockchain technology to create a transparent, secure platform where artists can sell directly to collectors without intermediaries.\n\nUsing non-fungible tokens (NFTs), each artwork is uniquely identified on the blockchain, establishing provenance and ensuring authenticity. Artists will receive fair compensation for their work, with smart contracts automatically distributing royalties on secondary sales.\n\nOur platform will feature both digital and physical artworks, with physical pieces linked to their digital certificates via secure authentication methods. We'll support various mediums and styles, from traditional painting and sculpture to digital art and mixed media.\n\nWith your support, we can revolutionize how art is bought, sold, and authenticated, creating a more equitable ecosystem for artists and collectors alike.",
           thumbnailUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-          goalAmount: 100000,
+          fundingGoal: 100000,
           creatorId: demoUser.id,
           categoryId: artCategory.id,
           slug: "decentralized-art-marketplace",
           featured: true,
           trending: false,
-          daysLeft: 15
+          daysRemaining: 15
         });
         
         await storage.updateProject(featuredProject1.id, {
-          raisedAmount: 67280,
-          backers: 124
+          currentFunding: 67280,
+          backerCount: 124
         });
 
         const featuredProject2 = await storage.createProject({
@@ -388,18 +434,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: "A decentralized platform that enables communities to invest in and manage local renewable energy projects, with transparent tracking of energy production and distribution.",
           story: "Climate change demands urgent action, and local renewable energy projects represent one of our most promising solutions. However, community energy initiatives often struggle with financing, management, and equitable distribution of benefits.\n\nOur Sustainable Energy Blockchain creates a decentralized platform where communities can pool resources to invest in local renewable energy projects. Using blockchain technology, we enable transparent tracking of energy production and distribution, ensuring all participants receive fair returns on their investments.\n\nSmart contracts automate payments based on energy generation, while tokenization allows fractional ownership of renewable assets, making investment accessible to everyone regardless of financial capacity.\n\nThe platform will initially support solar and wind projects, with plans to expand to other renewable sources. We'll provide tools for communities to plan, fund, and manage their energy initiatives collectively.\n\nWith your support, we can democratize access to renewable energy investment and accelerate the transition to a sustainable energy future.",
           thumbnailUrl: "https://images.unsplash.com/photo-1605792657660-596af9009e82?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-          goalAmount: 100000,
+          fundingGoal: 100000,
           creatorId: demoUser.id,
           categoryId: sustainCategory.id,
           slug: "sustainable-energy-blockchain",
           featured: true,
           trending: false,
-          daysLeft: 7
+          daysRemaining: 7
         });
         
         await storage.updateProject(featuredProject2.id, {
-          raisedAmount: 89750,
-          backers: 208
+          currentFunding: 89750,
+          backerCount: 208
         });
 
         // Create trending projects
@@ -408,18 +454,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: "An immersive virtual reality platform that revolutionizes remote learning through blockchain-verified credentials.",
           story: "The COVID-19 pandemic exposed limitations in remote education. Traditional video conferencing lacks engagement, while existing VR solutions fail to provide verifiable credentials.\n\nOur VR Education Platform creates immersive learning environments where students and educators interact naturally in virtual spaces. Blockchain technology verifies course completion, skills acquisition, and credential issuance, creating tamper-proof educational records.\n\nWe're building a platform that supports various learning styles through interactive 3D models, spatial audio, and haptic feedback. Content creators can monetize educational modules, while institutions can offer accredited courses in our virtual classrooms.\n\nInitially focusing on STEM fields where spatial understanding is crucial, we'll expand to liberal arts, vocational training, and professional development. The platform will be compatible with major VR headsets and accessible via desktop for those without VR equipment.\n\nHelp us transform education through immersive experiences and blockchain verification.",
           thumbnailUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-          goalAmount: 100000,
+          fundingGoal: 100000,
           creatorId: demoUser.id,
           categoryId: techCategory.id,
           slug: "vr-education-platform",
           featured: false,
           trending: true,
-          daysLeft: 21
+          daysRemaining: 21
         });
         
         await storage.updateProject(trendingProject1.id, {
-          raisedAmount: 45300,
-          backers: 156
+          currentFunding: 45300,
+          backerCount: 156
         });
 
         const trendingProject2 = await storage.createProject({
@@ -427,18 +473,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: "A decentralized platform connecting musicians directly with fans, ensuring fair royalty distribution through smart contracts.",
           story: "Musicians have long struggled with unfair compensation models in the music industry. Streaming services pay minimal royalties, while traditional record labels take substantial cuts of artists' earnings.\n\nOur Blockchain Music Platform connects musicians directly with fans, eliminating intermediaries and ensuring fair compensation through smart contracts. Artists upload music to our decentralized platform, retaining ownership rights while gaining access to a global audience.\n\nListeners subscribe or make micropayments for access, with the majority of revenue going directly to creators. Smart contracts automatically distribute funds to all contributors based on predefined agreements, ensuring transparent and equitable compensation.\n\nThe platform will feature discovery algorithms to help listeners find new artists, community curation tools, and options for exclusive content. Artists can also sell limited-edition digital collectibles related to their music.\n\nJoin us in creating a more sustainable music ecosystem where artists receive fair compensation for their creative work.",
           thumbnailUrl: "https://images.unsplash.com/photo-1523961131990-5ea7c61b2107?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-          goalAmount: 100000,
+          fundingGoal: 100000,
           creatorId: demoUser.id,
           categoryId: techCategory.id,
           slug: "blockchain-music-platform",
           featured: false,
           trending: true,
-          daysLeft: 9
+          daysRemaining: 9
         });
         
         await storage.updateProject(trendingProject2.id, {
-          raisedAmount: 78500,
-          backers: 319
+          currentFunding: 78500,
+          backerCount: 319
         });
 
         const trendingProject3 = await storage.createProject({
@@ -446,18 +492,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: "IoT sensors and blockchain technology for transparent tracking of sustainable farming practices and supply chain management.",
           story: "Modern agriculture faces challenges of sustainability, transparency, and fair compensation for farmers. Consumers want to know how their food is produced, while farmers struggle to verify their sustainable practices and receive fair prices.\n\nOur Smart Agricultural Network combines IoT sensors with blockchain technology to create a transparent record of farming practices and food supply chains. Sensors monitor soil health, water usage, and growing conditions, recording data to an immutable blockchain ledger.\n\nConsumers can scan product QR codes to view complete production histories, verifying sustainable practices. Smart contracts ensure farmers receive fair compensation based on quality metrics and sustainable certifications.\n\nThe platform supports small farmers by providing affordable sensor technology and connecting them directly with consumers willing to pay premiums for sustainably grown food. We'll initially focus on specialty crops before expanding to broader agricultural products.\n\nHelp us create a more transparent, sustainable food system that rewards responsible farming practices.",
           thumbnailUrl: "https://images.unsplash.com/photo-1606161290889-77950cfb67d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-          goalAmount: 100000,
+          fundingGoal: 100000,
           creatorId: demoUser.id,
           categoryId: sustainCategory.id,
           slug: "smart-agricultural-network",
           featured: false,
           trending: true,
-          daysLeft: 3
+          daysRemaining: 3
         });
         
         await storage.updateProject(trendingProject3.id, {
-          raisedAmount: 92700,
-          backers: 243
+          currentFunding: 92700,
+          backerCount: 243
         });
 
         const trendingProject4 = await storage.createProject({
@@ -465,18 +511,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: "A blockchain-based gaming ecosystem where players truly own their in-game assets and can trade them on an open marketplace.",
           story: "Traditional gaming platforms keep players locked in controlled ecosystems where they have no true ownership of their virtual assets or achievements. Despite spending countless hours and real money acquiring in-game items, players cannot freely trade or monetize these assets outside the game's ecosystem.\n\nOur Decentralized Gaming Platform creates a new paradigm where players have verifiable ownership of their in-game assets through blockchain technology. Using non-fungible tokens (NFTs), each virtual item becomes a unique digital asset that players can truly own, trade, or sell on open marketplaces.\n\nThe platform will support various game genres with interoperable assets that can move between compatible games. Developers can create games on our platform with tools for integrating blockchain assets, while players benefit from true ownership and potential appreciation of their gaming investments.\n\nWe'll launch with several native games while developing an SDK for third-party developers to integrate their existing or new games into our ecosystem.\n\nJoin us in revolutionizing gaming by giving players true ownership and control over their digital assets.",
           thumbnailUrl: "https://images.unsplash.com/photo-1560419015-7c427e8ae5ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-          goalAmount: 200000,
+          fundingGoal: 200000,
           creatorId: demoUser.id,
           categoryId: gameCategory.id,
           slug: "decentralized-gaming-platform",
           featured: false,
           trending: true,
-          daysLeft: 14
+          daysRemaining: 14
         });
         
         await storage.updateProject(trendingProject4.id, {
-          raisedAmount: 120400,
-          backers: 562
+          currentFunding: 120400,
+          backerCount: 562
         });
 
         // Create a transaction

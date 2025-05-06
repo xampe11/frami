@@ -69,7 +69,25 @@ export class MemStorage implements IStorage {
     this.transactionId = 1;
 
     // Seed initial data
+    this.seedData();
+  }
+
+  // Seed all data
+  private seedData() {
+    // First seed categories
     this.seedCategories();
+    
+    // Then seed user
+    this.seedDemoUser();
+    
+    // Finally seed projects using the above
+    this.seedSampleProjects();
+    
+    // Log seeded data for verification
+    console.log('🌱 Seeded categories:', this.categories.size);
+    console.log('🌱 Seeded users:', this.users.size);
+    console.log('🌱 Seeded projects:', this.projects.size);
+    console.log('🌱 Featured projects:', Array.from(this.projects.values()).filter(p => p.featured).length);
   }
 
   // Seed categories
@@ -93,12 +111,6 @@ export class MemStorage implements IStorage {
       };
       this.categories.set(category.id, category);
     });
-    
-    // Seed demo user
-    this.seedDemoUser();
-    
-    // Seed sample projects
-    this.seedSampleProjects();
   }
   
   // Seed a demo user

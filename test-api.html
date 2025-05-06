@@ -1,36 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>API Test</title>
-    <script>
-        async function testAPI() {
-            try {
-                // Test categories API
-                const categoriesResponse = await fetch('http://localhost:5000/api/categories');
-                const categories = await categoriesResponse.json();
-                document.getElementById('categories').textContent = JSON.stringify(categories, null, 2);
-                
-                // Test projects API
-                const projectsResponse = await fetch('http://localhost:5000/api/projects');
-                const projects = await projectsResponse.json();
-                document.getElementById('projects').textContent = JSON.stringify(projects, null, 2);
-                
-                document.getElementById('status').textContent = "API tests successful!";
-            } catch (error) {
-                document.getElementById('status').textContent = "Error: " + error.message;
-                console.error(error);
-            }
-        }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Test Page</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 5px;
+      overflow: auto;
+      max-height: 400px;
+    }
+    .actions {
+      margin: 20px 0;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+  </style>
 </head>
-<body onload="testAPI()">
-    <h1>API Test for RealWorld Projects</h1>
-    <div id="status">Testing...</div>
-    
-    <h2>Categories</h2>
-    <pre id="categories"></pre>
-    
-    <h2>Projects</h2>
-    <pre id="projects"></pre>
+<body>
+  <h1>API Testing</h1>
+  
+  <div class="actions">
+    <button id="resetDb">Reset Database</button>
+    <button id="getCategories">Get Categories</button>
+    <button id="getFeatured">Get Featured Projects</button>
+    <button id="getTrending">Get Trending Projects</button>
+  </div>
+
+  <h2>Response:</h2>
+  <pre id="response">Results will appear here...</pre>
+
+  <script>
+    const API_BASE = 'http://localhost:5000/api';
+    const responseEl = document.getElementById('response');
+
+    async function fetchAPI(endpoint, method = 'GET', body = null) {
+      try {
+        const options = {
+          method,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+
+        if (body) {
+          options.body = JSON.stringify(body);
+        }
+
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        const data = await response.json();
+        responseEl.textContent = JSON.stringify(data, null, 2);
+        return data;
+      } catch (error) {
+        responseEl.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    // Reset database
+    document.getElementById('resetDb').addEventListener('click', () => {
+      fetchAPI('/reset', 'POST');
+    });
+
+    // Get categories
+    document.getElementById('getCategories').addEventListener('click', () => {
+      fetchAPI('/categories');
+    });
+
+    // Get featured projects
+    document.getElementById('getFeatured').addEventListener('click', () => {
+      fetchAPI('/projects/featured');
+    });
+
+    // Get trending projects
+    document.getElementById('getTrending').addEventListener('click', () => {
+      fetchAPI('/projects/trending');
+    });
+  </script>
 </body>
 </html>

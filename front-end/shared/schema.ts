@@ -62,8 +62,8 @@ export const projects = pgTable("projects", {
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
   id: true,
-  raisedAmount: true,
-  backers: true,
+  currentFunding: true,
+  backerCount: true,
   createdAt: true,
   updatedAt: true,
 });
