@@ -47,9 +47,9 @@ const ProjectPage = () => {
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-5xl mx-auto">
-          <div className="w-full h-80 rounded-xl bg-gray-200 animate-pulse" />
-          <div className="mt-8 w-2/3 h-10 bg-gray-200 animate-pulse rounded" />
-          <div className="mt-4 w-full h-32 bg-gray-200 animate-pulse rounded" />
+          <div className="w-full h-80 rounded-xl bg-gray-200 dark:bg-slate-700 animate-pulse" />
+          <div className="mt-8 w-2/3 h-10 bg-gray-200 dark:bg-slate-700 animate-pulse rounded" />
+          <div className="mt-4 w-full h-32 bg-gray-200 dark:bg-slate-700 animate-pulse rounded" />
         </div>
       </div>
     );
@@ -60,8 +60,8 @@ const ProjectPage = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-5xl mx-auto text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-destructive" />
-          <h2 className="mt-4 text-2xl font-bold">Project not found</h2>
-          <p className="mt-2 text-gray-600">The project you're looking for doesn't exist or has been removed.</p>
+          <h2 className="mt-4 text-2xl font-bold dark:text-white">Project not found</h2>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">The project you're looking for doesn't exist or has been removed.</p>
           <Button className="mt-6" onClick={() => navigate("/")}>Back to Home</Button>
         </div>
       </div>
@@ -142,7 +142,7 @@ const ProjectPage = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2">
-            <div className="project-content rounded-xl overflow-hidden bg-white shadow-md">
+            <div className="project-content rounded-xl overflow-hidden bg-white dark:bg-slate-800 shadow-md">
               <div className="aspect-w-16 aspect-h-9 overflow-hidden">
                 <img
                   src={project.thumbnailUrl}
@@ -154,10 +154,10 @@ const ProjectPage = () => {
               <div className="p-6 md:p-8">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h1 className="text-2xl md:text-3xl font-bold mb-2">{project.title}</h1>
-                    <p className="text-gray-600 mb-6">{project.shortDescription || project.description.substring(0, 120) + '...'}</p>
+                    <h1 className="text-2xl md:text-3xl font-bold mb-2 dark:text-white">{project.title}</h1>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">{project.shortDescription || project.description.substring(0, 120) + '...'}</p>
                   </div>
-                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
+                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30">
                     {project.categoryId}
                   </Badge>
                 </div>
@@ -170,22 +170,22 @@ const ProjectPage = () => {
                   </TabsList>
                   
                   <TabsContent value="about" className="project-content">
-                    <div className="prose max-w-none">
-                      <p>{project.description}</p>
+                    <div className="prose dark:prose-invert max-w-none">
+                      <p className="dark:text-gray-300">{project.description}</p>
                     </div>
                   </TabsContent>
                   
                   <TabsContent value="updates" className="project-content">
-                    <div className="bg-gray-50 rounded-lg p-8 text-center">
-                      <h3 className="text-lg font-medium mb-2">No updates yet</h3>
-                      <p className="text-gray-600">The creator hasn't posted any updates yet.</p>
+                    <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-8 text-center">
+                      <h3 className="text-lg font-medium mb-2 dark:text-white">No updates yet</h3>
+                      <p className="text-gray-600 dark:text-gray-300">The creator hasn't posted any updates yet.</p>
                     </div>
                   </TabsContent>
                   
                   <TabsContent value="backers" className="project-content">
-                    <div className="flex items-center justify-center bg-gray-50 rounded-lg p-8">
-                      <Users className="h-6 w-6 text-gray-500 mr-3" />
-                      <p className="text-lg font-medium">{backerCount} backers have contributed so far</p>
+                    <div className="flex items-center justify-center bg-gray-50 dark:bg-slate-700 rounded-lg p-8">
+                      <Users className="h-6 w-6 text-gray-500 dark:text-gray-400 mr-3" />
+                      <p className="text-lg font-medium dark:text-white">{backerCount} backers have contributed so far</p>
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -205,15 +205,15 @@ const ProjectPage = () => {
               <CardContent className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="font-medium">{fundingPercentage}% funded</span>
-                    <span className="font-medium text-amber-600">
+                    <span className="font-medium dark:text-white">{fundingPercentage}% funded</span>
+                    <span className="font-medium text-amber-600 dark:text-amber-500">
                       {project.currentFunding} {fundingCurrency} of {project.fundingGoal} {fundingCurrency}
                     </span>
                   </div>
                   <Progress value={fundingPercentage} className="h-2" />
                 </div>
                 
-                <div className="flex justify-between text-sm text-gray-500">
+                <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-1" />
                     <span>{backerCount} backers</span>
@@ -228,7 +228,7 @@ const ProjectPage = () => {
                 
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="amount" className="block text-sm font-medium mb-1">
+                    <label htmlFor="amount" className="block text-sm font-medium mb-1 dark:text-white">
                       Contribution Amount ({fundingCurrency})
                     </label>
                     <input
@@ -238,7 +238,7 @@ const ProjectPage = () => {
                       onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
                       min="0.01"
                       step="0.01"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-slate-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                   
@@ -250,7 +250,7 @@ const ProjectPage = () => {
                   </Button>
                   
                   {!isConnected && (
-                    <div className="text-sm text-gray-500 flex items-start gap-2">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 flex items-start gap-2">
                       <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                       <span>
                         You need to connect your wallet before contributing to this project
@@ -260,12 +260,12 @@ const ProjectPage = () => {
                 </div>
               </CardContent>
               
-              <CardFooter className="flex justify-between border-t border-gray-100 pt-4">
-                <Button variant="ghost" size="sm" className="text-gray-500">
+              <CardFooter className="flex justify-between border-t border-gray-100 dark:border-gray-700 pt-4">
+                <Button variant="ghost" size="sm" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
-                <Button variant="ghost" size="sm" className="text-gray-500">
+                <Button variant="ghost" size="sm" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                   <Heart className="h-4 w-4 mr-2" />
                   Save
                 </Button>
@@ -274,19 +274,19 @@ const ProjectPage = () => {
             
             <Card className="project-content shadow-md">
               <CardHeader>
-                <CardTitle className="text-base">About the creator</CardTitle>
+                <CardTitle className="text-base dark:text-white">About the creator</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-600 font-medium">DC</span>
+                  <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
+                    <span className="text-gray-600 dark:text-gray-300 font-medium">DC</span>
                   </div>
                   <div>
-                    <h4 className="font-medium">Digital Creators Alliance</h4>
-                    <p className="text-sm text-gray-500">3 projects created</p>
+                    <h4 className="font-medium dark:text-white">Digital Creators Alliance</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">3 projects created</p>
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-gray-600">
+                <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
                   Creating innovative blockchain projects since 2020
                 </p>
               </CardContent>
