@@ -105,7 +105,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
           </Button>
         </div>
         
-        <p className="text-slate dark:text-slate-300 mb-4 line-clamp-3">
+        <p className="text-slate dark:text-slate-300 mb-4 line-clamp-2">
           {project.description}
         </p>
         

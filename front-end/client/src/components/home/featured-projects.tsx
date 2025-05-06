@@ -176,11 +176,11 @@ export default function FeaturedProjects() {
         
         <div 
           ref={carouselRef}
-          className="flex flex-nowrap gap-8 overflow-x-auto pb-6 hide-scrollbar"
+          className="flex flex-nowrap gap-8 overflow-x-auto pb-8 hide-scrollbar"
         >
           {featuredProjects.length > 0 ? (
             featuredProjects.map((project: Project) => (
-              <div key={project.id} className="min-w-[320px] md:min-w-[380px] max-w-[400px] h-[520px] flex-shrink-0">
+              <div key={project.id} className="min-w-[320px] md:min-w-[380px] max-w-[400px] h-auto flex-shrink-0">
                 <FeaturedProjectCard project={project} />
               </div>
             ))
