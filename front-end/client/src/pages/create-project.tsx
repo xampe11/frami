@@ -487,45 +487,95 @@ export default function CreateProject() {
                 {currentStep === 2 && (
                   <div className="bg-white rounded-xl shadow-sm p-8">
                     <h2 className="text-2xl font-bold mb-6">NFT Rewards</h2>
-                    <p className="text-gray-600 mb-8">
-                      Configure NFT rewards for your project backers.
+                    <p className="text-gray-600 mb-6">
+                      Set up NFT rewards for your backers. Offer exclusive digital collectibles tied to different funding tiers.
                     </p>
                     
                     <div className="space-y-6">
-                      <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                        <h3 className="font-semibold mb-2">NFT Rewards</h3>
-                        <p className="text-sm text-gray-600 mb-4">
-                          Create NFT rewards for different tiers of project backers. These digital assets will be minted and transferred to backers when they support your project.
-                        </p>
+                      {/* NFT Reward Tiers */}
+                      <div className="space-y-6 mb-6">
+                        <h3 className="text-lg font-medium">Reward Tiers</h3>
                         
-                        <div className="flex items-center gap-2 mb-6">
-                          <HelpCircle size={16} className="text-primary" />
-                          <span className="text-sm text-gray-600">Coming soon: This feature is under development.</span>
+                        {/* Basic Tier */}
+                        <div className="border border-gray-200 rounded-lg p-6 transition-all hover:border-primary/50 hover:shadow-sm">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h4 className="font-semibold text-lg mb-1">Basic Supporter</h4>
+                              <p className="text-primary font-medium mb-2">$50+</p>
+                              <p className="text-sm text-gray-600 mb-4">Exclusive digital badge NFT recognizing your early support</p>
+                              
+                              <div className="flex items-center text-xs text-gray-500">
+                                <span className="flex items-center mr-4">
+                                  <Users size={14} className="mr-1" />
+                                  Limited (100)
+                                </span>
+                                <span className="flex items-center">
+                                  <Calendar size={14} className="mr-1" />
+                                  Delivery: After funding
+                                </span>
+                              </div>
+                            </div>
+                            <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
+                              <Gift size={24} className="text-gray-400" />
+                            </div>
+                          </div>
                         </div>
                         
-                        <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center">
-                          <div className="flex justify-center mb-4">
-                            <FileText size={32} className="text-gray-400" />
+                        {/* Premium Tier */}
+                        <div className="border border-gray-200 rounded-lg p-6 transition-all hover:border-primary/50 hover:shadow-sm">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h4 className="font-semibold text-lg mb-1">Premium Backer</h4>
+                              <p className="text-primary font-medium mb-2">$250+</p>
+                              <p className="text-sm text-gray-600 mb-4">Animated collectible NFT with special access to project updates</p>
+                              
+                              <div className="flex items-center text-xs text-gray-500">
+                                <span className="flex items-center mr-4">
+                                  <Users size={14} className="mr-1" />
+                                  Limited (50)
+                                </span>
+                                <span className="flex items-center">
+                                  <Calendar size={14} className="mr-1" />
+                                  Delivery: After funding
+                                </span>
+                              </div>
+                            </div>
+                            <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
+                              <Gift size={24} className="text-gray-400" />
+                            </div>
                           </div>
-                          <h4 className="font-medium mb-2">Create NFT Rewards</h4>
-                          <p className="text-sm text-gray-500 mb-4">
-                            You'll be able to define multiple NFT rewards with different traits and funding levels.
-                          </p>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="bg-white"
-                            disabled
-                          >
-                            Add NFT Reward (Coming Soon)
-                          </Button>
+                        </div>
+                        
+                        {/* Founding Member Tier */}
+                        <div className="border border-gray-200 rounded-lg p-6 transition-all hover:border-primary/50 hover:shadow-sm">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h4 className="font-semibold text-lg mb-1">Founding Member</h4>
+                              <p className="text-primary font-medium mb-2">$1000+</p>
+                              <p className="text-sm text-gray-600 mb-4">Rare founding member NFT with voting rights on project milestones</p>
+                              
+                              <div className="flex items-center text-xs text-gray-500">
+                                <span className="flex items-center mr-4">
+                                  <Users size={14} className="mr-1" />
+                                  Limited (10)
+                                </span>
+                                <span className="flex items-center">
+                                  <Calendar size={14} className="mr-1" />
+                                  Delivery: After funding
+                                </span>
+                              </div>
+                            </div>
+                            <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
+                              <Gift size={24} className="text-gray-400" />
+                            </div>
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                      <div className="bg-blue-50 p-4 rounded-lg">
                         <div className="flex items-start">
-                          <Info className="h-5 w-5 text-yellow-500 mr-2 mt-0.5" />
-                          <p className="text-sm text-yellow-700">
+                          <Info className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
+                          <p className="text-sm text-blue-700">
                             NFT rewards are an optional feature. You can proceed with project creation without configuring NFT rewards.
                           </p>
                         </div>
