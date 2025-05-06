@@ -439,27 +439,27 @@ export default function CreateProject() {
                 
                 {/* Step 2: Team Management */}
                 {currentStep === 1 && (
-                  <div className="bg-white rounded-xl shadow-sm p-8">
-                    <h2 className="text-2xl font-bold mb-6">Team Management</h2>
-                    <p className="text-gray-600 mb-8">
+                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm dark:shadow-slate-700/10 p-8">
+                    <h2 className="text-2xl font-bold mb-6 dark:text-white">Team Management</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mb-8">
                       Add team members who will help manage your project. Your wallet address will automatically be included as the project creator.
                     </p>
                     
                     <div className="mb-6">
-                      <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                        <h3 className="font-semibold">Project Creator</h3>
-                        <p className="text-gray-500 text-sm">{form.getValues("creatorId") ? `User ID: ${form.getValues("creatorId")}` : "Connect wallet to see your address"}</p>
+                      <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg mb-4">
+                        <h3 className="font-semibold dark:text-white">Project Creator</h3>
+                        <p className="text-gray-500 dark:text-gray-300 text-sm">{form.getValues("creatorId") ? `User ID: ${form.getValues("creatorId")}` : "Connect wallet to see your address"}</p>
                       </div>
                       
                       <div className="space-y-4">
-                        <h3 className="font-semibold">Additional Team Members</h3>
+                        <h3 className="font-semibold dark:text-white">Additional Team Members</h3>
                         
                         <div className="flex gap-2">
                           <Input 
                             placeholder="Enter wallet address (0x...)" 
                             value={newTeamMember}
                             onChange={(e) => setNewTeamMember(e.target.value)}
-                            className="border-gray-300 focus:border-primary"
+                            className="border-gray-300 dark:border-slate-600 focus:border-primary dark:bg-slate-700 dark:text-white"
                           />
                           <Button 
                             type="button" 
@@ -472,13 +472,14 @@ export default function CreateProject() {
                         
                         <div className="space-y-2 mt-4">
                           {form.getValues("teamMembers")?.map((member, index) => (
-                            <div key={index} className="flex justify-between items-center bg-gray-50 p-3 rounded">
-                              <span className="text-sm font-mono">{member}</span>
+                            <div key={index} className="flex justify-between items-center bg-gray-50 dark:bg-slate-700 p-3 rounded">
+                              <span className="text-sm font-mono dark:text-white">{member}</span>
                               <Button 
                                 type="button" 
                                 variant="ghost" 
                                 size="sm"
                                 onClick={() => handleRemoveTeamMember(index)}
+                                className="dark:text-slate-300 dark:hover:text-white"
                               >
                                 Remove
                               </Button>
@@ -486,7 +487,7 @@ export default function CreateProject() {
                           ))}
                           
                           {(!form.getValues("teamMembers") || form.getValues("teamMembers").length === 0) && (
-                            <p className="text-gray-500 text-sm italic">No additional team members added</p>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm italic">No additional team members added</p>
                           )}
                         </div>
                       </div>
@@ -496,26 +497,26 @@ export default function CreateProject() {
                 
                 {/* Step 3: NFTs */}
                 {currentStep === 2 && (
-                  <div className="bg-white rounded-xl shadow-sm p-8">
-                    <h2 className="text-2xl font-bold mb-6">NFT Rewards</h2>
-                    <p className="text-gray-600 mb-6">
+                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm dark:shadow-slate-700/10 p-8">
+                    <h2 className="text-2xl font-bold mb-6 dark:text-white">NFT Rewards</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
                       Set up NFT rewards for your backers. Offer exclusive digital collectibles tied to different funding tiers.
                     </p>
                     
                     <div className="space-y-6">
                       {/* NFT Reward Tiers */}
                       <div className="space-y-6 mb-6">
-                        <h3 className="text-lg font-medium">Reward Tiers</h3>
+                        <h3 className="text-lg font-medium dark:text-white">Reward Tiers</h3>
                         
                         {/* Basic Tier */}
-                        <div className="border border-gray-200 rounded-lg p-6 transition-all hover:border-primary/50 hover:shadow-sm">
+                        <div className="border border-gray-200 dark:border-slate-600 rounded-lg p-6 transition-all hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-sm dark:bg-slate-700">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h4 className="font-semibold text-lg mb-1">Basic Supporter</h4>
+                              <h4 className="font-semibold text-lg mb-1 dark:text-white">Basic Supporter</h4>
                               <p className="text-primary font-medium mb-2">$50+</p>
-                              <p className="text-sm text-gray-600 mb-4">Exclusive digital badge NFT recognizing your early support</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Exclusive digital badge NFT recognizing your early support</p>
                               
-                              <div className="flex items-center text-xs text-gray-500">
+                              <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                                 <span className="flex items-center mr-4">
                                   <Users size={14} className="mr-1" />
                                   Limited (100)
@@ -526,21 +527,21 @@ export default function CreateProject() {
                                 </span>
                               </div>
                             </div>
-                            <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
-                              <Gift size={24} className="text-gray-400" />
+                            <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-slate-600 flex items-center justify-center">
+                              <Gift size={24} className="text-gray-400 dark:text-gray-300" />
                             </div>
                           </div>
                         </div>
                         
                         {/* Premium Tier */}
-                        <div className="border border-gray-200 rounded-lg p-6 transition-all hover:border-primary/50 hover:shadow-sm">
+                        <div className="border border-gray-200 dark:border-slate-600 rounded-lg p-6 transition-all hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-sm dark:bg-slate-700">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h4 className="font-semibold text-lg mb-1">Premium Backer</h4>
+                              <h4 className="font-semibold text-lg mb-1 dark:text-white">Premium Backer</h4>
                               <p className="text-primary font-medium mb-2">$250+</p>
-                              <p className="text-sm text-gray-600 mb-4">Animated collectible NFT with special access to project updates</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Animated collectible NFT with special access to project updates</p>
                               
-                              <div className="flex items-center text-xs text-gray-500">
+                              <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                                 <span className="flex items-center mr-4">
                                   <Users size={14} className="mr-1" />
                                   Limited (50)
@@ -551,21 +552,21 @@ export default function CreateProject() {
                                 </span>
                               </div>
                             </div>
-                            <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
-                              <Gift size={24} className="text-gray-400" />
+                            <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-slate-600 flex items-center justify-center">
+                              <Gift size={24} className="text-gray-400 dark:text-gray-300" />
                             </div>
                           </div>
                         </div>
                         
                         {/* Founding Member Tier */}
-                        <div className="border border-gray-200 rounded-lg p-6 transition-all hover:border-primary/50 hover:shadow-sm">
+                        <div className="border border-gray-200 dark:border-slate-600 rounded-lg p-6 transition-all hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-sm dark:bg-slate-700">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h4 className="font-semibold text-lg mb-1">Founding Member</h4>
+                              <h4 className="font-semibold text-lg mb-1 dark:text-white">Founding Member</h4>
                               <p className="text-primary font-medium mb-2">$1000+</p>
-                              <p className="text-sm text-gray-600 mb-4">Rare founding member NFT with voting rights on project milestones</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Rare founding member NFT with voting rights on project milestones</p>
                               
-                              <div className="flex items-center text-xs text-gray-500">
+                              <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                                 <span className="flex items-center mr-4">
                                   <Users size={14} className="mr-1" />
                                   Limited (10)
@@ -576,17 +577,17 @@ export default function CreateProject() {
                                 </span>
                               </div>
                             </div>
-                            <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
-                              <Gift size={24} className="text-gray-400" />
+                            <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-slate-600 flex items-center justify-center">
+                              <Gift size={24} className="text-gray-400 dark:text-gray-300" />
                             </div>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
                         <div className="flex items-start">
-                          <Info className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
-                          <p className="text-sm text-blue-700">
+                          <Info className="h-5 w-5 text-blue-500 dark:text-blue-400 mr-2 mt-0.5" />
+                          <p className="text-sm text-blue-700 dark:text-blue-300">
                             NFT rewards are an optional feature. You can proceed with project creation without configuring NFT rewards.
                           </p>
                         </div>
@@ -597,9 +598,9 @@ export default function CreateProject() {
                 
                 {/* Step 4: Deadline */}
                 {currentStep === 3 && (
-                  <div className="bg-white rounded-xl shadow-sm p-8">
-                    <h2 className="text-2xl font-bold mb-6">Funding Details</h2>
-                    <p className="text-gray-600 mb-8">
+                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm dark:shadow-slate-700/10 p-8">
+                    <h2 className="text-2xl font-bold mb-6 dark:text-white">Funding Details</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mb-8">
                       Set your funding goals and campaign duration.
                     </p>
                     
@@ -615,13 +616,13 @@ export default function CreateProject() {
                             <div className="space-y-4">
                               <FormControl>
                                 <div className="flex items-center">
-                                  <span className="mr-2">$</span>
+                                  <span className="mr-2 dark:text-white">$</span>
                                   <Input 
                                     type="number" 
                                     min={100} 
                                     value={field.value}
                                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                                    className="border-gray-300 focus:border-primary"
+                                    className="border-gray-300 dark:border-slate-600 focus:border-primary dark:bg-slate-700 dark:text-white"
                                   />
                                 </div>
                               </FormControl>
@@ -632,13 +633,14 @@ export default function CreateProject() {
                                 step={100}
                                 value={[field.value]}
                                 onValueChange={(values) => handleGoalChange(values[0])}
+                                className="dark:bg-slate-700"
                               />
-                              <div className="flex justify-between text-xs text-gray-500">
+                              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                                 <span>$100</span>
                                 <span>$100,000</span>
                               </div>
                             </div>
-                            <FormDescription className="text-xs">
+                            <FormDescription className="text-xs dark:text-gray-400">
                               Set a realistic funding goal for your project
                             </FormDescription>
                             <FormMessage />
@@ -662,12 +664,12 @@ export default function CreateProject() {
                                   max={90}
                                   value={field.value}
                                   onChange={(e) => field.onChange(parseInt(e.target.value))}
-                                  className="border-gray-300 focus:border-primary"
+                                  className="border-gray-300 dark:border-slate-600 focus:border-primary dark:bg-slate-700 dark:text-white"
                                 />
-                                <span className="ml-2">days</span>
+                                <span className="ml-2 dark:text-white">days</span>
                               </div>
                             </FormControl>
-                            <FormDescription className="text-xs">
+                            <FormDescription className="text-xs dark:text-gray-400">
                               How long will your fundraising campaign run? (1-90 days)
                             </FormDescription>
                             <FormMessage />
@@ -679,18 +681,19 @@ export default function CreateProject() {
                         control={form.control}
                         name="isFlexibleFunding"
                         render={({ field }) => (
-                          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border dark:border-slate-600 p-4 dark:bg-slate-700/50">
                             <FormControl>
                               <Checkbox
                                 checked={field.value}
                                 onCheckedChange={field.onChange}
+                                className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                               />
                             </FormControl>
                             <div className="space-y-1 leading-none">
-                              <FormLabel>
+                              <FormLabel className="dark:text-white">
                                 Flexible Funding
                               </FormLabel>
-                              <FormDescription className="text-xs">
+                              <FormDescription className="text-xs dark:text-gray-400">
                                 If enabled, you'll receive funds even if your goal isn't met. Otherwise, funds will be returned to backers if the goal isn't reached.
                               </FormDescription>
                             </div>
@@ -703,49 +706,49 @@ export default function CreateProject() {
                 
                 {/* Step 5: Deploy - Final Step */}
                 {currentStep === 4 && (
-                  <div className="bg-white rounded-xl shadow-sm p-8">
-                    <h2 className="text-2xl font-bold mb-6">Deploy Your Project</h2>
-                    <p className="text-gray-600 mb-8">
+                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm dark:shadow-slate-700/10 p-8">
+                    <h2 className="text-2xl font-bold mb-6 dark:text-white">Deploy Your Project</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mb-8">
                       Review your project details before deploying to the blockchain.
                     </p>
                     
                     <div className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="border rounded-lg p-4">
-                          <h3 className="font-semibold mb-2">Project Name</h3>
-                          <p>{form.getValues("title") || "Not set"}</p>
+                        <div className="border dark:border-slate-600 rounded-lg p-4 dark:bg-slate-700/50">
+                          <h3 className="font-semibold mb-2 dark:text-white">Project Name</h3>
+                          <p className="dark:text-gray-300">{form.getValues("title") || "Not set"}</p>
                         </div>
                         
-                        <div className="border rounded-lg p-4">
-                          <h3 className="font-semibold mb-2">Description</h3>
-                          <p className="line-clamp-3">{form.getValues("description") || "Not set"}</p>
+                        <div className="border dark:border-slate-600 rounded-lg p-4 dark:bg-slate-700/50">
+                          <h3 className="font-semibold mb-2 dark:text-white">Description</h3>
+                          <p className="line-clamp-3 dark:text-gray-300">{form.getValues("description") || "Not set"}</p>
                         </div>
                         
-                        <div className="border rounded-lg p-4">
-                          <h3 className="font-semibold mb-2">Funding Goal</h3>
-                          <p>${form.getValues("goalAmount") || 0}</p>
+                        <div className="border dark:border-slate-600 rounded-lg p-4 dark:bg-slate-700/50">
+                          <h3 className="font-semibold mb-2 dark:text-white">Funding Goal</h3>
+                          <p className="dark:text-gray-300">${form.getValues("goalAmount") || 0}</p>
                         </div>
                         
-                        <div className="border rounded-lg p-4">
-                          <h3 className="font-semibold mb-2">Campaign Duration</h3>
-                          <p>{form.getValues("daysLeft") || 0} days</p>
+                        <div className="border dark:border-slate-600 rounded-lg p-4 dark:bg-slate-700/50">
+                          <h3 className="font-semibold mb-2 dark:text-white">Campaign Duration</h3>
+                          <p className="dark:text-gray-300">{form.getValues("daysLeft") || 0} days</p>
                         </div>
                         
-                        <div className="border rounded-lg p-4">
-                          <h3 className="font-semibold mb-2">Flexible Funding</h3>
-                          <p>{form.getValues("isFlexibleFunding") ? "Yes" : "No"}</p>
+                        <div className="border dark:border-slate-600 rounded-lg p-4 dark:bg-slate-700/50">
+                          <h3 className="font-semibold mb-2 dark:text-white">Flexible Funding</h3>
+                          <p className="dark:text-gray-300">{form.getValues("isFlexibleFunding") ? "Yes" : "No"}</p>
                         </div>
                         
-                        <div className="border rounded-lg p-4">
-                          <h3 className="font-semibold mb-2">Team Members</h3>
-                          <p>{(form.getValues("teamMembers")?.length || 0) + 1} members</p>
+                        <div className="border dark:border-slate-600 rounded-lg p-4 dark:bg-slate-700/50">
+                          <h3 className="font-semibold mb-2 dark:text-white">Team Members</h3>
+                          <p className="dark:text-gray-300">{(form.getValues("teamMembers")?.length || 0) + 1} members</p>
                         </div>
                       </div>
                       
-                      <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                      <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700/50 p-4 rounded-lg">
                         <div className="flex items-start">
-                          <Info className="h-5 w-5 text-yellow-500 mr-2 mt-0.5" />
-                          <p className="text-sm text-yellow-700">
+                          <Info className="h-5 w-5 text-yellow-500 dark:text-yellow-400 mr-2 mt-0.5" />
+                          <p className="text-sm text-yellow-700 dark:text-yellow-300">
                             Once deployed, some project details cannot be changed without creating a new transaction. Make sure all information is correct before proceeding.
                           </p>
                         </div>
