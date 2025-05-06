@@ -50,7 +50,7 @@ const SmallProjectCard: React.FC<SmallProjectCardProps> = ({ project }) => {
   return (
     <div 
       ref={cardRef}
-      className="project-card bg-white rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300"
+      className="project-card bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300"
     >
       {project.isNew && <span className="badge-new text-xs">New</span>}
       {project.trending && <span className="badge-trending text-xs">Trending</span>}
@@ -66,15 +66,15 @@ const SmallProjectCard: React.FC<SmallProjectCardProps> = ({ project }) => {
           </div>
           
           <div className="p-4">
-            <h3 className="font-heading font-bold text-base mb-1 truncate text-black">{project.title}</h3>
-            <p className="text-gray-600 text-xs mb-3 line-clamp-1">{project.shortDescription}</p>
+            <h3 className="font-heading font-bold text-base mb-1 truncate text-black dark:text-white">{project.title}</h3>
+            <p className="text-gray-600 dark:text-gray-300 text-xs mb-3 line-clamp-1">{project.shortDescription}</p>
             
             <div className="mb-2">
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-bold text-black">{fundingPercentage}% funded</span>
-                <span className="font-medium text-black">{project.currentFunding} {project.fundingCurrency}</span>
+                <span className="font-bold text-black dark:text-white">{fundingPercentage}% funded</span>
+                <span className="font-medium text-black dark:text-white">{project.currentFunding} {project.fundingCurrency}</span>
               </div>
-              <div className="progress-bar bg-gray-100 rounded-full h-1.5">
+              <div className="progress-bar bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
                 <div 
                   className="bg-secondary h-full rounded-full" 
                   style={{ width: `${fundingPercentage}%` }}
@@ -82,7 +82,7 @@ const SmallProjectCard: React.FC<SmallProjectCardProps> = ({ project }) => {
               </div>
             </div>
             
-            <div className="flex justify-between text-xs text-gray-700 font-medium">
+            <div className="flex justify-between text-xs text-gray-700 dark:text-gray-300 font-medium">
               <span>{project.backerCount} backers</span>
               <span>{project.daysRemaining} days left</span>
             </div>

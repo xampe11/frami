@@ -55,12 +55,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         )}
         
         <Link href={`/projects/${project.slug}`}>
-          <h3 className="text-lg font-bold mt-2 font-inter line-clamp-1 hover:text-primary transition-colors">
+          <h3 className="text-lg font-bold mt-2 font-inter line-clamp-1 hover:text-primary dark:text-white transition-colors">
             {project.title}
           </h3>
         </Link>
         
-        <p className="text-slate text-sm mt-2 mb-3 line-clamp-2">
+        <p className="text-slate dark:text-slate-300 text-sm mt-2 mb-3 line-clamp-2">
           {project.description}
         </p>
         
@@ -82,9 +82,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                 className="h-6 w-6 rounded-full mr-2"
               />
             )}
-            <span className="font-medium">{creator?.username || 'Unknown creator'}</span>
+            <span className="font-medium dark:text-slate-200">{creator?.username || 'Unknown creator'}</span>
           </div>
-          <span className="text-slate">{project.daysLeft} days left</span>
+          <span className="text-slate dark:text-slate-300">{project.daysLeft} days left</span>
         </div>
       </div>
     </div>

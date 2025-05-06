@@ -52,7 +52,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
   const progress = calculateProgress(project.raisedAmount, project.goalAmount);
 
   return (
-    <div className="featured-project bg-white rounded-xl overflow-hidden shadow-card hover:shadow-hover transition duration-300">
+    <div className="featured-project bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card hover:shadow-hover transition duration-300">
       <Link href={`/projects/${project.slug}`}>
         <div className="overflow-hidden relative">
           <img 
@@ -89,7 +89,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
               </span>
             )}
             <Link href={`/projects/${project.slug}`}>
-              <h3 className="text-xl font-bold mt-2 mb-1 font-inter hover:text-primary transition-colors text-black">
+              <h3 className="text-xl font-bold mt-2 mb-1 font-inter hover:text-primary transition-colors text-black dark:text-white">
                 {project.title}
               </h3>
             </Link>
