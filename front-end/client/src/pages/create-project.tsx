@@ -291,29 +291,40 @@ export default function CreateProject() {
           </div>
         ) : (
           <div className="mb-8">
-            {/* Progress Steps - Redesigned to fix overlap issues */}
+            {/* Progress Steps - Complete redesign to remove line issues */}
             <div className="mb-8 border-t border-b py-6">
-              <div className="flex justify-between items-center relative">
-                {/* Horizontal connecting line */}
-                <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-gray-200 -translate-y-1/2" />
-                
-                {/* Step indicators */}
+              <div className="flex justify-between items-center">
+                {/* Step indicators with custom connecting lines */}
                 {steps.map((step, index) => (
-                  <div 
-                    key={step.id} 
-                    className={`flex flex-col items-center relative z-10 ${currentStep === index ? 'text-primary' : 'text-gray-400'} cursor-pointer`}
-                    onClick={() => setCurrentStep(index)}
-                  >
-                    <div className={`flex items-center justify-center w-10 h-10 mb-2 rounded-full ${
-                      currentStep === index 
-                        ? 'bg-primary text-white' 
-                        : index < currentStep 
-                          ? 'bg-primary/20 text-primary'
-                          : 'bg-gray-100'
-                    }`}>
+                  <div key={step.id} className="flex flex-col items-center relative">
+                    {/* Custom connecting lines - display between steps */}
+                    {index > 0 && (
+                      <div className={`absolute right-[calc(100%+0.75rem)] top-5 w-full h-0.5 
+                        ${index <= currentStep ? 'bg-primary' : 'bg-gray-200'}`} 
+                        style={{width: 'calc(100% + 1.5rem)', right: 'calc(100% + 0.75rem)'}}
+                      />
+                    )}
+                    
+                    {/* The step circle */}
+                    <div 
+                      className={`flex items-center justify-center w-10 h-10 mb-2 rounded-full ${
+                        currentStep === index 
+                          ? 'bg-primary text-white' 
+                          : index < currentStep 
+                            ? 'bg-primary/20 text-primary'
+                            : 'bg-gray-100 text-gray-400'
+                      } cursor-pointer z-10`}
+                      onClick={() => setCurrentStep(index)}
+                    >
                       {step.icon}
                     </div>
-                    <span className="text-xs font-medium mt-1">{step.name}</span>
+                    
+                    {/* Step name */}
+                    <span className={`text-xs font-medium mt-1 ${
+                      currentStep === index ? 'text-primary' : 'text-gray-400'
+                    }`}>
+                      {step.name}
+                    </span>
                   </div>
                 ))}
               </div>

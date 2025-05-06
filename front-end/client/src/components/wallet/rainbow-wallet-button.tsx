@@ -76,7 +76,7 @@ export default function RainbowWalletButton() {
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="flex flex-col space-y-1 p-2">
                       <p className="text-xs text-slate-500">Connected to {chain.name}</p>
-                      <p className="font-medium">{account.address}</p>
+                      <p className="font-medium">{account.address.substring(0, 6)}...{account.address.substring(account.address.length - 4)}</p>
                       <p className="text-sm text-slate-600">
                         {account.displayBalance
                           ? `${account.displayBalance}`
