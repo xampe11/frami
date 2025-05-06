@@ -320,7 +320,7 @@ export class MemStorage implements IStorage {
 
   async getProjectsByCreatorId(creatorId: number): Promise<Project[]> {
     return Array.from(this.projects.values()).filter(
-      project => project.creatorId === String(creatorId)
+      project => Number(project.creatorId) === creatorId
     );
   }
 
