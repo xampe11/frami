@@ -177,7 +177,13 @@ export function useGsapReveal(sectionRef: RefObject<HTMLElement>, delay: number 
           
           // Define cleanup function to kill all ScrollTriggers
           cleanupFunction = () => {
-            ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+            // Using explicit any type since ScrollTrigger types aren't readily available
+            const allTriggers = ScrollTrigger.getAll();
+            for (let i = 0; i < allTriggers.length; i++) {
+              allTriggers[i].kill();
+            }
+            
+            // Clear all timelines
             triggers.forEach(tl => tl.kill());
           };
         }

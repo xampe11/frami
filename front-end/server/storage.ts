@@ -70,6 +70,12 @@ export class MemStorage implements IStorage {
 
     // Seed initial categories
     this.seedCategories();
+    
+    // Seed demo user
+    this.seedDemoUser();
+    
+    // Seed sample projects
+    this.seedSampleProjects();
   }
 
   // Seed categories
