@@ -36,7 +36,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const progress = calculateProgress(project.raisedAmount, project.goalAmount);
 
   return (
-    <div className="project-card bg-white rounded-xl overflow-hidden shadow-card hover:shadow-hover transition duration-300">
+    <div className="project-card bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card hover:shadow-hover transition duration-300">
       <Link href={`/projects/${project.slug}`}>
         <div className="overflow-hidden h-48">
           <img 

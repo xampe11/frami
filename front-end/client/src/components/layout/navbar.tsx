@@ -53,7 +53,7 @@ export default function Navbar() {
 
           {/* Right Side - Search, Theme Toggle & Wallet Connection */}
           <div className="hidden md:flex items-center space-x-3">
-            <Button variant="ghost" size="icon" className="text-slate-700 hover:bg-slate-100">
+            <Button variant="ghost" size="icon" className="text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
               <Search className="h-5 w-5" />
             </Button>
             <ThemeToggle />
@@ -67,6 +67,7 @@ export default function Navbar() {
               size="icon" 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              className="text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               {isMobileMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -80,15 +81,15 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg mt-3 py-4 px-6 absolute w-full">
+        <div className="md:hidden bg-white dark:bg-slate-900 shadow-lg mt-3 py-4 px-6 absolute w-full">
           <nav className="flex flex-col space-y-4">
             <Link href="/projects">
-              <span className="text-slate-700 hover:text-primary transition-colors block py-2">
+              <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors block py-2">
                 Explore Projects
               </span>
             </Link>
             <Link href="/create-project">
-              <span className="text-slate-700 hover:text-primary transition-colors block py-2">
+              <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors block py-2">
                 Start a Project
               </span>
             </Link>
