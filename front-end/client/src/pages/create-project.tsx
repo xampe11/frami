@@ -183,19 +183,9 @@ export default function CreateProject() {
       icon: <FileText size={18} />
     },
     { 
-      id: "rulesets", 
-      name: "Rulesets", 
-      icon: <Settings size={18} />
-    },
-    { 
       id: "payouts", 
       name: "Team", 
       icon: <Users size={18} />
-    },
-    { 
-      id: "token", 
-      name: "Token", 
-      icon: <DollarSign size={18} />
     },
     { 
       id: "nfts", 
@@ -299,23 +289,32 @@ export default function CreateProject() {
           </div>
         ) : (
           <div className="mb-8">
-            {/* Progress Steps */}
-            <div className="flex justify-between items-center mb-8 border-t border-b py-6">
-              {steps.map((step, index) => (
-                <div 
-                  key={step.id} 
-                  className={`flex flex-col items-center ${currentStep === index ? 'text-primary' : 'text-gray-400'} cursor-pointer`}
-                  onClick={() => setCurrentStep(index)}
-                >
-                  <div className={`flex items-center justify-center w-10 h-10 mb-2 rounded-full ${currentStep === index ? 'bg-primary/10' : 'bg-gray-100'}`}>
-                    {step.icon}
+            {/* Progress Steps - Redesigned to fix overlap issues */}
+            <div className="mb-8 border-t border-b py-6">
+              <div className="flex justify-between items-center relative">
+                {/* Horizontal connecting line */}
+                <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-gray-200 -translate-y-1/2" />
+                
+                {/* Step indicators */}
+                {steps.map((step, index) => (
+                  <div 
+                    key={step.id} 
+                    className={`flex flex-col items-center relative z-10 ${currentStep === index ? 'text-primary' : 'text-gray-400'} cursor-pointer`}
+                    onClick={() => setCurrentStep(index)}
+                  >
+                    <div className={`flex items-center justify-center w-10 h-10 mb-2 rounded-full ${
+                      currentStep === index 
+                        ? 'bg-primary text-white' 
+                        : index < currentStep 
+                          ? 'bg-primary/20 text-primary'
+                          : 'bg-gray-100'
+                    }`}>
+                      {step.icon}
+                    </div>
+                    <span className="text-xs font-medium mt-1">{step.name}</span>
                   </div>
-                  <span className="text-xs font-medium">{step.name}</span>
-                  {index < steps.length - 1 && (
-                    <div className="absolute left-0 right-0 h-0.5 bg-gray-200 z-0" />
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
             
             <Form {...form}>
@@ -425,8 +424,8 @@ export default function CreateProject() {
                   </div>
                 )}
                 
-                {/* Step 3: Team Management */}
-                {currentStep === 2 && (
+                {/* Step 2: Team Management */}
+                {currentStep === 1 && (
                   <div className="bg-white rounded-xl shadow-sm p-8">
                     <h2 className="text-2xl font-bold mb-6">Team Management</h2>
                     <p className="text-gray-600 mb-8">
