@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { WalletProvider } from "@/contexts/wallet-context";
 import { apiRequest } from "@/lib/queryClient";
+import { ThemeProvider } from "next-themes";
 
 import Home from "@/pages/home";
 import Projects from "@/pages/projects";
@@ -115,18 +116,20 @@ function Router() {
 
 function App() {
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
-          <WalletProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
-          </WalletProvider>
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider>
+            <WalletProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </WalletProvider>
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ThemeProvider>
   );
 }
 

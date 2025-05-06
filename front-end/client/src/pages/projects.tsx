@@ -91,7 +91,7 @@ export default function Projects() {
             return b.backerCount - a.backerCount;
           case "trending":
           default:
-            return b.trending ? -1 : 1;
+            return b.trending === true ? -1 : 1;
         }
       });
       

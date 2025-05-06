@@ -3,6 +3,7 @@ import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import RainbowWalletButton from '../wallet/rainbow-wallet-button';
 import { Menu, X, Search } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -20,7 +21,9 @@ export default function Navbar() {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-md py-3' : 'bg-white/70 backdrop-blur-sm py-4'
+        isScrolled 
+          ? 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-md py-3' 
+          : 'bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm py-4'
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6">
@@ -37,22 +40,23 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link href="/projects">
-              <span className="text-slate-700 hover:text-primary transition-colors font-medium">
+              <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">
                 Explore Projects
               </span>
             </Link>
             <Link href="/create-project">
-              <span className="text-slate-700 hover:text-primary transition-colors font-medium">
+              <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">
                 Start a Project
               </span>
             </Link>
           </nav>
 
-          {/* Right Side - Search & Wallet Connection */}
+          {/* Right Side - Search, Theme Toggle & Wallet Connection */}
           <div className="hidden md:flex items-center space-x-3">
             <Button variant="ghost" size="icon" className="text-slate-700 hover:bg-slate-100">
               <Search className="h-5 w-5" />
             </Button>
+            <ThemeToggle />
             <RainbowWalletButton />
           </div>
 
@@ -88,7 +92,8 @@ export default function Navbar() {
                 Start a Project
               </span>
             </Link>
-            <div className="pt-2">
+            <div className="pt-2 flex items-center space-x-2">
+              <ThemeToggle />
               <RainbowWalletButton />
             </div>
           </nav>
