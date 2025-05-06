@@ -65,7 +65,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
             }}
           />
           <div className="overlay">
-            <span className={`bg-${category?.slug === 'sustainability' ? 'secondary' : 'primary'}/20 text-white text-xs px-3 py-1 rounded-full uppercase font-bold`}>
+            <span className="bg-primary/60 text-white text-xs px-3 py-1 rounded-full uppercase font-bold">
               {category?.name || 'Featured'}
             </span>
             <h3>{project.title}</h3>
@@ -84,7 +84,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
         <div className="flex justify-between items-start mb-4">
           <div>
             {category && (
-              <span className={`bg-${category.slug === 'sustainability' ? 'secondary' : 'primary'}/10 text-${category.slug === 'sustainability' ? 'secondary' : 'primary'} text-xs px-3 py-1 rounded-full uppercase font-bold`}>
+              <span className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-light text-xs px-3 py-1 rounded-full uppercase font-bold">
                 {category.name}
               </span>
             )}

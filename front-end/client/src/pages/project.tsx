@@ -83,8 +83,15 @@ const ProjectPage = () => {
         <div className="max-w-5xl mx-auto text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-destructive" />
           <h2 className="mt-4 text-2xl font-bold dark:text-white">Project not found</h2>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">The project you're looking for doesn't exist or has been removed.</p>
-          <Button className="mt-6" onClick={() => navigate("/")}>Back to Home</Button>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            {error instanceof Error 
+              ? `Error: ${error.message}` 
+              : "The project you're looking for doesn't exist or has been removed."}
+          </p>
+          <div className="mt-6 flex justify-center gap-4">
+            <Button onClick={() => navigate("/")}>Back to Home</Button>
+            <Button variant="outline" onClick={() => window.location.reload()}>Try Again</Button>
+          </div>
         </div>
       </div>
     );
@@ -199,9 +206,13 @@ const ProjectPage = () => {
                       <p className="dark:text-gray-300 mb-6">{project.description}</p>
                       
                       <h3 className="text-xl font-semibold mb-4 dark:text-white">The story</h3>
-                      {project.story.split('\n\n').map((paragraph, index) => (
-                        <p key={index} className="dark:text-gray-300 mb-4">{paragraph}</p>
-                      ))}
+                      {project.story ? (
+                        project.story.split('\n\n').map((paragraph, index) => (
+                          <p key={index} className="dark:text-gray-300 mb-4">{paragraph}</p>
+                        ))
+                      ) : (
+                        <p className="dark:text-gray-300 mb-4">No detailed story has been provided for this project yet.</p>
+                      )}
                     </div>
                   </TabsContent>
                   
@@ -384,6 +395,42 @@ const ProjectPage = () => {
                 <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
                   {creator?.bio || 'Creating innovative blockchain projects'}
                 </p>
+                
+                {creator?.walletAddress && (
+                  <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Creator wallet address:</p>
+                    <div className="flex items-center justify-between">
+                      <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-mono break-all">
+                        {creator.walletAddress}
+                      </code>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="ml-2 h-6 w-6 p-0" 
+                        onClick={() => {
+                          if (creator?.walletAddress) {
+                            navigator.clipboard.writeText(creator.walletAddress);
+                            toast({
+                              title: "Address copied",
+                              description: "Wallet address copied to clipboard"
+                            });
+                          }
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                      </Button>
+                    </div>
+                    <div className="mt-3 flex items-center text-xs text-gray-500 dark:text-gray-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                      </svg>
+                      <span>Verified creator with 4 successful projects</span>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

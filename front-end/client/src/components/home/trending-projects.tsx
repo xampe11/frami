@@ -19,32 +19,32 @@ export default function TrendingProjects() {
 
   if (isLoading) {
     return (
-      <section className="py-12 bg-white">
+      <section className="py-12 bg-white dark:bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center mb-8">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-8 w-48 dark:bg-slate-700" />
+            <Skeleton className="h-6 w-32 dark:bg-slate-700" />
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden shadow-card">
-                <Skeleton className="w-full h-48" />
+              <div key={i} className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card">
+                <Skeleton className="w-full h-48 dark:bg-slate-700" />
                 <div className="p-5">
-                  <Skeleton className="h-5 w-20 mb-2" />
-                  <Skeleton className="h-6 w-[80%] mb-2" />
-                  <Skeleton className="h-4 w-full mb-1" />
-                  <Skeleton className="h-4 w-[90%] mb-4" />
+                  <Skeleton className="h-5 w-20 mb-2 dark:bg-slate-700" />
+                  <Skeleton className="h-6 w-[80%] mb-2 dark:bg-slate-700" />
+                  <Skeleton className="h-4 w-full mb-1 dark:bg-slate-700" />
+                  <Skeleton className="h-4 w-[90%] mb-4 dark:bg-slate-700" />
                   
-                  <Skeleton className="h-4 w-full mb-1" />
-                  <Skeleton className="h-2 w-full mb-4" />
+                  <Skeleton className="h-4 w-full mb-1 dark:bg-slate-700" />
+                  <Skeleton className="h-2 w-full mb-4 dark:bg-slate-700" />
                   
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
-                      <Skeleton className="h-6 w-6 rounded-full mr-2" />
-                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-6 w-6 rounded-full mr-2 dark:bg-slate-700" />
+                      <Skeleton className="h-4 w-20 dark:bg-slate-700" />
                     </div>
-                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-16 dark:bg-slate-700" />
                   </div>
                 </div>
               </div>
@@ -60,13 +60,13 @@ export default function TrendingProjects() {
   }
 
   return (
-    <section ref={sectionRef} className="pt-0 pb-12 bg-white">
+    <section ref={sectionRef} className="pt-0 pb-12 bg-white dark:bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold font-inter">Trending Projects</h2>
+          <h2 className="text-2xl font-bold font-inter dark:text-white">Trending Projects</h2>
           <Link 
             href="/explore" 
-            className="text-primary font-medium text-sm flex items-center hover:underline"
+            className="text-primary font-medium text-sm flex items-center hover:underline dark:text-primary-light"
           >
             View all projects
             <ChevronRight className="ml-1 h-4 w-4" />

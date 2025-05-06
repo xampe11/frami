@@ -14,7 +14,7 @@ export default function FeaturedProjects() {
   
   useGsapReveal(sectionRef);
   
-  const { data: featuredProjects, isLoading, error } = useQuery({
+  const { data: featuredProjects, isLoading, error } = useQuery<Project[]>({
     queryKey: ['/api/projects/featured'],
     queryFn: async () => {
       console.log('Fetching featured projects...');
@@ -23,7 +23,9 @@ export default function FeaturedProjects() {
       const data = await response.json();
       console.log('Featured projects data:', data);
       return data;
-    }
+    },
+    retry: 3,
+    staleTime: 60000  // 1 minute
   });
 
   const scrollLeft = () => {
