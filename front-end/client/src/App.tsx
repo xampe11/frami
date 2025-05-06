@@ -92,6 +92,19 @@ function Router() {
           <Route path="/projects" component={Projects} />
           <Route path="/projects/:slug" component={Project} />
           <Route path="/create-project" component={CreateProject} />
+          {/* Redirects for old routes */}
+          <Route path="/explore">
+            {() => {
+              window.location.href = '/projects';
+              return null;
+            }}
+          </Route>
+          <Route path="/discover">
+            {() => {
+              window.location.href = '/projects';
+              return null;
+            }}
+          </Route>
           <Route component={NotFound} />
         </Switch>
       </main>

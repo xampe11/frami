@@ -58,7 +58,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/create"
+                  href="/create-project"
                   className="text-gray-600 hover:text-white transition"
                 >
                   Start a Project
@@ -106,7 +106,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/explore"
+                  href="/projects"
                   className="text-gray-600 hover:text-white transition"
                 >
                   Discover Projects

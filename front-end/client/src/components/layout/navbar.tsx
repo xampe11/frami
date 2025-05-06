@@ -36,19 +36,14 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/explore">
+            <Link href="/projects">
               <span className="text-slate-700 hover:text-primary transition-colors font-medium">
-                Explore
+                Explore Projects
               </span>
             </Link>
             <Link href="/create-project">
               <span className="text-slate-700 hover:text-primary transition-colors font-medium">
                 Start a Project
-              </span>
-            </Link>
-            <Link href="/discover">
-              <span className="text-slate-700 hover:text-primary transition-colors font-medium">
-                Discover
               </span>
             </Link>
           </nav>
@@ -83,19 +78,14 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white shadow-lg mt-3 py-4 px-6 absolute w-full">
           <nav className="flex flex-col space-y-4">
-            <Link href="/explore">
+            <Link href="/projects">
               <span className="text-slate-700 hover:text-primary transition-colors block py-2">
-                Explore
+                Explore Projects
               </span>
             </Link>
             <Link href="/create-project">
               <span className="text-slate-700 hover:text-primary transition-colors block py-2">
                 Start a Project
-              </span>
-            </Link>
-            <Link href="/discover">
-              <span className="text-slate-700 hover:text-primary transition-colors block py-2">
-                Discover
               </span>
             </Link>
             <div className="pt-2">

@@ -404,7 +404,7 @@ export default function Projects() {
               ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
               : 'md:grid-cols-2 lg:grid-cols-3'} gap-6`}>
               {projects
-                ?.filter((p) => p.isNew)
+                ?.filter((p) => new Date(p.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000) // Projects less than 7 days old
                 .map((project) => (
                   viewMode === 'grid' 
                     ? <ProjectCard key={project.id} project={project} />
