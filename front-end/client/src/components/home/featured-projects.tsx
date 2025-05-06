@@ -22,10 +22,12 @@ export default function FeaturedProjects() {
       if (!response.ok) throw new Error('Failed to fetch featured projects');
       const data = await response.json();
       console.log('Featured projects data:', data);
-      return data || [];
+      return Array.isArray(data) ? data : [];
     },
     retry: 3,
-    staleTime: 60000  // 1 minute
+    staleTime: 60000,  // 1 minute
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
 
   const scrollLeft = () => {
@@ -178,7 +180,7 @@ export default function FeaturedProjects() {
         >
           {featuredProjects.length > 0 ? (
             featuredProjects.map((project: Project) => (
-              <div key={project.id} className="min-w-[350px] md:min-w-[400px] h-[550px] flex-shrink-0">
+              <div key={project.id} className="min-w-[320px] md:min-w-[380px] max-w-[400px] h-[520px] flex-shrink-0">
                 <FeaturedProjectCard project={project} />
               </div>
             ))
