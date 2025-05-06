@@ -43,7 +43,9 @@ import {
   FileText,
   Settings,
   Loader2,
-  Wallet
+  Wallet,
+  Gift,
+  CheckCircle
 } from "lucide-react";
 
 // Extend the insert schema to add client-side validation
@@ -179,28 +181,28 @@ export default function CreateProject() {
   const steps = [
     { 
       id: "details", 
-      name: "Details", 
+      name: "Basic Info", 
       icon: <FileText size={18} />
     },
     { 
-      id: "payouts", 
+      id: "team", 
       name: "Team", 
       icon: <Users size={18} />
     },
     { 
       id: "nfts", 
-      name: "NFTs", 
-      icon: <FileText size={18} />
+      name: "NFT Rewards", 
+      icon: <Gift size={18} />
     },
     { 
-      id: "deadline", 
-      name: "Deadline", 
-      icon: <Calendar size={18} />
+      id: "funding", 
+      name: "Funding", 
+      icon: <DollarSign size={18} />
     },
     { 
-      id: "deploy", 
-      name: "Deploy", 
-      icon: <ChevronRight size={18} />
+      id: "review", 
+      name: "Review", 
+      icon: <CheckCircle size={18} />
     }
   ];
   
