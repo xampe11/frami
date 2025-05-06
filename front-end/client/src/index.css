@@ -224,4 +224,14 @@
   .dark .badge-trending {
     @apply bg-secondary/90 text-white;
   }
+  
+  /* Utility for hiding scrollbars but allowing scrolling */
+  .hide-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
 }

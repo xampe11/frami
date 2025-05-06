@@ -297,11 +297,16 @@ export class MemStorage implements IStorage {
   }
 
   async getFeaturedProjects(limit?: number): Promise<Project[]> {
-    const featured = Array.from(this.projects.values()).filter(
-      project => project.featured
-    );
+    const allProjects = Array.from(this.projects.values());
+    console.log(`Total projects: ${allProjects.length}`);
     
-    return limit ? featured.slice(0, limit) : featured;
+    const featured = allProjects.filter(project => project.featured);
+    console.log(`Featured projects: ${featured.length}`, featured.map(p => p.title));
+    
+    const result = limit ? featured.slice(0, limit) : featured;
+    console.log(`Returning featured projects: ${result.length}`);
+    
+    return result;
   }
 
   async getTrendingProjects(limit?: number): Promise<Project[]> {

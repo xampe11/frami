@@ -175,13 +175,18 @@ export default function FeaturedProjects() {
         <div 
           ref={carouselRef}
           className="flex flex-nowrap gap-8 overflow-x-auto pb-6 hide-scrollbar"
-          style={{ minHeight: "400px" }}
         >
-          {featuredProjects.map((project: Project) => (
-            <div key={project.id} className="min-w-[350px] md:min-w-[400px] flex-shrink-0">
-              <FeaturedProjectCard project={project} />
+          {featuredProjects.length > 0 ? (
+            featuredProjects.map((project: Project) => (
+              <div key={project.id} className="min-w-[350px] md:min-w-[400px] h-[550px] flex-shrink-0">
+                <FeaturedProjectCard project={project} />
+              </div>
+            ))
+          ) : (
+            <div className="w-full text-center py-12">
+              <p className="text-slate dark:text-slate-400">No featured projects found.</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </section>
