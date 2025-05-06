@@ -14,7 +14,7 @@ import { WalletProvider } from "@/contexts/wallet-context";
 import { apiRequest } from "@/lib/queryClient";
 
 import Home from "@/pages/home";
-import Discover from "@/pages/discover";
+import Projects from "@/pages/projects";
 import Project from "@/pages/project";
 import CreateProject from "@/pages/create-project";
 import NotFound from "@/pages/not-found";
@@ -89,7 +89,7 @@ function Router() {
       <main className="flex-grow">
         <Switch>
           <Route path="/" component={Home} />
-          <Route path="/discover" component={Discover} />
+          <Route path="/projects" component={Projects} />
           <Route path="/projects/:slug" component={Project} />
           <Route path="/create-project" component={CreateProject} />
           <Route component={NotFound} />
