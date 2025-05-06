@@ -85,7 +85,7 @@ function Router() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-background text-foreground dark:bg-slate-900">
       <Navbar />
       <main className="flex-grow">
         <Switch>

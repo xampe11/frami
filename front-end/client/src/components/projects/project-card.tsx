@@ -33,7 +33,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     enabled: !!project.creatorId,
   });
 
-  const progress = calculateProgress(project.raisedAmount, project.goalAmount);
+  const progress = calculateProgress(project.currentFunding, project.fundingGoal);
 
   return (
     <div className="project-card bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card hover:shadow-hover transition duration-300">

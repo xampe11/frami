@@ -141,23 +141,23 @@ export default function Projects() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden shadow-card">
-                <Skeleton className="w-full h-48" />
+              <div key={i} className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card">
+                <Skeleton className="w-full h-48 dark:bg-slate-700" />
                 <div className="p-5">
-                  <Skeleton className="h-5 w-20 mb-2" />
-                  <Skeleton className="h-6 w-[80%] mb-2" />
-                  <Skeleton className="h-4 w-full mb-1" />
-                  <Skeleton className="h-4 w-[90%] mb-4" />
+                  <Skeleton className="h-5 w-20 mb-2 dark:bg-slate-700" />
+                  <Skeleton className="h-6 w-[80%] mb-2 dark:bg-slate-700" />
+                  <Skeleton className="h-4 w-full mb-1 dark:bg-slate-700" />
+                  <Skeleton className="h-4 w-[90%] mb-4 dark:bg-slate-700" />
                   
-                  <Skeleton className="h-4 w-full mb-1" />
-                  <Skeleton className="h-2 w-full mb-4" />
+                  <Skeleton className="h-4 w-full mb-1 dark:bg-slate-700" />
+                  <Skeleton className="h-2 w-full mb-4 dark:bg-slate-700" />
                   
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
-                      <Skeleton className="h-6 w-6 rounded-full mr-2" />
-                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-6 w-6 rounded-full mr-2 dark:bg-slate-700" />
+                      <Skeleton className="h-4 w-20 dark:bg-slate-700" />
                     </div>
-                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-16 dark:bg-slate-700" />
                   </div>
                 </div>
               </div>
@@ -173,7 +173,7 @@ export default function Projects() {
       <div className="container mx-auto px-4 sm:px-6">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">Explore Projects</h1>
-          <p className="text-gray-600 max-w-2xl">
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl">
             Discover innovative blockchain projects from creators around the world
             and fund the next big thing with transparency and security.
           </p>
@@ -181,7 +181,7 @@ export default function Projects() {
         
         <div className="flex flex-col md:flex-row gap-4 justify-between mb-8">
           <div className="relative flex-grow max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
             <Input
               type="text"
               placeholder="Search projects..."
@@ -358,9 +358,9 @@ export default function Projects() {
               </div>
             ) : (
               <div className="text-center py-16">
-                <Filter className="mx-auto h-12 w-12 text-slate-300 mb-4" />
+                <Filter className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600 mb-4" />
                 <h3 className="text-xl font-bold mb-2">No Projects Found</h3>
-                <p className="text-gray-600 max-w-md mx-auto">
+                <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
                   We couldn't find any projects matching your current filters. 
                   Try changing your search or clearing filters.
                 </p>
