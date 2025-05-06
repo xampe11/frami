@@ -52,14 +52,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-lg font-bold mb-4 font-inter text-gray-600">
+            <h4 className="text-lg font-bold mb-4 font-inter text-gray-600 dark:text-gray-400">
               For Creators
             </h4>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/create-project"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Start a Project
                 </Link>
@@ -67,7 +67,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Creator Guidelines
                 </a>
@@ -75,7 +75,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Fees & Payments
                 </a>
@@ -83,7 +83,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Blockchain Education
                 </a>
@@ -91,7 +91,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Creator Resources
                 </a>
@@ -100,14 +100,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-lg font-bold mb-4 font-inter text-gray-600">
+            <h4 className="text-lg font-bold mb-4 font-inter text-gray-600 dark:text-gray-400">
               For Backers
             </h4>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/projects"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Discover Projects
                 </Link>
@@ -115,7 +115,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Wallet Setup Guide
                 </a>
@@ -123,7 +123,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Trust & Safety
                 </a>
@@ -131,7 +131,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Backer Protection
                 </a>
@@ -139,7 +139,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   FAQs
                 </a>
@@ -148,14 +148,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-lg font-bold mb-4 font-inter text-gray-600">
+            <h4 className="text-lg font-bold mb-4 font-inter text-gray-600 dark:text-gray-400">
               About
             </h4>
             <ul className="space-y-2">
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Our Mission
                 </a>
@@ -163,7 +163,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Stats
                 </a>
@@ -171,7 +171,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Press
                 </a>
@@ -179,7 +179,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Careers
                 </a>
@@ -187,7 +187,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-600 hover:text-white transition"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Contact Us
                 </a>
@@ -198,33 +198,33 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-gray-600 text-sm mb-4 md:mb-0">
-              <p className="text-gray-600">
+            <div className="text-gray-600 dark:text-gray-400 text-sm mb-4 md:mb-0">
+              <p className="text-gray-600 dark:text-gray-400">
                 © {currentYear} RealWorldProjects. All rights reserved.
               </p>
             </div>
             <div className="flex flex-wrap gap-4 sm:gap-6 justify-center">
               <a
                 href="#"
-                className="text-gray-600 hover:text-white text-sm transition"
+                className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white text-sm transition"
               >
                 Terms of Service
               </a>
               <a
                 href="#"
-                className="text-gray-600 hover:text-white text-sm transition"
+                className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white text-sm transition"
               >
                 Privacy Policy
               </a>
               <a
                 href="#"
-                className="text-gray-600 hover:text-white text-sm transition"
+                className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white text-sm transition"
               >
                 Cookie Policy
               </a>
               <a
                 href="#"
-                className="text-gray-600 hover:text-white text-sm transition"
+                className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white text-sm transition"
               >
                 Accessibility
               </a>

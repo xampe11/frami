@@ -72,15 +72,15 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="animated-bg bg-white pt-28 md:pt-32 pb-12 md:pb-20">
+    <section ref={sectionRef} className="animated-bg pt-28 md:pt-32 pb-12 md:pb-20">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex flex-col md:flex-row items-center">
           <div ref={textRef} className="w-full md:w-1/2 mb-10 md:mb-0 pr-0 md:pr-12">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              <span style={{ color: "#000000" }}>Fund the future with </span>
-              <span style={{ color: "#6366f1", fontWeight: 800 }}>blockchain</span>
+              <span className="text-black dark:text-white">Fund the future with </span>
+              <span className="text-primary font-extrabold">blockchain</span>
             </h1>
-            <p style={{ color: "#374151" }} className="text-lg md:text-xl mb-8 font-medium">
+            <p className="text-slate-700 dark:text-slate-300 text-lg md:text-xl mb-8 font-medium">
               Bringing creative projects to life with transparency, security, and global access through blockchain technology.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
@@ -102,7 +102,7 @@ export default function HeroSection() {
                   />
                 ))}
               </div>
-              <span style={{ color: "#4B5563" }}>Join <span style={{ color: "#000000", fontWeight: 700 }}>12,000+</span> creators worldwide</span>
+              <span className="text-slate-600 dark:text-slate-400">Join <span className="text-black dark:text-white font-bold">12,000+</span> creators worldwide</span>
             </div>
           </div>
           <div ref={imageRef} className="w-full md:w-1/2 relative">
@@ -129,30 +129,30 @@ export default function HeroSection() {
             </div>
             
             {/* Floating Elements */}
-            <div ref={floatingRef1} className="absolute -top-6 -right-6 bg-white p-3 rounded-lg shadow-lg rotate-3 hidden md:block">
+            <div ref={floatingRef1} className="absolute -top-6 -right-6 bg-white dark:bg-slate-800 p-3 rounded-lg shadow-lg rotate-3 hidden md:block">
               <div className="flex items-center space-x-2">
-                <div className="bg-primary/10 p-2 rounded-full">
+                <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-full">
                   <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs" style={{ color: "#4B5563" }}>Secured by</p>
-                  <p className="text-sm font-bold" style={{ color: "#000000" }}>Blockchain</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">Secured by</p>
+                  <p className="text-sm font-bold text-black dark:text-white">Blockchain</p>
                 </div>
               </div>
             </div>
             
-            <div ref={floatingRef2} className="absolute -bottom-6 -left-6 bg-white p-3 rounded-lg shadow-lg -rotate-3 hidden md:block">
+            <div ref={floatingRef2} className="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 p-3 rounded-lg shadow-lg -rotate-3 hidden md:block">
               <div className="flex items-center space-x-2">
-                <div className="bg-secondary/10 p-2 rounded-full">
+                <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-full">
                   <svg className="h-5 w-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs" style={{ color: "#4B5563" }}>Global</p>
-                  <p className="text-sm font-bold" style={{ color: "#000000" }}>Participation</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">Global</p>
+                  <p className="text-sm font-bold text-black dark:text-white">Participation</p>
                 </div>
               </div>
             </div>
