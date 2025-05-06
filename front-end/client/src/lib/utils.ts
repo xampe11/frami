@@ -36,11 +36,11 @@ export function generateRandomHash(): string {
 }
 
 export function getProjectStatusClass(percentFunded: number): string {
-  if (percentFunded >= 100) return 'text-success';
-  if (percentFunded >= 75) return 'text-success';
-  if (percentFunded >= 50) return 'text-secondary';
-  if (percentFunded >= 25) return 'text-warning';
-  return 'text-slate-400';
+  if (percentFunded >= 100) return 'text-success dark:text-success';
+  if (percentFunded >= 75) return 'text-success dark:text-success';
+  if (percentFunded >= 50) return 'text-secondary dark:text-secondary';
+  if (percentFunded >= 25) return 'text-warning dark:text-warning';
+  return 'text-slate-400 dark:text-slate-500';
 }
 
 export const getCategoryIcon = (icon: string): string => {
