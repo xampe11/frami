@@ -97,7 +97,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
           <Button
             variant="ghost"
             size="icon"
-            className="text-slate hover:text-primary"
+            className="text-slate hover:text-primary dark:text-slate-400 dark:hover:text-primary"
             onClick={handleSaveProject}
             aria-label={saved ? "Unsave project" : "Save project"}
           >
@@ -105,7 +105,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
           </Button>
         </div>
         
-        <p className="text-slate mb-4 line-clamp-3">
+        <p className="text-slate dark:text-slate-300 mb-4 line-clamp-3">
           {project.description}
         </p>
         
@@ -127,13 +127,13 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
               />
             )}
             <div>
-              <p className="text-xs text-slate">Created by</p>
-              <p className="text-sm font-medium">{creator?.username || 'Unknown creator'}</p>
+              <p className="text-xs text-slate dark:text-slate-400">Created by</p>
+              <p className="text-sm font-medium dark:text-slate-200">{creator?.username || 'Unknown creator'}</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-slate">Time left</p>
-            <p className="text-sm font-medium">{project.daysLeft} days</p>
+            <p className="text-xs text-slate dark:text-slate-400">Time left</p>
+            <p className="text-sm font-medium dark:text-slate-200">{project.daysLeft} days</p>
           </div>
         </div>
       </div>

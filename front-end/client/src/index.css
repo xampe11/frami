@@ -36,17 +36,17 @@
 }
 
 .dark {
-  --background: 240 10% 3.9%;
+  --background: 240 10% 8%;
   --foreground: 0 0% 98%;
   --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --popover: 240 10% 3.9%;
+  --muted-foreground: 240 5% 82%;
+  --popover: 240 10% 8%;
   --popover-foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
+  --card: 240 10% 12%;
   --card-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
+  --border: 240 3.7% 20%;
   --input: 240 3.7% 15.9%;
-  --primary: 255 87% 70%;
+  --primary: 255 87% 75%;
   --primary-foreground: 0 0% 100%;
   --secondary: 174 100% 41%;
   --secondary-foreground: 0 0% 100%;
@@ -55,6 +55,11 @@
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
   --ring: 240 4.9% 83.9%;
+  
+  /* Custom colors for dark mode */
+  --dark: 240 23% 14.5%;
+  --light: 210 11.1% 96.9%;
+  --slate: 240 15.7% 72%;
 }
 
 @layer base {
@@ -95,6 +100,17 @@
       rgba(0, 208, 163, 0.08) 100%
     );
     animation: rotate 40s linear infinite;
+  }
+  
+  .dark .animated-bg::before {
+    background: linear-gradient(
+      45deg,
+      rgba(108, 99, 255, 0.12) 0%, 
+      rgba(0, 208, 163, 0.12) 25%,
+      rgba(255, 64, 129, 0.12) 50%,
+      rgba(108, 99, 255, 0.12) 75%,
+      rgba(0, 208, 163, 0.12) 100%
+    );
   }
   
   @keyframes rotate {
