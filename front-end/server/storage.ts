@@ -68,14 +68,8 @@ export class MemStorage implements IStorage {
     this.updateId = 1;
     this.transactionId = 1;
 
-    // Seed initial categories
+    // Seed initial data
     this.seedCategories();
-    
-    // Seed demo user
-    this.seedDemoUser();
-    
-    // Seed sample projects
-    this.seedSampleProjects();
   }
 
   // Seed categories
@@ -99,6 +93,136 @@ export class MemStorage implements IStorage {
       };
       this.categories.set(category.id, category);
     });
+    
+    // Seed demo user
+    this.seedDemoUser();
+    
+    // Seed sample projects
+    this.seedSampleProjects();
+  }
+  
+  // Seed a demo user
+  private seedDemoUser() {
+    const user: User = {
+      id: this.userId++,
+      username: 'blockchain_creator',
+      password: 'password123', // Not used in frontend demo
+      walletAddress: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+      avatarUrl: 'https://i.pravatar.cc/150?img=12',
+      bio: 'Blockchain enthusiast and tech entrepreneur with a passion for decentralized technologies.',
+      createdAt: new Date()
+    };
+    this.users.set(user.id, user);
+  }
+
+  // Seed sample projects
+  private seedSampleProjects() {
+    const demoUser = Array.from(this.users.values())[0];
+    if (!demoUser) return;
+
+    // Get category IDs
+    const artCategory = Array.from(this.categories.values()).find(cat => cat.slug === 'art');
+    const techCategory = Array.from(this.categories.values()).find(cat => cat.slug === 'technology');
+    const sustainCategory = Array.from(this.categories.values()).find(cat => cat.slug === 'sustainability');
+    const gameCategory = Array.from(this.categories.values()).find(cat => cat.slug === 'games');
+    
+    if (!artCategory || !techCategory || !sustainCategory || !gameCategory) return;
+
+    // Create featured projects
+    const now = new Date();
+    const oneDay = 24 * 60 * 60 * 1000;
+
+    // Featured Project 1: Decentralized Art Marketplace
+    const project1: Project = {
+      id: this.projectId++,
+      title: "Decentralized Art Marketplace",
+      description: "A platform for artists to sell their work directly to collectors using NFT technology, eliminating middlemen and ensuring proper attribution and royalties.",
+      story: "The art world has long been plagued by issues of forgery, attribution disputes, and unfair compensation to artists. Our decentralized art marketplace leverages blockchain technology to create a transparent, secure platform where artists can sell directly to collectors without intermediaries.\n\nUsing non-fungible tokens (NFTs), each artwork is uniquely identified on the blockchain, establishing provenance and ensuring authenticity.",
+      shortDescription: "NFT marketplace for direct artist-collector transactions",
+      thumbnailUrl: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      fundingGoal: 100000,
+      currentFunding: 67280,
+      fundingCurrency: "USD",
+      backerCount: 124,
+      creatorId: String(demoUser.id),
+      categoryId: artCategory.id,
+      slug: "decentralized-art-marketplace",
+      featured: true,
+      trending: false,
+      daysRemaining: 15,
+      createdAt: new Date(now.getTime() - 15 * oneDay),
+      updatedAt: now
+    };
+    this.projects.set(project1.id, project1);
+
+    // Featured Project 2: Sustainable Energy Blockchain
+    const project2: Project = {
+      id: this.projectId++,
+      title: "Sustainable Energy Blockchain",
+      description: "A decentralized platform that enables communities to invest in and manage local renewable energy projects, with transparent tracking of energy production and distribution.",
+      story: "Climate change demands urgent action, and local renewable energy projects represent one of our most promising solutions. However, community energy initiatives often struggle with financing, management, and equitable distribution of benefits.\n\nOur Sustainable Energy Blockchain creates a decentralized platform where communities can pool resources to invest in local renewable energy projects.",
+      shortDescription: "Community-owned renewable energy investments on blockchain",
+      thumbnailUrl: "https://images.unsplash.com/photo-1605792657660-596af9009e82?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      fundingGoal: 100000,
+      currentFunding: 89750,
+      fundingCurrency: "USD",
+      backerCount: 208,
+      creatorId: String(demoUser.id),
+      categoryId: sustainCategory.id,
+      slug: "sustainable-energy-blockchain",
+      featured: true,
+      trending: false,
+      daysRemaining: 7,
+      createdAt: new Date(now.getTime() - 23 * oneDay),
+      updatedAt: now
+    };
+    this.projects.set(project2.id, project2);
+
+    // Featured Project 3: Blockchain Identity Verification
+    const project3: Project = {
+      id: this.projectId++,
+      title: "Blockchain Identity Verification",
+      description: "A secure, decentralized platform for digital identity verification that puts users in control of their personal data using blockchain technology.",
+      story: "Identity theft affects millions of people annually, and centralized identity systems are vulnerable to data breaches. Our blockchain identity verification platform gives users control over their personal information using decentralized identifiers and verifiable credentials.",
+      shortDescription: "Self-sovereign identity solution on blockchain",
+      thumbnailUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      fundingGoal: 75000,
+      currentFunding: 41250,
+      fundingCurrency: "USD",
+      backerCount: 95,
+      creatorId: String(demoUser.id),
+      categoryId: techCategory.id,
+      slug: "blockchain-identity-verification",
+      featured: true,
+      trending: true,
+      daysRemaining: 21,
+      createdAt: new Date(now.getTime() - 9 * oneDay),
+      updatedAt: now
+    };
+    this.projects.set(project3.id, project3);
+
+    // Featured Project 4: Decentralized Gaming Platform
+    const project4: Project = {
+      id: this.projectId++,
+      title: "Decentralized Gaming Platform",
+      description: "A blockchain-based gaming platform where players truly own their in-game assets as NFTs and can trade them freely across games and platforms.",
+      story: "Traditional gaming platforms lock player-earned assets within closed ecosystems. Our decentralized gaming platform uses blockchain to give players true ownership of their in-game items and achievements as NFTs that can be traded or used across different games.",
+      shortDescription: "Gaming platform with true in-game asset ownership",
+      thumbnailUrl: "https://images.unsplash.com/photo-1560419015-7c427e8ae5ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      fundingGoal: 200000,
+      currentFunding: 120400,
+      fundingCurrency: "USD",
+      backerCount: 562,
+      creatorId: String(demoUser.id),
+      categoryId: gameCategory.id,
+      slug: "decentralized-gaming-platform",
+      featured: true,
+      trending: true,
+      daysRemaining: 14,
+      createdAt: new Date(now.getTime() - 16 * oneDay),
+      updatedAt: now
+    };
+    this.projects.set(project4.id, project4);
   }
 
   // User operations
@@ -114,7 +238,12 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userId++;
-    const user: User = { ...insertUser, id };
+    const now = new Date();
+    const user: User = { 
+      ...insertUser, 
+      id,
+      createdAt: now 
+    };
     this.users.set(id, user);
     return user;
   }
@@ -193,11 +322,13 @@ export class MemStorage implements IStorage {
   async createProject(insertProject: InsertProject): Promise<Project> {
     const id = this.projectId++;
     const now = new Date();
+    
+    // Ensure we're using the right property names from the schema
     const project: Project = { 
       ...insertProject, 
       id, 
-      raisedAmount: 0, 
-      backers: 0, 
+      currentFunding: 0, 
+      backerCount: 0, 
       createdAt: now, 
       updatedAt: now 
     };
@@ -253,13 +384,13 @@ export class MemStorage implements IStorage {
     const transaction: Transaction = { ...insertTransaction, id, createdAt: now };
     this.transactions.set(id, transaction);
     
-    // Update project's raised amount and backers count
+    // Update project's current funding and backer count
     const project = this.projects.get(transaction.projectId);
     if (project && transaction.status === 'completed') {
       const updatedProject = {
         ...project,
-        raisedAmount: project.raisedAmount + transaction.amount,
-        backers: project.backers + 1,
+        currentFunding: project.currentFunding + transaction.amount,
+        backerCount: project.backerCount + 1,
         updatedAt: now
       };
       this.projects.set(project.id, updatedProject);
@@ -286,8 +417,8 @@ export class MemStorage implements IStorage {
       if (project) {
         const updatedProject = {
           ...project,
-          raisedAmount: project.raisedAmount + transaction.amount,
-          backers: project.backers + 1,
+          currentFunding: project.currentFunding + transaction.amount,
+          backerCount: project.backerCount + 1,
           updatedAt: new Date()
         };
         this.projects.set(project.id, updatedProject);
