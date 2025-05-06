@@ -18,3 +18,4 @@ args = "cd front-end && npm run dev"
 
 [nix]
 channel = "stable-24_05"
+packages = ["jq"]
