@@ -23,7 +23,13 @@ import Footer from "@/components/layout/footer";
 import { useMediaQuery } from "@/hooks/use-mobile";
 
 // Get environment variables with fallback
-const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID || 'your-project-id';
+const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
+
+// Debug environment variables
+console.log("Wallet Connect Project ID:", projectId ? "Found" : "Not found");
+if (!projectId) {
+  console.error("Missing VITE_WALLET_CONNECT_PROJECT_ID. Wallet Connect may not work properly.");
+}
 
 // Create a client for React Query
 const queryClient = new QueryClient({

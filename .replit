@@ -15,3 +15,6 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd front-end && npm run dev"
+
+[nix]
+channel = "stable-24_05"

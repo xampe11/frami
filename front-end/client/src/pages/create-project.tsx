@@ -41,7 +41,9 @@ import {
   Calendar,
   DollarSign,
   FileText,
-  Settings
+  Settings,
+  Loader2,
+  Wallet
 } from "lucide-react";
 
 // Extend the insert schema to add client-side validation
@@ -77,6 +79,22 @@ export default function CreateProject() {
   useEffect(() => {
     document.title = "Create Project | Real World Projects";
   }, []);
+  
+  // Check if wallet is connected on component mount
+  useEffect(() => {
+    // Check localStorage directly to handle wallet state persistence
+    try {
+      const savedWallet = localStorage.getItem("wallet");
+      if (savedWallet && !isConnected) {
+        console.log("Found wallet in localStorage but not connected in state");
+        // If wallet exists in localStorage but isConnected is false
+        // This could indicate that the wallet state was not properly loaded
+        // We won't reload here to avoid loops, but connect if a wallet click happens
+      }
+    } catch (error) {
+      console.error("Error checking wallet localStorage:", error);
+    }
+  }, [isConnected]);
   
   // Fetch categories
   const { data: categories, isLoading: isLoadingCategories } = useQuery({
@@ -247,7 +265,22 @@ export default function CreateProject() {
               You need to connect your cryptocurrency wallet to create and manage your project.
             </p>
             <Button 
-              onClick={() => connect("metamask")}
+              onClick={async () => {
+                try {
+                  await connect("metamask");
+                  // Force page refresh after successful connection
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 1000);
+                } catch (err) {
+                  console.error("Failed to connect wallet:", err);
+                  toast({
+                    title: "Connection Failed",
+                    description: "Could not connect to wallet. Please try again.",
+                    variant: "destructive",
+                  });
+                }
+              }}
               className="bg-primary hover:bg-primary/90" 
               disabled={isConnecting}
             >
@@ -257,7 +290,10 @@ export default function CreateProject() {
                   Connecting...
                 </span>
               ) : (
-                "Connect Wallet"
+                <span className="flex items-center">
+                  <span className="mr-2">💰</span>
+                  Connect Wallet
+                </span>
               )}
             </Button>
           </div>

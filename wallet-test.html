@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wallet Connection Test</title>
+    <script>
+        async function checkWalletStatus() {
+            try {
+                const walletData = localStorage.getItem('wallet');
+                
+                if (walletData) {
+                    const parsed = JSON.parse(walletData);
+                    document.getElementById('walletStatus').textContent = 'Wallet data found in localStorage: ' + JSON.stringify(parsed, null, 2);
+                } else {
+                    document.getElementById('walletStatus').textContent = 'No wallet data found in localStorage.';
+                }
+            } catch (error) {
+                document.getElementById('walletStatus').textContent = 'Error checking wallet: ' + error.message;
+            }
+        }
+
+        function clearWalletData() {
+            localStorage.removeItem('wallet');
+            checkWalletStatus();
+        }
+    </script>
+</head>
+<body onload="checkWalletStatus()">
+    <h1>Wallet Connection Test</h1>
+    <p>This page checks if wallet connection data is stored in localStorage.</p>
+    
+    <div>
+        <h2>Current Wallet Status:</h2>
+        <pre id="walletStatus">Checking...</pre>
+        
+        <button onclick="checkWalletStatus()">Refresh Status</button>
+        <button onclick="clearWalletData()">Clear Wallet Data</button>
+    </div>
+    
+    <div>
+        <h2>Instructions:</h2>
+        <ol>
+            <li>Open the main website at <a href="http://localhost:5000/" target="_blank">http://localhost:5000/</a></li>
+            <li>Connect your wallet on the main site</li>
+            <li>Come back here and click "Refresh Status" to see if the wallet data was stored</li>
+        </ol>
+    </div>
+</body>
+</html>

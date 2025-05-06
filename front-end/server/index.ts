@@ -1,8 +1,23 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import cors from "cors";
 
 const app = express();
+
+// Enable CORS for all routes - especially important for Replit
+app.use(cors({
+  origin: [
+    "http://localhost:5000", 
+    "https://localhost:5000", 
+    "https://7a29d217-39cd-417a-96be-cdf84316ef4a-00-14iknayvdpegq.riker.replit.dev",
+    /\.replit\.dev$/
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

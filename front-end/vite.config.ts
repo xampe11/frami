@@ -31,6 +31,9 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
-    allowedHosts: "all",
+    allowedHosts: ["all", "7a29d217-39cd-417a-96be-cdf84316ef4a-00-14iknayvdpegq.riker.replit.dev"],
+    hmr: {
+      clientPort: 443,
+    },
   },
 });
