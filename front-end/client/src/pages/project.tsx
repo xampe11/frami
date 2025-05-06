@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Project } from "@shared/schema";
+import { Project, Category, User } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { 
@@ -30,6 +30,18 @@ const ProjectPage = () => {
   
   const { data: project, isLoading, error } = useQuery<Project>({
     queryKey: [`/api/projects/${slug}`],
+  });
+  
+  // Fetch project category
+  const { data: category } = useQuery<Category>({
+    queryKey: [`/api/categories/${project?.categoryId}`],
+    enabled: !!project?.categoryId,
+  });
+
+  // Fetch project creator
+  const { data: creator } = useQuery<User>({
+    queryKey: [`/api/users/${project?.creatorId}`],
+    enabled: !!project?.creatorId,
   });
   
   useEffect(() => {
@@ -157,9 +169,11 @@ const ProjectPage = () => {
                     <h1 className="text-2xl md:text-3xl font-bold mb-2 dark:text-white">{project.title}</h1>
                     <p className="text-gray-600 dark:text-gray-300 mb-6">{project.shortDescription || project.description.substring(0, 120) + '...'}</p>
                   </div>
-                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30">
-                    {project.categoryId}
-                  </Badge>
+                  {category && (
+                    <Badge className="bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30">
+                      {category.name}
+                    </Badge>
+                  )}
                 </div>
                 
                 <Tabs defaultValue="about" className="mt-6">
@@ -279,15 +293,17 @@ const ProjectPage = () => {
               <CardContent>
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
-                    <span className="text-gray-600 dark:text-gray-300 font-medium">DC</span>
+                    <span className="text-gray-600 dark:text-gray-300 font-medium">
+                      {creator?.username?.charAt(0) || 'C'}
+                    </span>
                   </div>
                   <div>
-                    <h4 className="font-medium dark:text-white">Digital Creators Alliance</h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">3 projects created</p>
+                    <h4 className="font-medium dark:text-white">{creator?.username || 'Anonymous Creator'}</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Project Creator</p>
                   </div>
                 </div>
                 <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-                  Creating innovative blockchain projects since 2020
+                  {creator?.bio || 'Creating innovative blockchain projects'}
                 </p>
               </CardContent>
             </Card>
