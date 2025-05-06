@@ -33,19 +33,28 @@ const ProjectPage = () => {
   });
   
   // Fetch project category
-  const { data: category } = useQuery<Category>({
+  const { data: category, isLoading: isLoadingCategory } = useQuery<Category>({
     queryKey: [`/api/categories/${project?.categoryId}`],
     enabled: !!project?.categoryId,
   });
 
   // Fetch project creator
-  const { data: creator } = useQuery<User>({
+  const { data: creator, isLoading: isLoadingCreator } = useQuery<User>({
     queryKey: [`/api/users/${project?.creatorId}`],
     enabled: !!project?.creatorId,
   });
   
+  // Set page title when project is loaded
   useEffect(() => {
-    // Animate project content on load
+    if (project && !isLoading) {
+      document.title = `${project.title} | RealWorld Projects`;
+    } else {
+      document.title = "Project Details | RealWorld Projects";
+    }
+  }, [project, isLoading]);
+
+  // Animate project content on load
+  useEffect(() => {
     if (project && !isLoading) {
       gsap.fromTo(
         ".project-content",
@@ -55,7 +64,8 @@ const ProjectPage = () => {
     }
   }, [project, isLoading]);
   
-  if (isLoading) {
+  // Show loading state when any required data is loading
+  if (isLoading || isLoadingCategory || isLoadingCreator) {
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-5xl mx-auto">
