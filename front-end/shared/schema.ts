@@ -49,7 +49,7 @@ export const projects = pgTable("projects", {
   currentFunding: doublePrecision("current_funding").default(0).notNull(),
   fundingCurrency: text("funding_currency").notNull(),
   shortDescription: text("short_description").notNull(),
-  creatorId: text("creator_id").notNull(),
+  creatorId: integer("creator_id").notNull(),
   categoryId: integer("category_id").notNull(),
   slug: text("slug").notNull().unique(),
   featured: boolean("featured").default(false).notNull(),

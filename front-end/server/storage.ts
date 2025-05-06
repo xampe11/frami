@@ -345,7 +345,11 @@ export class MemStorage implements IStorage {
       currentFunding: 0, 
       backerCount: 0, 
       createdAt: now, 
-      updatedAt: now 
+      updatedAt: now,
+      fundingCurrency: insertProject.fundingCurrency || "ETH",
+      featured: !!insertProject.featured,
+      trending: !!insertProject.trending,
+      shortDescription: insertProject.shortDescription || insertProject.description.substring(0, 100)
     };
     this.projects.set(id, project);
     return project;
