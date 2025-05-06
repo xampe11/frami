@@ -49,7 +49,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
     });
   };
 
-  const progress = calculateProgress(project.raisedAmount, project.goalAmount);
+  const progress = calculateProgress(project.currentFunding, project.fundingGoal);
 
   return (
     <div className="featured-project bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card hover:shadow-hover transition duration-300">
@@ -73,8 +73,8 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
               <div className="bg-secondary h-2 rounded-full" style={{width: `${progress}%`}}></div>
             </div>
             <div className="flex justify-between mt-1 text-sm text-white">
-              <span className="font-bold">{formatCurrency(project.raisedAmount)} raised</span>
-              <span>{formatCurrency(project.goalAmount)} goal</span>
+              <span className="font-bold">{formatCurrency(project.currentFunding)} raised</span>
+              <span>{formatCurrency(project.fundingGoal)} goal</span>
             </div>
           </div>
         </div>
@@ -111,8 +111,8 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
         
         <div className="mb-4">
           <ProjectProgress 
-            raisedAmount={project.raisedAmount}
-            goalAmount={project.goalAmount} 
+            raisedAmount={project.currentFunding}
+            goalAmount={project.fundingGoal} 
             showAmounts
           />
         </div>
@@ -133,7 +133,7 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
           </div>
           <div className="text-right">
             <p className="text-xs text-slate dark:text-slate-400">Time left</p>
-            <p className="text-sm font-medium dark:text-slate-200">{project.daysLeft} days</p>
+            <p className="text-sm font-medium dark:text-slate-200">{project.daysRemaining} days</p>
           </div>
         </div>
       </div>

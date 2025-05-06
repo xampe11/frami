@@ -175,4 +175,20 @@
   .category-btn.active {
     @apply bg-primary text-white;
   }
+  
+  .badge-new {
+    @apply absolute top-2 left-2 bg-accent text-white px-2 py-1 rounded-full text-xs font-bold z-10;
+  }
+  
+  .badge-trending {
+    @apply absolute top-2 right-2 bg-secondary text-white px-2 py-1 rounded-full text-xs font-bold z-10;
+  }
+  
+  .dark .badge-new {
+    @apply bg-accent/90 text-white;
+  }
+  
+  .dark .badge-trending {
+    @apply bg-secondary/90 text-white;
+  }
 }

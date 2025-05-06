@@ -52,7 +52,8 @@ const SmallProjectCard: React.FC<SmallProjectCardProps> = ({ project }) => {
       ref={cardRef}
       className="project-card bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300"
     >
-      {project.isNew && <span className="badge-new text-xs">New</span>}
+      {new Date(project.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000 && 
+        <span className="badge-new text-xs">New</span>}
       {project.trending && <span className="badge-trending text-xs">Trending</span>}
       
       <Link href={`/projects/${project.slug}`}>

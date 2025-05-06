@@ -66,8 +66,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         
         <div className="mb-3">
           <ProjectProgress 
-            raisedAmount={project.raisedAmount}
-            goalAmount={project.goalAmount} 
+            raisedAmount={project.currentFunding}
+            goalAmount={project.fundingGoal} 
             showAmounts 
             size="sm"
           />
@@ -84,7 +84,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             )}
             <span className="font-medium dark:text-slate-200">{creator?.username || 'Unknown creator'}</span>
           </div>
-          <span className="text-slate dark:text-slate-300">{project.daysLeft} days left</span>
+          <span className="text-slate dark:text-slate-300">{project.daysRemaining} days left</span>
         </div>
       </div>
     </div>
