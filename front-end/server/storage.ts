@@ -242,7 +242,10 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id,
-      createdAt: now 
+      createdAt: now,
+      walletAddress: insertUser.walletAddress || null,
+      avatarUrl: insertUser.avatarUrl || null,
+      bio: insertUser.bio || null
     };
     this.users.set(id, user);
     return user;
@@ -305,7 +308,7 @@ export class MemStorage implements IStorage {
 
   async getProjectsByCreatorId(creatorId: number): Promise<Project[]> {
     return Array.from(this.projects.values()).filter(
-      project => project.creatorId === creatorId
+      project => project.creatorId === String(creatorId)
     );
   }
 
@@ -381,7 +384,15 @@ export class MemStorage implements IStorage {
   async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
     const id = this.transactionId++;
     const now = new Date();
-    const transaction: Transaction = { ...insertTransaction, id, createdAt: now };
+    
+    // Ensure transactionHash is null instead of undefined when not provided
+    const transaction: Transaction = { 
+      ...insertTransaction, 
+      id, 
+      createdAt: now,
+      transactionHash: insertTransaction.transactionHash || null
+    };
+    
     this.transactions.set(id, transaction);
     
     // Update project's current funding and backer count
