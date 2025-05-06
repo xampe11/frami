@@ -69,7 +69,7 @@ export default function RainbowWalletButton() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
                       <Wallet className="mr-2 h-4 w-4" />
-                      {account.address}
+                      {account.address.substring(0, 6)}...{account.address.substring(account.address.length - 4)}
                       <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
