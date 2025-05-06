@@ -65,45 +65,45 @@ export default function FeaturedProjects() {
 
   if (isLoading) {
     return (
-      <section className="py-12 bg-light">
+      <section className="py-12 bg-light dark:bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center mb-8">
-            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-8 w-48 dark:bg-slate-700" />
             <div className="flex space-x-2">
-              <Skeleton className="h-9 w-9 rounded-full" />
-              <Skeleton className="h-9 w-9 rounded-full" />
+              <Skeleton className="h-9 w-9 rounded-full dark:bg-slate-700" />
+              <Skeleton className="h-9 w-9 rounded-full dark:bg-slate-700" />
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[1, 2].map((i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden shadow-card">
-                <Skeleton className="w-full h-64" />
+              <div key={i} className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card dark:shadow-slate-700/10">
+                <Skeleton className="w-full h-64 dark:bg-slate-700" />
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <Skeleton className="h-5 w-20 mb-2" />
-                      <Skeleton className="h-7 w-48" />
+                      <Skeleton className="h-5 w-20 mb-2 dark:bg-slate-700" />
+                      <Skeleton className="h-7 w-48 dark:bg-slate-700" />
                     </div>
-                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="h-6 w-6 rounded-full dark:bg-slate-700" />
                   </div>
-                  <Skeleton className="h-4 w-full mb-2" />
-                  <Skeleton className="h-4 w-[90%] mb-6" />
+                  <Skeleton className="h-4 w-full mb-2 dark:bg-slate-700" />
+                  <Skeleton className="h-4 w-[90%] mb-6 dark:bg-slate-700" />
                   
-                  <Skeleton className="h-4 w-full mb-1" />
-                  <Skeleton className="h-2 w-full mb-4" />
+                  <Skeleton className="h-4 w-full mb-1 dark:bg-slate-700" />
+                  <Skeleton className="h-2 w-full mb-4 dark:bg-slate-700" />
                   
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
-                      <Skeleton className="h-8 w-8 rounded-full mr-2" />
+                      <Skeleton className="h-8 w-8 rounded-full mr-2 dark:bg-slate-700" />
                       <div>
-                        <Skeleton className="h-3 w-16 mb-1" />
-                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-16 mb-1 dark:bg-slate-700" />
+                        <Skeleton className="h-4 w-24 dark:bg-slate-700" />
                       </div>
                     </div>
                     <div className="text-right">
-                      <Skeleton className="h-3 w-16 mb-1" />
-                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="h-3 w-16 mb-1 dark:bg-slate-700" />
+                      <Skeleton className="h-4 w-16 dark:bg-slate-700" />
                     </div>
                   </div>
                 </div>
@@ -118,11 +118,11 @@ export default function FeaturedProjects() {
   if (error) {
     console.error("Error fetching featured projects:", error);
     return (
-      <section className="py-12 bg-light">
+      <section className="py-12 bg-light dark:bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold font-inter text-black mb-4">Featured Projects</h2>
-            <p className="text-red-500">Failed to load featured projects. Please try again later.</p>
+            <h2 className="text-2xl font-bold font-inter text-black dark:text-white mb-4">Featured Projects</h2>
+            <p className="text-red-500 dark:text-red-400">Failed to load featured projects. Please try again later.</p>
           </div>
         </div>
       </section>
@@ -132,11 +132,11 @@ export default function FeaturedProjects() {
   if (!featuredProjects || featuredProjects.length === 0) {
     console.log("No featured projects found or empty array returned");
     return (
-      <section className="py-12 bg-light">
+      <section className="py-12 bg-light dark:bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold font-inter text-black mb-4">Featured Projects</h2>
-            <p className="text-gray-700">Check back soon for featured projects!</p>
+            <h2 className="text-2xl font-bold font-inter text-black dark:text-white mb-4">Featured Projects</h2>
+            <p className="text-gray-700 dark:text-gray-300">Check back soon for featured projects!</p>
           </div>
         </div>
       </section>
@@ -144,27 +144,27 @@ export default function FeaturedProjects() {
   }
 
   return (
-    <section ref={sectionRef} className="py-10 bg-light">
+    <section ref={sectionRef} className="py-10 bg-light dark:bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold font-inter">Featured Projects</h2>
+          <h2 className="text-2xl font-bold font-inter dark:text-white">Featured Projects</h2>
           <div className="flex space-x-2">
             <Button 
               variant="outline" 
               size="icon" 
-              className="bg-white rounded-full shadow-sm hover:shadow-md transition"
+              className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-full shadow-sm hover:shadow-md transition"
               onClick={scrollLeft}
             >
-              <ChevronLeft className="h-5 w-5 text-slate" />
+              <ChevronLeft className="h-5 w-5 text-slate dark:text-slate-400" />
               <span className="sr-only">Previous</span>
             </Button>
             <Button 
               variant="outline" 
               size="icon" 
-              className="bg-white rounded-full shadow-sm hover:shadow-md transition"
+              className="bg-white dark:bg-slate-800 dark:border-slate-700 rounded-full shadow-sm hover:shadow-md transition"
               onClick={scrollRight}
             >
-              <ChevronRight className="h-5 w-5 text-slate" />
+              <ChevronRight className="h-5 w-5 text-slate dark:text-slate-400" />
               <span className="sr-only">Next</span>
             </Button>
           </div>

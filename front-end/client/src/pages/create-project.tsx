@@ -244,16 +244,16 @@ export default function CreateProject() {
   };
   
   return (
-    <div ref={sectionRef} className="pt-24 pb-12 bg-gray-50">
+    <div ref={sectionRef} className="pt-24 pb-12 bg-gray-50 dark:bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold font-inter mb-2">CREATE A PROJECT</h1>
+          <h1 className="text-3xl font-bold font-inter mb-2 dark:text-white">CREATE A PROJECT</h1>
         </div>
         
         {!isConnected ? (
-          <div className="bg-white rounded-xl shadow-sm p-8 mb-8 text-center">
-            <h2 className="text-xl font-bold mb-4">Connect Your Wallet</h2>
-            <p className="text-slate-600 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm dark:shadow-slate-700/10 p-8 mb-8 text-center">
+            <h2 className="text-xl font-bold mb-4 dark:text-white">Connect Your Wallet</h2>
+            <p className="text-slate-600 dark:text-slate-300 mb-6">
               You need to connect your cryptocurrency wallet to create and manage your project.
             </p>
             <Button 
@@ -292,7 +292,7 @@ export default function CreateProject() {
         ) : (
           <div className="mb-8">
             {/* Progress Steps - Complete redesign to remove line issues */}
-            <div className="mb-8 border-t border-b py-6">
+            <div className="mb-8 border-t border-b dark:border-slate-700 py-6">
               <div className="flex justify-between items-center">
                 {/* Step indicators with custom connecting lines */}
                 {steps.map((step, index) => (
@@ -300,7 +300,7 @@ export default function CreateProject() {
                     {/* Custom connecting lines - display between steps */}
                     {index > 0 && (
                       <div className={`absolute right-[calc(100%+0.75rem)] top-5 w-full h-0.5 
-                        ${index <= currentStep ? 'bg-primary' : 'bg-gray-200'}`} 
+                        ${index <= currentStep ? 'bg-primary' : 'bg-gray-200 dark:bg-slate-700'}`} 
                         style={{width: 'calc(100% + 1.5rem)', right: 'calc(100% + 0.75rem)'}}
                       />
                     )}
@@ -311,8 +311,8 @@ export default function CreateProject() {
                         currentStep === index 
                           ? 'bg-primary text-white' 
                           : index < currentStep 
-                            ? 'bg-primary/20 text-primary'
-                            : 'bg-gray-100 text-gray-400'
+                            ? 'bg-primary/20 text-primary dark:bg-primary/30'
+                            : 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-300'
                       } cursor-pointer z-10`}
                       onClick={() => setCurrentStep(index)}
                     >
@@ -321,7 +321,7 @@ export default function CreateProject() {
                     
                     {/* Step name */}
                     <span className={`text-xs font-medium mt-1 ${
-                      currentStep === index ? 'text-primary' : 'text-gray-400'
+                      currentStep === index ? 'text-primary' : 'text-gray-400 dark:text-gray-300'
                     }`}>
                       {step.name}
                     </span>
@@ -334,9 +334,9 @@ export default function CreateProject() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 {/* Step 1: Project Details */}
                 {currentStep === 0 && (
-                  <div className="bg-white rounded-xl shadow-sm p-8">
-                    <h2 className="text-2xl font-bold mb-6">Project Details</h2>
-                    <p className="text-gray-600 mb-8">
+                  <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm dark:shadow-slate-700/10 p-8">
+                    <h2 className="text-2xl font-bold mb-6 dark:text-white">Project Details</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mb-8">
                       Enter your project's details. You can edit your project's details at any time after
                       you deploy your project, but the transaction will cost gas.
                     </p>
@@ -398,10 +398,10 @@ export default function CreateProject() {
                               />
                             </FormControl>
                             <FormDescription className="text-xs mt-2">
-                              <div className="bg-gray-50 p-4 rounded-lg">
-                                <h3 className="font-bold mb-2">About</h3>
-                                <p className="mb-4">Contributors are more likely to fund your project if they're passionate about your idea and feel like they can trust you. Here are a few suggestions for what to cover in this section:</p>
-                                <ol className="list-decimal pl-5 space-y-2">
+                              <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
+                                <h3 className="font-bold mb-2 dark:text-white">About</h3>
+                                <p className="mb-4 dark:text-gray-200">Contributors are more likely to fund your project if they're passionate about your idea and feel like they can trust you. Here are a few suggestions for what to cover in this section:</p>
+                                <ol className="list-decimal pl-5 space-y-2 dark:text-gray-200">
                                   <li>Introduce the team behind your project and what you've worked on before</li>
                                   <li>Briefly describe your project and why you think it's important</li>
                                   <li>Include a call to action for supporters and what they will get</li>
