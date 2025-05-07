@@ -12,9 +12,17 @@ interface FeatureCardProps {
 }
 
 function FeatureCard({ icon, color, title, description }: FeatureCardProps) {
+  const bgColorClasses = {
+    primary: "bg-indigo-100 dark:bg-indigo-900/30",
+    secondary: "bg-cyan-100 dark:bg-cyan-900/30",
+    accent: "bg-pink-100 dark:bg-pink-900/30"
+  };
+  
+  const bgClass = bgColorClasses[color as keyof typeof bgColorClasses] || bgColorClasses.primary;
+  
   return (
     <div className="bg-gray-50 dark:bg-slate-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-      <div className={`bg-${color}/20 dark:bg-${color}/10 w-14 h-14 flex items-center justify-center rounded-full mb-4`}>
+      <div className={`w-14 h-14 flex items-center justify-center rounded-full mb-4 ${bgClass}`}>
         {icon}
       </div>
       <h3 className="text-xl font-bold font-inter mb-3 text-slate-800 dark:text-white">{title}</h3>
@@ -30,19 +38,19 @@ export default function BlockchainFeatures() {
   
   const features = [
     {
-      icon: <Lock className="h-6 w-6 text-primary" />,
+      icon: <Lock className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />,
       color: "primary",
       title: "Transparent & Secure",
       description: "All transactions and funding milestones are recorded on the blockchain, providing complete transparency and immutable proof of funding activity."
     },
     {
-      icon: <Globe className="h-6 w-6 text-secondary" />,
+      icon: <Globe className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />,
       color: "secondary",
       title: "Global Access",
       description: "Anyone with an internet connection and cryptocurrency can participate, removing geographical restrictions and banking limitations."
     },
     {
-      icon: <FileText className="h-6 w-6 text-accent" />,
+      icon: <FileText className="h-6 w-6 text-pink-600 dark:text-pink-400" />,
       color: "accent",
       title: "Smart Contracts",
       description: "Automated smart contracts ensure funds are only released when predetermined project milestones are reached, protecting both creators and backers."
