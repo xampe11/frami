@@ -50,7 +50,7 @@ const SmallProjectCard: React.FC<SmallProjectCardProps> = ({ project }) => {
   return (
     <div 
       ref={cardRef}
-      className="project-card bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300"
+      className="project-card bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl border border-gray-200 dark:border-slate-700 transition-all duration-300"
     >
       {new Date(project.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000 && 
         <span className="badge-new text-xs">New</span>}
