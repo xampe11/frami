@@ -34,15 +34,15 @@ export default function HowItWorks() {
   const steps = [
     {
       number: 1,
-      icon: <Lightbulb className="h-6 w-6 text-primary" />,
-      title: "Create Your Project",
-      description: "Define your project goals, funding targets, and milestone deliverables."
-    },
-    {
-      number: 2,
       icon: <Wallet className="h-6 w-6 text-primary" />,
       title: "Connect Wallet",
       description: "Link your cryptocurrency wallet to receive and manage project funds securely."
+    },
+    {
+      number: 2,
+      icon: <Lightbulb className="h-6 w-6 text-primary" />,
+      title: "Create Your Project",
+      description: "Define your project goals, funding targets, and milestone deliverables."
     },
     {
       number: 3,
