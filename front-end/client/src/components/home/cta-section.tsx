@@ -55,7 +55,7 @@ export default function CTASection() {
                 asChild
                 className="bg-white text-primary hover:bg-gray-100 font-medium py-3 px-6 rounded-lg transition duration-150 text-center opacity-100 transform-none"
               >
-                <Link href="/create">Start a Project</Link>
+                <Link href="/create-project">Start a Project</Link>
               </Button>
               <Button 
                 asChild

@@ -51,10 +51,10 @@ const CreateProjectCTA = () => {
           <p className="text-lg mb-8 opacity-90">
             Get your creative or innovative idea funded with the power and security of blockchain technology.
           </p>
-          <Link href="/start-project">
-            <a className="inline-block btn-primary bg-white text-primary hover:bg-gray-100 font-medium rounded-full px-8 py-3 shadow-lg">
+          <Link href="/create-project">
+            <span className="inline-block btn-primary bg-white text-primary hover:bg-gray-100 font-medium rounded-full px-8 py-3 shadow-lg">
               Start Your Project
-            </a>
+            </span>
           </Link>
         </div>
       </div>

@@ -118,7 +118,7 @@ export default function HeroSection() {
                 <Link href="/explore">Discover Projects</Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="border border-primary text-primary hover:bg-primary hover:text-white font-medium rounded-lg">
-                <Link href="/create">Start a Project</Link>
+                <Link href="/create-project">Start a Project</Link>
               </Button>
             </div>
             <div className="mt-8 flex items-center space-x-2">

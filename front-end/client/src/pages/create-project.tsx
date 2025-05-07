@@ -77,9 +77,10 @@ export default function CreateProject() {
   
   useGsapReveal(sectionRef);
   
-  // Set page title
+  // Set page title and scroll to top
   useEffect(() => {
     document.title = "Create Project | Real World Projects";
+    window.scrollTo(0, 0);
   }, []);
   
   // Check if wallet is connected on component mount
