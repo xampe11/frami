@@ -6,17 +6,18 @@ import cors from "cors";
 const app = express();
 
 // Enable CORS for all routes - especially important for Replit
-app.use(cors({
-  origin: [
-    "http://localhost:5000", 
-    "https://localhost:5000", 
-    "https://7a29d217-39cd-417a-96be-cdf84316ef4a-00-14iknayvdpegq.riker.replit.dev",
-    /\.replit\.dev$/
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5000",
+      "https://7a29d217-39cd-417a-96be-cdf84316ef4a-00-14iknayvdpegq.riker.replit.dev",
+      /\.replit\.dev$/,
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  }),
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -75,11 +76,14 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  server.listen(
+    {
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    },
+    () => {
+      log(`serving on port ${port}`);
+    },
+  );
 })();
