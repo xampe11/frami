@@ -59,8 +59,8 @@ const Header = () => {
   };
 
   const navLinks = [
-    { title: "Discover", path: "/discover" },
-    { title: "Start a Project", path: "/start-project" },
+    { title: "Discover", path: "/explore" },
+    { title: "Start a Project", path: "/create-project" },
     { title: "How It Works", path: "/#how-it-works" },
     { title: "About", path: "/#about" },
   ];

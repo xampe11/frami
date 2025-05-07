@@ -39,7 +39,7 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/projects">
+            <Link href="/explore">
               <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">
                 Explore Projects
               </span>
@@ -83,7 +83,7 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white dark:bg-slate-900 shadow-lg mt-3 py-4 px-6 absolute w-full">
           <nav className="flex flex-col space-y-4">
-            <Link href="/projects">
+            <Link href="/explore">
               <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors block py-2">
                 Explore Projects
               </span>
