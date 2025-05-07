@@ -7,7 +7,6 @@ import {ProxyAdmin} from "../src/proxy/ProxyAdmin.sol";
 import {PlatformRegistry} from "../src/PlatformRegistry.sol";
 import {Project} from "../src/Project.sol";
 import {ProjectFactory} from "../src/ProjectFactory.sol";
-import {ProjectNFT} from "../src/ProjectNFT.sol";
 
 contract DeployUpgradeableScript is Script {
     function run() external {
@@ -29,9 +28,6 @@ contract DeployUpgradeableScript is Script {
 
         Project projectImpl = new Project();
         console.log("Project implementation deployed at:", address(projectImpl));
-
-        ProjectNFT projectNFTImpl = new ProjectNFT();
-        console.log("ProjectNFT implementation deployed at:", address(projectNFTImpl));
 
         // Treasury address - you can use a separate address in production
         address treasury = deployer;
@@ -58,16 +54,6 @@ contract DeployUpgradeableScript is Script {
 
         ERC1967Proxy projectFactoryProxy = new ERC1967Proxy(address(projectFactoryImpl), projectFactoryData);
         console.log("ProjectFactory proxy deployed at:", address(projectFactoryProxy));
-
-        // Deploy ProjectNFT proxy
-        bytes memory projectNFTData = abi.encodeWithSelector(
-            ProjectNFT.initialize.selector,
-            deployer, // initialOwner
-            address(platformRegistryProxy) // registry address
-        );
-
-        ERC1967Proxy projectNFTProxy = new ERC1967Proxy(address(projectNFTImpl), projectNFTData);
-        console.log("ProjectNFT proxy deployed at:", address(projectNFTProxy));
 
         // Update registry with factory address
         PlatformRegistry platformRegistry = PlatformRegistry(address(platformRegistryProxy));
