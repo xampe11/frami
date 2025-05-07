@@ -112,6 +112,19 @@ function Router() {
               return null;
             }}
           </Route>
+          {/* Redirects for old create project routes */}
+          <Route path="/create">
+            {() => {
+              window.location.href = '/create-project';
+              return null;
+            }}
+          </Route>
+          <Route path="/start-project">
+            {() => {
+              window.location.href = '/create-project';
+              return null;
+            }}
+          </Route>
           <Route component={NotFound} />
         </Switch>
       </main>
