@@ -27,7 +27,10 @@ export default function FeaturedProjects() {
     retry: 3,
     staleTime: 60000,  // 1 minute
     refetchOnMount: true,
-    refetchOnWindowFocus: true
+    refetchOnWindowFocus: true,
+    gcTime: 3600000, // 1 hour (formerly cacheTime)
+    // Set high priority
+    networkMode: 'always',
   });
 
   const scrollLeft = () => {
@@ -47,29 +50,42 @@ export default function FeaturedProjects() {
       if (typeof window !== "undefined" && featuredProjects && featuredProjects.length > 0) {
         const { gsap } = await import("gsap");
         
-        // Animate featured projects
-        gsap.from('.featured-project', {
-          y: 50,
-          opacity: 0,
-          duration: 0.8,
-          stagger: 0.2,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%"
-          }
+        // Ensure everything is visible before animation
+        gsap.set('.featured-project, .featured-project .overlay, .featured-project img', {
+          opacity: 1,
+          visibility: 'visible'
         });
+        
+        // Animate featured projects with a slight fade-in and slide-up effect
+        gsap.fromTo('.featured-project', 
+          { y: 20, opacity: 0.8 },
+          { 
+            y: 0, 
+            opacity: 1, 
+            duration: 0.6, 
+            stagger: 0.15, 
+            ease: "power2.out",
+            clearProps: "all", // Clear all GSAP properties after animation
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 90%"
+            }
+          }
+        );
       }
     };
     
+    // Wait a short moment to ensure DOM is fully ready
     if (featuredProjects && featuredProjects.length > 0) {
-      initAnimation();
+      setTimeout(() => {
+        initAnimation();
+      }, 100);
     }
   }, [featuredProjects]);
 
   if (isLoading) {
     return (
-      <section className="py-12 bg-light dark:bg-slate-900">
+      <section className="py-12 bg-gray-50 dark:bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center mb-8">
             <Skeleton className="h-8 w-48 dark:bg-slate-700" />
@@ -81,7 +97,7 @@ export default function FeaturedProjects() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[1, 2].map((i) => (
-              <div key={i} className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card dark:shadow-slate-700/10">
+              <div key={i} className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-slate-700 dark:shadow-slate-700/10">
                 <Skeleton className="w-full h-64 dark:bg-slate-700" />
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
@@ -122,7 +138,7 @@ export default function FeaturedProjects() {
   if (error) {
     console.error("Error fetching featured projects:", error);
     return (
-      <section className="py-12 bg-light dark:bg-slate-900">
+      <section className="py-12 bg-gray-50 dark:bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 className="text-2xl font-bold font-inter text-black dark:text-white mb-4">Featured Projects</h2>
@@ -136,7 +152,7 @@ export default function FeaturedProjects() {
   if (!featuredProjects || featuredProjects.length === 0) {
     console.log("No featured projects found or empty array returned");
     return (
-      <section className="py-12 bg-light dark:bg-slate-900">
+      <section className="py-12 bg-gray-50 dark:bg-slate-900">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center">
             <h2 className="text-2xl font-bold font-inter text-black dark:text-white mb-4">Featured Projects</h2>
@@ -148,7 +164,7 @@ export default function FeaturedProjects() {
   }
 
   return (
-    <section ref={sectionRef} className="py-10 bg-light dark:bg-slate-900">
+    <section ref={sectionRef} className="py-10 bg-gray-50 dark:bg-slate-900">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold font-inter dark:text-white">Featured Projects</h2>

@@ -52,19 +52,20 @@ export default function FeaturedProjectCard({ project }: FeaturedProjectCardProp
   const progress = calculateProgress(project.currentFunding, project.fundingGoal);
 
   return (
-    <div className="featured-project bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-card hover:shadow-hover transition duration-300 h-full flex flex-col">
+    <div className="featured-project bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl border border-gray-200 dark:border-slate-700 transition duration-300 h-full flex flex-col">
       <Link href={`/projects/${project.slug}`} className="block">
         <div className="overflow-hidden relative">
           <img 
             src={project.thumbnailUrl || "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"} 
             alt={project.title} 
-            className="featured-project-img w-full h-56 object-cover"
+            className="featured-project-img w-full h-56 object-cover opacity-100"
+            loading="eager"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
             }}
           />
-          <div className="overlay">
+          <div className="overlay opacity-100">
             <span className="bg-primary/60 text-white text-xs px-3 py-1 rounded-full uppercase font-bold">
               {category?.name || 'Featured'}
             </span>

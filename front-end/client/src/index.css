@@ -73,9 +73,10 @@
   }
   
   /* Ensure all content is visible by default, even before animations */
-  h1, h2, h3, h4, h5, h6, p, button, a, img, div {
+  h1, h2, h3, h4, h5, h6, p, button, a, img, div, .featured-project, .overlay, .featured-project-img {
     opacity: 1;
     transform: none;
+    visibility: visible;
   }
   
   /* Preloader and content transitions */
@@ -89,10 +90,20 @@
   .content-visible button, 
   .content-visible a, 
   .content-visible img, 
-  .content-visible div.animated-element {
+  .content-visible div.animated-element,
+  .content-visible .featured-project,
+  .content-visible .overlay,
+  .content-visible .featured-project-img {
     opacity: 1 !important;
+    visibility: visible !important;
     transform: none !important;
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out, visibility 0s;
+  }
+  
+  /* Ensure featured project overlays are always visible */
+  .featured-project, .featured-project .overlay, .featured-project img {
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   .fade-out {
@@ -172,13 +183,17 @@
   }
   
   .featured-project .overlay {
-    @apply absolute bottom-0 left-0 right-0 p-6;
+    @apply absolute bottom-0 left-0 right-0 p-6 opacity-100 visible;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%);
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .featured-project .overlay h3 {
-    @apply text-white text-xl font-bold mb-2;
+    @apply text-white text-xl font-bold mb-2 opacity-100 visible;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .project-card {
