@@ -41,9 +41,10 @@ export default function Projects() {
   
   useGsapReveal(sectionRef);
   
-  // Set page title
+  // Set page title and scroll to top
   useEffect(() => {
     document.title = "Explore Projects | RealWorld Projects";
+    window.scrollTo(0, 0);
   }, []);
   
   // Fetch all projects

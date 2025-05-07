@@ -5,7 +5,7 @@ import { WagmiProvider } from 'wagmi';
 import { mainnet, polygon } from 'wagmi/chains';
 import { http } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect } from "react";
@@ -64,6 +64,12 @@ const config = getDefaultConfig({
 function Router() {
   const { toast } = useToast();
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const [location] = useLocation();
+
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
 
   useEffect(() => {
     // Initialize Gsap ScrollTrigger
@@ -90,19 +96,19 @@ function Router() {
       <main className="flex-grow">
         <Switch>
           <Route path="/" component={Home} />
-          <Route path="/projects" component={Projects} />
+          <Route path="/explore" component={Projects} />
           <Route path="/projects/:slug" component={Project} />
           <Route path="/create-project" component={CreateProject} />
           {/* Redirects for old routes */}
-          <Route path="/explore">
+          <Route path="/projects">
             {() => {
-              window.location.href = '/projects';
+              window.location.href = '/explore';
               return null;
             }}
           </Route>
           <Route path="/discover">
             {() => {
-              window.location.href = '/projects';
+              window.location.href = '/explore';
               return null;
             }}
           </Route>

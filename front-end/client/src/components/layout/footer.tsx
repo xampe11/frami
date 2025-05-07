@@ -106,7 +106,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/projects"
+                  href="/explore"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Discover Projects

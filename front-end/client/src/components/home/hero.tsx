@@ -52,7 +52,7 @@ const Hero = () => {
             Discover and fund innovative real-world projects with the transparency and efficiency of blockchain technology.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link href="/projects">
+            <Link href="/explore">
               <a className="hero-button btn-primary">
                 Explore Projects
               </a>
