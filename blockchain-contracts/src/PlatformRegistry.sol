@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {Project} from "./Project.sol";
+import {PlatformRegistryStorage} from "./PlatformRegistryStorage.sol";
 
 /**
  * @title IProjectFactory
@@ -28,30 +29,19 @@ interface IProjectFactory {
 }
 
 /**
- * @title PlatformRegistryStorage
- * @dev Storage contract for PlatformRegistry to avoid storage collisions during upgrades
+ * @title IFounderNFT
+ * @dev Interface for the FounderNFT contract
  */
-contract PlatformRegistryStorage {
-    // Platform configuration
-    uint256 internal _platformFeePercentage;
-    address internal _platformTreasury;
-
-    // Project tracking
-    mapping(address => bool) internal _registeredProjects;
-    address[] internal _allProjects;
-
-    // Implementation version
-    string internal _version;
-
-    // For future token support - keeping storage slots reserved
-    // This ensures that when we add token support later, we won't have storage collision issues
-    mapping(address => bool) internal _reservedTokenSlot;
+interface IFounderNFT {
+    function addPlatformFees(uint256 amount) external;
+    function getPlatformFeeDistributionPercentage() external view returns (uint256);
+    function getTotalStakedTokens() external view returns (uint256);
 }
+
 /**
  * @title PlatformRegistry
  * @dev Main registry contract with upgrade capabilities and access control
  */
-
 contract PlatformRegistry is
     Initializable,
     PlatformRegistryStorage,
@@ -65,6 +55,11 @@ contract PlatformRegistry is
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant PROJECT_CREATOR_ROLE = keccak256("PROJECT_CREATOR_ROLE");
 
+    // Extension types
+    bytes32 public constant NFT_FACTORY_EXTENSION = keccak256("NFT_FACTORY");
+    bytes32 public constant TOKEN_FACTORY_EXTENSION = keccak256("TOKEN_FACTORY");
+    bytes32 public constant FOUNDER_NFT_EXTENSION = keccak256("FOUNDER_NFT_EXTENSION");
+
     // Project Factory (can be upgraded separately)
     address public projectFactory;
 
@@ -73,6 +68,11 @@ contract PlatformRegistry is
     event PlatformFeeUpdated(uint256 newFee);
     event FactoryUpdated(address indexed oldFactory, address indexed newFactory);
     event VersionUpdated(string version);
+    event ExtensionRegistered(
+        bytes32 indexed extensionType, address indexed extensionAddress, address indexed oldExtensionAddress
+    );
+    event ExtensionRemoved(bytes32 indexed extensionType, address indexed extensionAddress);
+    event FounderFeesRelayed(address indexed project, uint256 amount);
 
     /**
      * @dev Prevents initialization function from being called twice
@@ -155,6 +155,44 @@ contract PlatformRegistry is
     }
 
     /**
+     * @dev Register an extension
+     */
+    function registerExtension(bytes32 extensionType, address extensionAddress) external onlyRole(ADMIN_ROLE) {
+        require(extensionAddress != address(0), "Invalid extension address");
+
+        address oldExtension = _extensions[extensionType];
+        _extensions[extensionType] = extensionAddress;
+
+        emit ExtensionRegistered(extensionType, extensionAddress, oldExtension);
+    }
+
+    /**
+     * @dev Remove an extension
+     */
+    function removeExtension(bytes32 extensionType) external onlyRole(ADMIN_ROLE) {
+        require(_extensions[extensionType] != address(0), "Extension not registered");
+
+        address oldExtension = _extensions[extensionType];
+        delete _extensions[extensionType];
+
+        emit ExtensionRemoved(extensionType, oldExtension);
+    }
+
+    /**
+     * @dev Get an extension address
+     */
+    function getExtension(bytes32 extensionType) external view returns (address) {
+        return _extensions[extensionType];
+    }
+
+    /**
+     * @dev Check if an extension is registered
+     */
+    function isExtensionRegistered(bytes32 extensionType) external view returns (bool) {
+        return _extensions[extensionType] != address(0);
+    }
+
+    /**
      * @dev Updates the platform fee percentage
      */
     function updatePlatformFee(uint256 newFee) external onlyRole(ADMIN_ROLE) {
@@ -169,6 +207,41 @@ contract PlatformRegistry is
     function updateTreasury(address newTreasury) external onlyRole(ADMIN_ROLE) {
         require(newTreasury != address(0), "Invalid treasury address");
         _platformTreasury = newTreasury;
+    }
+
+    /**
+     * @dev Returns if a project is registered
+     */
+    function isProjectRegistered(address project) external view returns (bool) {
+        return _registeredProjects[project];
+    }
+
+    /**
+     * @dev Relay platform fees to the Founder NFT contract
+     * Only callable by registered projects
+     */
+    function relayFounderFees(uint256 amount) external payable {
+        require(_registeredProjects[msg.sender], "Only registered projects can relay fees");
+
+        // Get the founder NFT extension
+        address founderNFTAddress = _extensions[FOUNDER_NFT_EXTENSION];
+        if (founderNFTAddress == address(0)) {
+            return; // No founder NFT extension registered
+        }
+
+        // Forward the funds to the founder NFT contract
+        (bool success,) = founderNFTAddress.call{value: amount}("");
+        if (!success) {
+            return; // Silently fail - we don't want to revert the entire transaction
+        }
+
+        // Add fees to distribution pool
+        try IFounderNFT(founderNFTAddress).addPlatformFees(amount) {
+            // Successfully added fees for distribution
+            emit FounderFeesRelayed(msg.sender, amount);
+        } catch {
+            // If call fails, we already sent the ETH, so continue
+        }
     }
 
     /**
@@ -204,13 +277,6 @@ contract PlatformRegistry is
      */
     function platformTreasury() external view returns (address) {
         return _platformTreasury;
-    }
-    /**
-     * @dev Returns if a project is registered
-     */
-
-    function isProjectRegistered(address project) external view returns (bool) {
-        return _registeredProjects[project];
     }
 
     /**
@@ -255,5 +321,12 @@ contract PlatformRegistry is
     function setVersion(string memory newVersion) external onlyRole(UPGRADER_ROLE) {
         _version = newVersion;
         emit VersionUpdated(newVersion);
+    }
+
+    /**
+     * @dev Function to receive ETH
+     */
+    receive() external payable {
+        // Allow receiving ETH for relaying
     }
 }

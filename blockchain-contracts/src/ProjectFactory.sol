@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {ERC1967Proxy} from "./proxy/ERC1967Proxy.sol";
+import {ProjectFactoryStorage} from "./ProjectFactoryStorage.sol";
 
 /**
  * @title IProject
@@ -26,21 +27,6 @@ interface IProject {
         address platformRegistry,
         address[] memory teamMembers
     ) external;
-}
-
-/**
- * @title ProjectFactoryStorage
- * @dev Storage contract for ProjectFactory
- */
-contract ProjectFactoryStorage {
-    // Registry address
-    address internal _platformRegistry;
-
-    // Projects created by this factory
-    address[] internal _createdProjects;
-
-    // Implementation address for project proxies
-    address internal _projectImplementation;
 }
 
 /**

@@ -6,7 +6,6 @@ import {ERC1967Proxy} from "../../src/proxy/ERC1967Proxy.sol";
 import {PlatformRegistry} from "../../src/PlatformRegistry.sol";
 import {Project} from "../../src/Project.sol";
 import {ProjectFactory} from "../../src/ProjectFactory.sol";
-import {ProjectNFT} from "../../src/ProjectNFT.sol";
 
 contract PlatformRegistryTest is Test {
     PlatformRegistry public implementation;
@@ -45,7 +44,7 @@ contract PlatformRegistryTest is Test {
         proxy = new ERC1967Proxy(address(implementation), data);
 
         // Cast proxy to implementation type for easier testing
-        registry = PlatformRegistry(address(proxy));
+        registry = PlatformRegistry(payable(address(proxy)));
 
         // Give users some ETH
         vm.deal(user1, 10 ether);

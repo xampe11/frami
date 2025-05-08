@@ -56,7 +56,7 @@ contract DeployUpgradeableScript is Script {
         console.log("ProjectFactory proxy deployed at:", address(projectFactoryProxy));
 
         // Update registry with factory address
-        PlatformRegistry platformRegistry = PlatformRegistry(address(platformRegistryProxy));
+        PlatformRegistry platformRegistry = PlatformRegistry(payable(address(platformRegistryProxy)));
         platformRegistry.updateProjectFactory(address(projectFactoryProxy));
         console.log("Updated PlatformRegistry with ProjectFactory address");
 

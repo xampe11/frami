@@ -7,6 +7,27 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import {ProjectStorage} from "./ProjectStorage.sol";
+
+/**
+ * @title IFounderNFT
+ * @dev Interface for the FounderNFT contract
+ */
+interface IFounderNFT {
+    function getPlatformFeeDistributionPercentage() external view returns (uint256);
+    function getTotalStakedTokens() external view returns (uint256);
+    function addPlatformFees(uint256 amount) external;
+}
+
+/**
+ * @title IPlatformRegistry
+ * @dev Interface for the PlatformRegistry with extension registry and relay functionality
+ */
+interface IPlatformRegistry {
+    function getExtension(bytes32 extensionType) external view returns (address);
+    function relayFounderFees(uint256 amount) external payable;
+    function isProjectRegistered(address project) external view returns (bool);
+}
 
 /**
  * @title IProjectFactoryRegistry
@@ -14,58 +35,6 @@ import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol
  */
 interface IProjectFactoryRegistry {
     function isFactoryRegistered(address factory) external view returns (bool);
-}
-
-/**
- * @title ProjectStorage
- * @dev Storage contract for Project
- */
-contract ProjectStorage {
-    // Project configuration
-    string internal _name;
-    string internal _description;
-    address internal _creator;
-    uint256 internal _fundingGoal;
-    uint256 internal _deadline;
-    bool internal _isFlexibleFunding;
-    uint256 internal _platformFeePercentage;
-    address internal _platformTreasury;
-    address internal _platformRegistry;
-
-    // Project state
-    enum State {
-        Active,
-        Successful,
-        Failed,
-        Cancelled
-    }
-
-    State internal _state;
-
-    uint256 internal _totalFundsRaised;
-    uint256 internal _totalFundsWithdrawn;
-    uint256 internal _totalInvestors;
-
-    // Milestone tracking
-    struct Milestone {
-        string description;
-        uint256 fundingPercentage;
-        bool completed;
-        bool fundsReleased;
-        uint256 votesNeeded;
-        uint256 votesReceived;
-        mapping(address => bool) investorVoted;
-    }
-
-    uint256 internal _milestoneCount;
-    mapping(uint256 => Milestone) internal _milestones;
-
-    // Team members
-    mapping(address => bool) internal _teamMembers;
-
-    // Investor tracking
-    mapping(address => uint256) internal _investments;
-    address[] internal _investors;
 }
 
 /**
@@ -270,16 +239,72 @@ contract Project is
         // Calculate funds to release based on percentage
         uint256 releaseAmount = (_totalFundsRaised * _milestones[milestoneId].fundingPercentage) / 10000;
         uint256 platformFee = (releaseAmount * _platformFeePercentage) / 10000;
-        uint256 creatorAmount = releaseAmount - platformFee;
+
+        // Get the extension registry from platform
+        address foundersNFTAddress;
+        bool hasFounderNFT = false;
+        uint256 founderShare = 0;
+        uint256 treasuryAmount = platformFee;
+
+        // Check for Founder NFT through extension registry
+        try IPlatformRegistry(_platformRegistry).getExtension(keccak256("FOUNDER_NFT_EXTENSION")) returns (
+            address founderAddr
+        ) {
+            if (founderAddr != address(0)) {
+                foundersNFTAddress = founderAddr;
+                hasFounderNFT = true;
+            }
+        } catch {
+            // If call fails, continue without Founder NFT integration
+        }
+
+        // Calculate fee distribution if FounderNFT is available
+        if (hasFounderNFT) {
+            try IFounderNFT(foundersNFTAddress).getPlatformFeeDistributionPercentage() returns (
+                uint256 founderPercentage
+            ) {
+                // Calculate founder share (e.g., 30% of platform fee)
+                founderShare = (platformFee * founderPercentage) / 10000;
+
+                // Only distribute if there's a non-zero share
+                if (founderShare > 0) {
+                    // Check if there are staked tokens
+                    try IFounderNFT(foundersNFTAddress).getTotalStakedTokens() returns (uint256 stakedTokens) {
+                        if (stakedTokens > 0) {
+                            // Use the registry's relay function to send fees to FounderNFT
+                            treasuryAmount = platformFee - founderShare;
+
+                            try IPlatformRegistry(_platformRegistry).relayFounderFees{value: founderShare}(founderShare)
+                            {
+                                // Successfully relayed fees through the registry
+                            } catch {
+                                // If relay fails, send all fees to treasury
+                                treasuryAmount = platformFee;
+                                founderShare = 0;
+                            }
+                        }
+                    } catch {
+                        // If call fails, send all fees to treasury
+                        treasuryAmount = platformFee;
+                        founderShare = 0;
+                    }
+                }
+            } catch {
+                // If call fails, send all fees to treasury
+                treasuryAmount = platformFee;
+                founderShare = 0;
+            }
+        }
 
         // Update withdrawn funds
         _totalFundsWithdrawn += releaseAmount;
 
-        // Send platform fee
-        (bool feeSuccess,) = _platformTreasury.call{value: platformFee}("");
+        // Send platform fee to treasury (minus founder share if applicable)
+        (bool feeSuccess,) = _platformTreasury.call{value: treasuryAmount}("");
         require(feeSuccess, "Fee transfer failed");
 
         // Send funds to creator
+        uint256 creatorAmount = releaseAmount - platformFee;
         (bool success,) = _creator.call{value: creatorAmount}("");
         require(success, "Transfer failed");
 
@@ -328,6 +353,36 @@ contract Project is
         require(success, "Refund failed");
 
         emit RefundIssued(msg.sender, refundAmount);
+    }
+
+    /**
+     * @dev Set the project's NFT contract address
+     */
+    function setProjectNFTContract(address nftContract) external onlyRole(ADMIN_ROLE) {
+        require(_projectNFTContract == address(0), "NFT contract already set");
+        _projectNFTContract = nftContract;
+    }
+
+    /**
+     * @dev Set the project's token contract address
+     */
+    function setProjectTokenContract(address tokenContract) external onlyRole(ADMIN_ROLE) {
+        require(_projectTokenContract == address(0), "Token contract already set");
+        _projectTokenContract = tokenContract;
+    }
+
+    /**
+     * @dev Get the project's NFT contract address
+     */
+    function getProjectNFTContract() external view returns (address) {
+        return _projectNFTContract;
+    }
+
+    /**
+     * @dev Get the project's token contract address
+     */
+    function getProjectTokenContract() external view returns (address) {
+        return _projectTokenContract;
     }
 
     /**
@@ -394,6 +449,9 @@ contract Project is
         return (_state);
     }
 
+    /**
+     * @dev Get project isFlexibleFunding state
+     */
     function getIsFlexibleFunding() external view returns (bool isFlexibleFunding) {
         return (_isFlexibleFunding);
     }
