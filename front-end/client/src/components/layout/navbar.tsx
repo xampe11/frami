@@ -49,6 +49,11 @@ export default function Navbar() {
                 Start a Project
               </span>
             </Link>
+            <Link href="/founder-nft">
+              <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">
+                Founder NFT
+              </span>
+            </Link>
           </nav>
 
           {/* Right Side - Search, Theme Toggle & Wallet Connection */}
@@ -91,6 +96,11 @@ export default function Navbar() {
             <Link href="/create-project">
               <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors block py-2">
                 Start a Project
+              </span>
+            </Link>
+            <Link href="/founder-nft">
+              <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors block py-2">
+                Founder NFT
               </span>
             </Link>
             <div className="pt-2 flex items-center space-x-2">
