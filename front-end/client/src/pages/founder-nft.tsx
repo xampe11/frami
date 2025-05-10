@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight, PieChart, Users, VoteIcon, Clock, Info, AlertCircle } from "lucide-react";
 import gsap from "gsap";
+import founderNftImage from "../assets/images/founder-nft.png";
 
 // Hero Section component
 const HeroSection = () => {
@@ -36,43 +37,47 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="w-full py-16 md:py-24 lg:py-32 bg-gradient-to-br from-primary/10 via-background to-primary/5">
+    <section className="w-full py-16 md:py-24 lg:py-32 bg-[#111827] dark:bg-[#111827]">
       <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* NFT Showcase */}
         <div 
           ref={nftImageRef}
-          className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl p-1"
+          className="flex justify-center"
         >
-          <div className="w-full aspect-square rounded-3xl overflow-hidden bg-black/5 dark:bg-white/5 shadow-xl relative">
-            <div className="absolute inset-0 flex items-center justify-center text-4xl font-bold text-primary/20">
-              Founder NFT
-            </div>
-            <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-              Exclusive Collection
+          <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl p-1 max-w-md mx-auto w-full">
+            <div className="w-full aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-purple-900/40 to-blue-900/40 shadow-xl relative flex items-center justify-center p-4">
+              <img 
+                src={founderNftImage} 
+                alt="Founder NFT" 
+                className="w-full h-full object-contain"
+              />
+              <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                Exclusive Collection
+              </div>
             </div>
           </div>
         </div>
         
         {/* Content */}
         <div ref={textContentRef} className="space-y-6">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
             Founder NFT
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground">
+          <p className="text-xl md:text-2xl text-gray-300">
             Your exclusive access pass to platform governance, fee distribution, and early project access.
           </p>
           
           {/* NFT Stats */}
           <div ref={counterRef} className="grid grid-cols-2 gap-4 pt-4">
-            <div className="bg-background/80 backdrop-blur-sm p-4 rounded-xl border border-border">
-              <div className="text-sm text-muted-foreground">Supply</div>
-              <div className="text-2xl font-bold">1,000 / 1,000</div>
-              <Progress value={100} className="h-1.5 mt-2" />
+            <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700">
+              <div className="text-sm text-gray-400">Supply</div>
+              <div className="text-2xl font-bold text-white">1,000 / 1,000</div>
+              <Progress value={100} className="h-1.5 mt-2 bg-indigo-900" />
             </div>
-            <div className="bg-background/80 backdrop-blur-sm p-4 rounded-xl border border-border">
-              <div className="text-sm text-muted-foreground">Price</div>
-              <div className="text-2xl font-bold">0.1 ETH</div>
-              <div className="text-sm text-muted-foreground mt-2">≈ $250 USD</div>
+            <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700">
+              <div className="text-sm text-gray-400">Price</div>
+              <div className="text-2xl font-bold text-white">0.1 ETH</div>
+              <div className="text-sm text-gray-400 mt-2">≈ $250 USD</div>
             </div>
           </div>
         </div>
@@ -135,7 +140,16 @@ const MintInterface = () => {
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold mb-10 text-center">Mint Your Founder NFT</h2>
         
-        <Card className="max-w-2xl mx-auto border-2 border-primary/20 shadow-lg">
+        <Card className="max-w-2xl mx-auto border-2 border-primary/20 shadow-lg overflow-hidden">
+          <div className="flex items-center justify-center p-4 bg-gradient-to-r from-primary/10 to-purple-500/10">
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-purple-900/40 to-blue-900/40">
+              <img 
+                src={founderNftImage} 
+                alt="Founder NFT" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
           <CardHeader>
             <CardTitle>Founder NFT Minting</CardTitle>
             <CardDescription>Select quantity and review gas fees before minting</CardDescription>
@@ -312,11 +326,12 @@ const PlatformIntegration = () => {
           <div className="rounded-xl bg-muted p-6 aspect-square max-w-lg mx-auto w-full flex items-center justify-center">
             <div className="relative w-full h-full">
               <div className="absolute inset-1/4 rounded-full border-4 border-primary/30 flex items-center justify-center">
-                <div className="absolute inset-1/4 rounded-full border-2 border-primary/50 bg-background/80 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-xl font-bold">Founder NFT</div>
-                    <div className="text-sm text-muted-foreground">Hub & Core</div>
-                  </div>
+                <div className="absolute inset-1/4 rounded-full border-2 border-primary/50 bg-background/80 flex items-center justify-center p-2">
+                  <img 
+                    src={founderNftImage} 
+                    alt="Founder NFT" 
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 
                 {/* Connection lines */}
