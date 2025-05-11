@@ -139,7 +139,7 @@ export default function FeaturedProjects() {
     console.error("Error fetching featured projects:", error);
     return (
       <section className="py-12 bg-gray-50 dark:bg-slate-900">
-        <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
+        <div className="container mx-auto px-4 sm:px-6 max-w-[110rem]">
           <div className="text-center">
             <h2 className="text-2xl font-bold font-inter text-black dark:text-white mb-4">Featured Projects</h2>
             <p className="text-red-500 dark:text-red-400">Failed to load featured projects. Please try again later.</p>
@@ -153,7 +153,7 @@ export default function FeaturedProjects() {
     console.log("No featured projects found or empty array returned");
     return (
       <section className="py-12 bg-gray-50 dark:bg-slate-900">
-        <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
+        <div className="container mx-auto px-4 sm:px-6 max-w-[110rem]">
           <div className="text-center">
             <h2 className="text-2xl font-bold font-inter text-black dark:text-white mb-4">Featured Projects</h2>
             <p className="text-gray-700 dark:text-gray-300">Check back soon for featured projects!</p>
@@ -165,7 +165,7 @@ export default function FeaturedProjects() {
 
   return (
     <section ref={sectionRef} className="py-10 bg-gray-50 dark:bg-slate-900">
-      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem] max-w-[90rem]">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem]">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold font-inter dark:text-white">Featured Projects</h2>
           <div className="flex space-x-2">
