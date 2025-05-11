@@ -328,7 +328,7 @@ const CoreBenefits = () => {
   ];
   
   return (
-    <section ref={sectionRef} className="py-20 bg-gradient-to-b from-background to-primary/5">
+    <section ref={sectionRef} className="py-20 bg-gradient-to-b from-[#111827] to-[#1a1e31] text-white">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-4">Core Benefits</h2>
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -339,14 +339,14 @@ const CoreBenefits = () => {
           {benefits.map((benefit, index) => (
             <div 
               key={index}
-              className="benefit-card flex flex-col p-6 bg-card rounded-xl shadow-md border border-border hover:shadow-lg transition-shadow"
+              className="benefit-card flex flex-col p-6 bg-[#0f172a] rounded-xl shadow-md border border-gray-700 hover:shadow-lg transition-shadow text-white"
             >
               <div className="mb-4">{benefit.icon}</div>
               <h3 className="text-xl font-bold mb-2">{benefit.title}</h3>
               <p className="text-muted-foreground mb-4">{benefit.description}</p>
               
               {/* Animated graphic placeholder */}
-              <div className="mt-auto h-32 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground italic p-2 text-center">
+              <div className="mt-auto h-32 rounded-md bg-[#1a1e31] flex items-center justify-center text-xs text-gray-400 italic p-2 text-center">
                 {benefit.animation}
               </div>
             </div>
@@ -360,7 +360,7 @@ const CoreBenefits = () => {
 // Platform Integration section
 const PlatformIntegration = () => {
   return (
-    <section className="py-20 bg-background">
+    <section className="py-20 bg-[#1a1e31] text-white">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-4">Platform Integration</h2>
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -369,7 +369,7 @@ const PlatformIntegration = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Infographic */}
-          <div className="rounded-xl bg-muted p-6 aspect-square max-w-lg mx-auto w-full flex items-center justify-center">
+          <div className="rounded-xl bg-[#0f172a] p-6 aspect-square max-w-lg mx-auto w-full flex items-center justify-center border border-gray-700 shadow-md">
             <div className="relative w-full h-full">
               <div className="absolute inset-1/4 rounded-full border-4 border-primary/30 flex items-center justify-center">
                 <div className="absolute inset-1/4 rounded-full border-2 border-primary/50 bg-background/80 flex items-center justify-center p-2">
@@ -456,7 +456,7 @@ const PlatformIntegration = () => {
 // FAQ section
 const FAQ = () => {
   return (
-    <section className="py-20 bg-gradient-to-t from-background to-primary/5">
+    <section className="py-20 bg-gradient-to-t from-[#111827] to-[#1a1e31] text-white">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-4">Frequently Asked Questions</h2>
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -464,7 +464,7 @@ const FAQ = () => {
         </p>
         
         <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible className="w-full text-white">
             <AccordionItem value="item-1">
               <AccordionTrigger>How do I mint a Founder NFT?</AccordionTrigger>
               <AccordionContent>
