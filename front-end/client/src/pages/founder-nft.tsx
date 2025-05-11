@@ -10,11 +10,16 @@ import { ArrowRight, PieChart, Users, VoteIcon, Clock, Info, AlertCircle } from 
 import gsap from "gsap";
 import founderNftVideo from "../assets/videos/FounderNFT.mp4";
 
-// Hero Section component
-const HeroSection = () => {
+// Combined Hero & Mint Section component
+const HeroAndMintSection = () => {
   const nftImageRef = useRef<HTMLDivElement>(null);
   const textContentRef = useRef<HTMLDivElement>(null);
-  const counterRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [isMinting, setIsMinting] = useState(false);
+  const [transactionStatus, setTransactionStatus] = useState<null | 'pending' | 'success' | 'error'>(null);
+  const { isConnected, connect } = useWallet();
+  const { toast } = useToast();
 
   useEffect(() => {
     const tl = gsap.timeline();
@@ -35,68 +40,31 @@ const HeroSection = () => {
       }, "-=0.5");
     }
   }, []);
-
-  return (
-    <section className="w-full py-16 md:py-24 lg:py-32 bg-[#111827] dark:bg-[#111827]">
-      <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        {/* NFT Showcase */}
-        <div 
-          ref={nftImageRef}
-          className="flex justify-center"
-        >
-          <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl p-1 max-w-md mx-auto w-full">
-            <div className="w-full aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-purple-900/40 to-blue-900/40 shadow-xl relative flex items-center justify-center p-4">
-              <video
-                src={founderNftVideo}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-contain"
-                style={{ maxHeight: "100%" }}
-              />
-              <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-                Exclusive Collection
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Content */}
-        <div ref={textContentRef} className="space-y-6">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
-            Founder NFT
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-300">
-            Your exclusive access pass to platform governance, fee distribution, and early project access.
-          </p>
-          
-          {/* NFT Stats */}
-          <div ref={counterRef} className="grid grid-cols-2 gap-4 pt-4">
-            <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700">
-              <div className="text-sm text-gray-400">Supply</div>
-              <div className="text-2xl font-bold text-white">1,000 / 1,000</div>
-              <Progress value={100} className="h-1.5 mt-2 bg-indigo-900" />
-            </div>
-            <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700">
-              <div className="text-sm text-gray-400">Price</div>
-              <div className="text-2xl font-bold text-white">0.1 ETH</div>
-              <div className="text-sm text-gray-400 mt-2">≈ $250 USD</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// Mint Interface component
-const MintInterface = () => {
-  const [quantity, setQuantity] = useState(1);
-  const [isMinting, setIsMinting] = useState(false);
-  const [transactionStatus, setTransactionStatus] = useState<null | 'pending' | 'success' | 'error'>(null);
-  const { isConnected, connect } = useWallet();
-  const { toast } = useToast();
+  
+  // Set video playback rate
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 0.5;
+    }
+    
+    // Add event listener to reset playback rate after video loads
+    const handleVideoLoad = () => {
+      if (videoRef.current) {
+        videoRef.current.playbackRate = 0.5;
+      }
+    };
+    
+    const videoElement = videoRef.current;
+    if (videoElement) {
+      videoElement.addEventListener('loadeddata', handleVideoLoad);
+    }
+    
+    return () => {
+      if (videoElement) {
+        videoElement.removeEventListener('loadeddata', handleVideoLoad);
+      }
+    };
+  }, []);
 
   const decrementQuantity = () => {
     if (quantity > 1) {
@@ -140,106 +108,177 @@ const MintInterface = () => {
   };
 
   return (
-    <section className="py-16 bg-background">
+    <section className="w-full py-16 md:py-24 lg:py-28 bg-[#111827] dark:bg-[#111827]">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-10 text-center">Mint Your Founder NFT</h2>
-        
-        <Card className="max-w-2xl mx-auto border-2 border-primary/20 shadow-lg overflow-hidden">
-          <div className="flex items-center justify-center p-4 bg-gradient-to-r from-primary/10 to-purple-500/10">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-purple-900/40 to-blue-900/40">
-              <video
-                src={founderNftVideo}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-contain"
-              />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          {/* Left Side: NFT Showcase and Info */}
+          <div>
+            <div ref={textContentRef} className="space-y-6 mb-8">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
+                Founder NFT
+              </h1>
+              <p className="text-xl md:text-2xl text-gray-300">
+                Your exclusive access pass to platform governance, fee distribution, and early project access.
+              </p>
+            </div>
+            
+            <div 
+              ref={nftImageRef}
+              className="flex justify-center"
+            >
+              <div className="max-w-xs mx-auto w-full relative">
+                {/* Hexagonal frame with purple glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#8A63D2]/30 to-[#583c8e]/30 rounded-3xl blur-md"></div>
+                
+                {/* Main card container with border */}
+                <div className="relative bg-[#1a1e31] border border-[#f0d795]/30 rounded-3xl p-3 pb-6 shadow-xl overflow-hidden">
+                  {/* Decorative top corners */}
+                  <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-[#f0d795] rounded-tl-3xl opacity-60"></div>
+                  <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-[#f0d795] rounded-tr-3xl opacity-60"></div>
+                  
+                  {/* Bottom corners */}
+                  <div className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-[#f0d795] rounded-bl-3xl opacity-60"></div>
+                  <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-[#f0d795] rounded-br-3xl opacity-60"></div>
+                  
+                  {/* Golden hexagon border */}
+                  <div className="w-full aspect-square relative">
+                    <div className="absolute inset-[5%] border-2 border-[#f0d795]/70 rounded-xl transform rotate-45 pointer-events-none"></div>
+                    <div className="absolute inset-[5%] border-2 border-[#f0d795]/70 rounded-xl transform -rotate-45 pointer-events-none"></div>
+                    
+                    {/* Video content */}
+                    <div className="absolute inset-[10%] flex items-center justify-center">
+                      <video
+                        ref={videoRef}
+                        src={founderNftVideo}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-contain relative z-10"
+                      />
+                    </div>
+                    
+                    {/* Gold speckles decoration */}
+                    <div className="absolute top-2 right-2 w-8 h-8 bg-[#f0d795]/10 rounded-full blur-sm"></div>
+                    <div className="absolute bottom-4 left-4 w-6 h-6 bg-[#f0d795]/10 rounded-full blur-sm"></div>
+                    
+                    {/* Badge */}
+                    <div className="absolute bottom-[-10px] w-full flex justify-center z-20">
+                      <div className="bg-black/70 text-white px-4 py-1 rounded-full text-sm border border-[#f0d795]/30">
+                        Exclusive Collection
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <CardHeader>
-            <CardTitle>Founder NFT Minting</CardTitle>
-            <CardDescription>Select quantity and review gas fees before minting</CardDescription>
-          </CardHeader>
           
-          <CardContent className="space-y-6">
-            {/* Quantity Selector */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Quantity</label>
-              <div className="flex items-center border rounded-md overflow-hidden">
-                <button 
-                  onClick={decrementQuantity} 
-                  className="px-3 py-2 bg-muted hover:bg-muted/80 transition-colors border-r"
-                  disabled={quantity <= 1}
-                >
-                  -
-                </button>
-                <div className="flex-1 text-center py-2">{quantity}</div>
-                <button 
-                  onClick={incrementQuantity} 
-                  className="px-3 py-2 bg-muted hover:bg-muted/80 transition-colors border-l"
-                  disabled={quantity >= 10}
-                >
-                  +
-                </button>
+          {/* Right Side: Stats and Minting Interface */}
+          <div className="space-y-6 mt-8 lg:mt-0">
+            {/* NFT Stats - moved here */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700">
+                <div className="text-sm text-gray-400">Supply</div>
+                <div className="text-xl font-bold text-white">1,000 / 1,000</div>
+                <Progress value={100} className="h-1.5 mt-2 bg-[#8A63D2]/50" />
+              </div>
+              <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700">
+                <div className="text-sm text-gray-400">Price</div>
+                <div className="text-xl font-bold text-white">0.1 ETH</div>
+                <div className="text-sm text-gray-400 mt-2">≈ $250 USD</div>
               </div>
             </div>
             
-            {/* Price Information */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Price per NFT</span>
-                <span className="font-medium">0.1 ETH</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Quantity</span>
-                <span className="font-medium">x{quantity}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Estimated Gas Fee</span>
-                <span className="font-medium">~0.005 ETH</span>
-              </div>
-              <div className="border-t pt-2 mt-2">
-                <div className="flex justify-between font-bold">
-                  <span>Total</span>
-                  <span>{(quantity * 0.1 + 0.005).toFixed(3)} ETH</span>
+            {/* Minting Interface */}
+            <Card className="border border-gray-700 shadow-xl overflow-hidden bg-[#1a1e31]/80 text-white">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-xl font-bold">Mint Your Founder NFT</CardTitle>
+                <CardDescription className="text-gray-300">Select quantity and review gas fees before minting</CardDescription>
+              </CardHeader>
+              
+              <CardContent className="space-y-5">
+                {/* Quantity Selector */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300">Quantity</label>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center border border-gray-700 rounded-md overflow-hidden bg-[#111827] w-2/5 mx-auto">
+                      <button 
+                        onClick={decrementQuantity} 
+                        className="w-7 h-7 flex items-center justify-center hover:bg-gray-800 transition-colors border-r border-gray-700"
+                        disabled={quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <div className="flex-1 text-center py-1 text-white">{quantity}</div>
+                      <button 
+                        onClick={incrementQuantity} 
+                        className="w-7 h-7 flex items-center justify-center hover:bg-gray-800 transition-colors border-l border-gray-700"
+                        disabled={quantity >= 10}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            
-            {/* Transaction Status */}
-            {transactionStatus && (
-              <div className={`p-3 rounded-md ${
-                transactionStatus === 'pending' ? 'bg-yellow-50 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200' :
-                transactionStatus === 'success' ? 'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-200' :
-                'bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-200'
-              }`}>
-                <div className="flex items-center">
-                  {transactionStatus === 'pending' && <Clock className="h-4 w-4 mr-2" />}
-                  {transactionStatus === 'success' && <div className="h-4 w-4 mr-2">✓</div>}
-                  {transactionStatus === 'error' && <AlertCircle className="h-4 w-4 mr-2" />}
-                  <span>
-                    {transactionStatus === 'pending' && 'Transaction in progress...'}
-                    {transactionStatus === 'success' && 'Transaction successful!'}
-                    {transactionStatus === 'error' && 'Transaction failed. Please try again.'}
-                  </span>
+                
+                {/* Price Information */}
+                <div className="space-y-2 pt-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-300">Price per NFT</span>
+                    <span className="font-medium text-white">0.1 ETH</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-300">Quantity</span>
+                    <span className="font-medium text-white">x{quantity}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-300">Estimated Gas Fee</span>
+                    <span className="font-medium text-white">~0.005 ETH</span>
+                  </div>
+                  <div className="border-t border-gray-700 pt-2 mt-2">
+                    <div className="flex justify-between font-bold">
+                      <span className="text-gray-200">Total</span>
+                      <span className="text-white">{(quantity * 0.1 + 0.005).toFixed(3)} ETH</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-          </CardContent>
-          
-          <CardFooter>
-            <Button 
-              onClick={handleMint} 
-              className="w-full" 
-              disabled={isMinting}
-            >
-              {!isConnected ? "Connect Wallet to Mint" : 
-               isMinting ? "Processing..." : 
-               `Mint ${quantity} NFT${quantity > 1 ? 's' : ''}`}
-            </Button>
-          </CardFooter>
-        </Card>
+                
+                {/* Transaction Status */}
+                {transactionStatus && (
+                  <div className={`p-3 rounded-md ${
+                    transactionStatus === 'pending' ? 'bg-yellow-900/30 text-yellow-200' :
+                    transactionStatus === 'success' ? 'bg-green-900/30 text-green-200' :
+                    'bg-red-900/30 text-red-200'
+                  }`}>
+                    <div className="flex items-center">
+                      {transactionStatus === 'pending' && <Clock className="h-4 w-4 mr-2" />}
+                      {transactionStatus === 'success' && <div className="h-4 w-4 mr-2">✓</div>}
+                      {transactionStatus === 'error' && <AlertCircle className="h-4 w-4 mr-2" />}
+                      <span>
+                        {transactionStatus === 'pending' && 'Transaction in progress...'}
+                        {transactionStatus === 'success' && 'Transaction successful!'}
+                        {transactionStatus === 'error' && 'Transaction failed. Please try again.'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+              
+              <CardFooter>
+                <Button 
+                  onClick={handleMint} 
+                  className="w-3/5 mx-auto bg-[#8A63D2] hover:bg-[#7651c0] text-white rounded-md py-2 h-auto" 
+                  disabled={isMinting}
+                >
+                  {!isConnected ? "Connect Wallet to Mint" : 
+                   isMinting ? "Processing..." : 
+                   `Mint ${quantity > 1 ? quantity + ' NFTs' : '1 NFT'}`}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -341,6 +380,9 @@ const PlatformIntegration = () => {
                     muted
                     playsInline
                     className="w-full h-full object-contain"
+                    onLoadedData={(e) => {
+                      e.currentTarget.playbackRate = 0.5;
+                    }}
                   />
                 </div>
                 
@@ -491,8 +533,7 @@ export default function FounderNFTPage() {
 
   return (
     <div className="min-h-screen">
-      <HeroSection />
-      <MintInterface />
+      <HeroAndMintSection />
       <CoreBenefits />
       <PlatformIntegration />
       <FAQ />
