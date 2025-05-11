@@ -59,7 +59,7 @@ export default function ProjectDetails() {
   
   // Set page title
   useEffect(() => {
-    document.title = "Project Details | RealWorld Projects";
+    document.title = "Project Details | Frami";
   }, []);
   
   // Fetch project data

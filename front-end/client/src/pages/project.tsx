@@ -47,9 +47,9 @@ const ProjectPage = () => {
   // Set page title when project is loaded
   useEffect(() => {
     if (project && !isLoading) {
-      document.title = `${project.title} | RealWorld Projects`;
+      document.title = `${project.title} | Frami`;
     } else {
-      document.title = "Project Details | RealWorld Projects";
+      document.title = "Project Details | Frami";
     }
   }, [project, isLoading]);
 

@@ -71,7 +71,7 @@ const Header = () => {
         <div className="flex items-center">
           <Link href="/">
             <div className="flex items-center">
-              <span className="text-2xl font-bold font-heading text-gradient">RealWorldProjects</span>
+              <span className="text-2xl font-bold font-heading text-gradient">Frami</span>
             </div>
           </Link>
           

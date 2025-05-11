@@ -70,7 +70,7 @@ contract ProjectNFT is
      * @dev Initializes the contract
      */
     function initialize(address initialOwner, address platformRegistry) external initializer {
-        __ERC721_init("Real World Project Investment", "RWPI");
+        __ERC721_init("Frami Project Investment", "FRAMI-PI");
         __ERC721URIStorage_init();
         __Ownable_init(initialOwner);
         __AccessControl_init();

@@ -60,7 +60,7 @@ contract FounderNFT is
         uint256 daoTokenAllocationPercentage,
         uint256 minimumStakingPeriod
     ) external initializer {
-        __ERC721_init("Real World Projects Founder", "RWPF");
+        __ERC721_init("Frami Founder", "FRAMI");
         __ERC721Enumerable_init();
         __Ownable_init(initialOwner);
         __AccessControl_init();
