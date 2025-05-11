@@ -32,7 +32,7 @@ export default function Navbar() {
           <Link href="/">
             <div className="flex items-center cursor-pointer">
               <span className={`text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-[#9376FF] transition-colors`}>
-                Real World Projects
+                Frami
               </span>
             </div>
           </Link>

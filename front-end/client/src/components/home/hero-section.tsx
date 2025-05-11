@@ -111,7 +111,7 @@ export default function HeroSection() {
               <span className="text-primary font-extrabold">blockchain</span>
             </h1>
             <p className="text-slate-700 dark:text-slate-300 text-lg md:text-xl mb-8 font-medium">
-              Bringing creative projects to life with transparency, security, and global access through blockchain technology.
+              Frami helps bring creative projects to life with transparency, security, and global access through blockchain technology.
             </p>
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white font-medium rounded-lg">

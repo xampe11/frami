@@ -12,8 +12,8 @@ export default function Footer() {
           <div>
             <div className="flex items-center mb-4">
               <BlockchainLogo className="h-8 w-8 text-primary" />
-              <span className="text-primary">
-                RealWorld<span className="text-primary">Projects</span>
+              <span className="text-primary ml-2 text-xl font-bold">
+                Frami
               </span>
             </div>
             <p className="text-gray-400 mb-4">
@@ -200,7 +200,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-600 dark:text-gray-400 text-sm mb-4 md:mb-0">
               <p className="text-gray-600 dark:text-gray-400">
-                © {currentYear} RealWorldProjects. All rights reserved.
+                © {currentYear} Frami. All rights reserved.
               </p>
             </div>
             <div className="flex flex-wrap gap-4 sm:gap-6 justify-center">

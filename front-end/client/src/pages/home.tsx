@@ -29,7 +29,7 @@ export default function Home() {
   
   useEffect(() => {
     // Set the document title
-    document.title = "RealWorld Projects | Blockchain Crowdfunding";
+    document.title = "Frami | Blockchain Crowdfunding";
     
     // Ensure all content is visible by adding explicit styles
     if (pageRef.current) {

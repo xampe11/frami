@@ -476,7 +476,7 @@ const FAQ = () => {
 export default function FounderNFTPage() {
   // Set page title
   useEffect(() => {
-    document.title = "Founder NFT Collection | Exclusive Access & Benefits";
+    document.title = "Frami Founder NFT | Exclusive Access & Benefits";
   }, []);
 
   return (
