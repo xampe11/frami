@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useWalletStore } from "@/store/wallet-store";
 import { Menu, Search, X } from "lucide-react";
 import gsap from "gsap";
@@ -24,18 +28,18 @@ const Header = () => {
 
   useEffect(() => {
     if (isScrolled) {
-      gsap.to("header", {
-        backgroundColor: "rgba(255, 255, 255, 0.95)",
+      gsap.to("header", { 
+        backgroundColor: "rgba(255, 255, 255, 0.95)", 
         boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
         backdropFilter: "blur(8px)",
-        duration: 0.3,
+        duration: 0.3 
       });
     } else {
-      gsap.to("header", {
-        backgroundColor: "rgba(255, 255, 255, 1)",
+      gsap.to("header", { 
+        backgroundColor: "rgba(255, 255, 255, 1)", 
         boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
         backdropFilter: "blur(0px)",
-        duration: 0.3,
+        duration: 0.3 
       });
     }
   }, [isScrolled]);
@@ -67,25 +71,21 @@ const Header = () => {
         <div className="flex items-center">
           <Link href="/">
             <div className="flex items-center">
-              <span className="text-primary ml-2 text-xl font-bold tracking-wider">
-                Frami
-              </span>
+              <span className="text-2xl font-bold font-heading text-gradient">Frami</span>
             </div>
           </Link>
-
+          
           <nav className="hidden md:flex ml-12 space-x-8">
             {navLinks.map((link) => (
               <Link key={link.path} href={link.path}>
-                <span
-                  className={`nav-link ${location === link.path ? "text-primary" : ""}`}
-                >
+                <span className={`nav-link ${location === link.path ? "text-primary" : ""}`}>
                   {link.title}
                 </span>
               </Link>
             ))}
           </nav>
         </div>
-
+        
         <div className="flex items-center space-x-4">
           <div className="relative hidden md:block">
             <form onSubmit={handleSearch}>
@@ -99,14 +99,15 @@ const Header = () => {
               <Search className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
             </form>
           </div>
-
-          <button onClick={handleWalletClick} className="wallet-button">
+          
+          <button 
+            onClick={handleWalletClick}
+            className="wallet-button"
+          >
             {isConnected ? (
               <>
                 <i className="fas fa-check-circle mr-2"></i>
-                <span>
-                  {address?.slice(0, 4)}...{address?.slice(-4)}
-                </span>
+                <span>{address?.slice(0, 4)}...{address?.slice(-4)}</span>
               </>
             ) : (
               <>
@@ -115,13 +116,13 @@ const Header = () => {
               </>
             )}
           </button>
-
+          
           <Link href={isConnected ? "/profile" : "/login"}>
             <Button className="hidden md:inline-flex btn-primary">
               {isConnected ? "My Account" : "Sign Up"}
             </Button>
           </Link>
-
+          
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
@@ -141,23 +142,19 @@ const Header = () => {
                     <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   </form>
                 </div>
-
+                
                 <nav className="flex flex-col py-6">
                   {navLinks.map((link) => (
                     <Link key={link.path} href={link.path}>
-                      <span
-                        className={`py-3 px-2 font-medium block cursor-pointer ${
-                          location === link.path
-                            ? "text-primary"
-                            : "text-gray-800"
-                        }`}
-                      >
+                      <span className={`py-3 px-2 font-medium block cursor-pointer ${
+                        location === link.path ? "text-primary" : "text-gray-800"
+                      }`}>
                         {link.title}
                       </span>
                     </Link>
                   ))}
                 </nav>
-
+                
                 <div className="mt-auto pb-6 space-y-4">
                   <button
                     onClick={handleWalletClick}
@@ -166,9 +163,7 @@ const Header = () => {
                     {isConnected ? (
                       <>
                         <i className="fas fa-check-circle mr-2"></i>
-                        <span>
-                          {address?.slice(0, 6)}...{address?.slice(-4)}
-                        </span>
+                        <span>{address?.slice(0, 6)}...{address?.slice(-4)}</span>
                       </>
                     ) : (
                       <>
@@ -177,7 +172,7 @@ const Header = () => {
                       </>
                     )}
                   </button>
-
+                  
                   <Link href={isConnected ? "/profile" : "/login"}>
                     <Button className="w-full btn-primary">
                       {isConnected ? "My Account" : "Sign Up"}
