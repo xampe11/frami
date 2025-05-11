@@ -63,7 +63,7 @@ const Header = () => {
 
   return (
     <header className="bg-white sticky top-0 z-50 transition-all duration-200">
-      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem] py-3 flex justify-between items-center">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem] py-3 flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/">
             <div className="flex items-center">
