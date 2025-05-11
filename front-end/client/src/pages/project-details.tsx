@@ -185,7 +185,7 @@ export default function ProjectDetails() {
   // If there's an error or project not found
   if (projectError || (!isLoadingProject && !project)) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem] py-16 text-center">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem] py-16 text-center">
         <AlertCircle className="h-16 w-16 text-error mx-auto mb-4" />
         <h1 className="text-3xl font-bold mb-4">Project Not Found</h1>
         <p className="text-slate mb-8">

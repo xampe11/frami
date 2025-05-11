@@ -457,7 +457,7 @@ const PlatformIntegration = () => {
 const FAQ = () => {
   return (
     <section className="py-20 bg-gradient-to-t from-gray-100 to-white dark:from-[#111827] dark:to-[#1a1e31] text-black dark:text-white">
-      <div className="container mx-auto px-10 max-w-[90rem]">
+      <div className="container mx-auto px-10 max-w-[110rem]">
         <h2 className="text-3xl font-bold text-center mb-4">Frequently Asked Questions</h2>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
           Get answers to the most common questions about our Founder NFTs.
