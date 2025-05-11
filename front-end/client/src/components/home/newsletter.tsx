@@ -44,7 +44,7 @@ const Newsletter = () => {
   
   return (
     <section className="py-12 bg-gray-50 animate-on-scroll">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-card p-8">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 mb-6 md:mb-0 md:pr-8">
