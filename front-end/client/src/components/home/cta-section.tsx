@@ -42,7 +42,7 @@ export default function CTASection() {
 
   return (
     <section ref={sectionRef} className="py-16 bg-gradient-to-r from-primary to-secondary text-white opacity-100">
-      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem]">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="mb-8 md:mb-0 md:max-w-xl opacity-100 transform-none">
             <h2 className="text-3xl font-bold font-inter mb-4 opacity-100 transform-none">Ready to Launch Your Project?</h2>

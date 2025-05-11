@@ -103,7 +103,7 @@ export default function HeroSection() {
 
   return (
     <section ref={sectionRef} className="animated-bg pt-28 md:pt-32 pb-12 md:pb-20">
-      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem]">
         <div className="flex flex-col md:flex-row items-center">
           <div ref={textRef} className="w-full md:w-1/2 mb-10 md:mb-0 pr-0 md:pr-12">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">

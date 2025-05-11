@@ -31,7 +31,7 @@ const Categories = () => {
   
   return (
     <section className="py-12 bg-white categories-section">
-      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem]">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold font-heading">Browse by Category</h2>
           <Link href="/discover">
