@@ -43,7 +43,7 @@ export default function Projects() {
   
   // Set page title and scroll to top
   useEffect(() => {
-    document.title = "Explore Projects | RealWorld Projects";
+    document.title = "Explore Projects | Frami";
     window.scrollTo(0, 0);
   }, []);
   

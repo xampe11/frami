@@ -13,7 +13,7 @@ export async function initWalletKit() {
       walletKitInstance = await WalletKit.init({
         projectId,
         metadata: {
-          name: 'Real World Projects',
+          name: 'Frami',
           description: 'A blockchain-powered crowdfunding platform',
           url: window.location.origin,
           icons: ['https://avatars.githubusercontent.com/u/37784886'],

@@ -53,7 +53,7 @@ const queryClient = new QueryClient({
 
 // Create Wagmi config with RainbowKit
 const config = getDefaultConfig({
-  appName: 'Real World Projects',
+  appName: 'Frami',
   projectId: projectId,
   chains: [mainnet, polygon],
   transports: {

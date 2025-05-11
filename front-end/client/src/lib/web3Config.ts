@@ -6,7 +6,7 @@ const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID as string;
 
 // 2. Create wagmiConfig
 const metadata = {
-  name: "Real World Projects",
+  name: "Frami",
   description: "A blockchain-powered crowdfunding platform",
   url: window.location.origin,
   icons: ["https://avatars.githubusercontent.com/u/37784886"],

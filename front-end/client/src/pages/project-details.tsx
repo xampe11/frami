@@ -71,7 +71,7 @@ export default function ProjectDetails() {
   // Update page title when project is loaded
   useEffect(() => {
     if (project) {
-      document.title = `${project.title} | RealWorld Projects`;
+      document.title = `${project.title} | Frami`;
     }
   }, [project]);
   
