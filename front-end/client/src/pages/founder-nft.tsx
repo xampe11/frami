@@ -178,42 +178,42 @@ const HeroAndMintSection = () => {
           <div className="space-y-6 mt-8 lg:mt-0">
             {/* NFT Stats - moved here */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700 shadow-md">
-                <div className="text-sm text-gray-300">Supply</div>
-                <div className="text-xl font-bold text-white">1,000 / 1,000</div>
+              <div className="bg-white dark:bg-[#1a1e31] p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-md">
+                <div className="text-sm text-gray-500 dark:text-gray-300">Supply</div>
+                <div className="text-xl font-bold text-black dark:text-white">1,000 / 1,000</div>
                 <Progress value={100} className="h-1.5 mt-2 bg-[#8A63D2]/50" />
               </div>
-              <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700 shadow-md">
-                <div className="text-sm text-gray-300">Price</div>
-                <div className="text-xl font-bold text-white">0.1 ETH</div>
-                <div className="text-sm text-gray-300 mt-2">≈ $250 USD</div>
+              <div className="bg-white dark:bg-[#1a1e31] p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-md">
+                <div className="text-sm text-gray-500 dark:text-gray-300">Price</div>
+                <div className="text-xl font-bold text-black dark:text-white">0.1 ETH</div>
+                <div className="text-sm text-gray-500 dark:text-gray-300 mt-2">≈ $250 USD</div>
               </div>
             </div>
             
             {/* Minting Interface */}
-            <Card className="border border-gray-700 shadow-xl overflow-hidden bg-[#1a1e31] text-white">
+            <Card className="border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden bg-white dark:bg-[#1a1e31] text-black dark:text-white">
               <CardHeader className="pb-3">
                 <CardTitle className="text-xl font-bold">Mint Your Founder NFT</CardTitle>
-                <CardDescription className="text-gray-300">Select quantity and review gas fees before minting</CardDescription>
+                <CardDescription className="text-gray-500 dark:text-gray-300">Select quantity and review gas fees before minting</CardDescription>
               </CardHeader>
               
               <CardContent className="space-y-5">
                 {/* Quantity Selector */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">Quantity</label>
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Quantity</label>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center border border-gray-700 rounded-md overflow-hidden bg-[#111827] w-2/5 mx-auto">
+                    <div className="flex items-center border border-gray-300 dark:border-gray-700 rounded-md overflow-hidden bg-gray-50 dark:bg-[#111827] w-2/5 mx-auto">
                       <button 
                         onClick={decrementQuantity} 
-                        className="w-7 h-7 flex items-center justify-center hover:bg-gray-800 transition-colors border-r border-gray-700"
+                        className="w-7 h-7 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors border-r border-gray-300 dark:border-gray-700"
                         disabled={quantity <= 1}
                       >
                         -
                       </button>
-                      <div className="flex-1 text-center py-1 text-white">{quantity}</div>
+                      <div className="flex-1 text-center py-1 text-black dark:text-white">{quantity}</div>
                       <button 
                         onClick={incrementQuantity} 
-                        className="w-7 h-7 flex items-center justify-center hover:bg-gray-800 transition-colors border-l border-gray-700"
+                        className="w-7 h-7 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors border-l border-gray-300 dark:border-gray-700"
                         disabled={quantity >= 10}
                       >
                         +
@@ -331,7 +331,7 @@ const CoreBenefits = () => {
     <section ref={sectionRef} className="py-20 bg-gradient-to-b from-white to-gray-100 dark:from-[#111827] dark:to-[#1a1e31] text-black dark:text-white">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-4">Core Benefits</h2>
-        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+        <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
           Each Founder NFT unlocks exclusive benefits that increase in value as the platform grows.
         </p>
         
@@ -363,7 +363,7 @@ const PlatformIntegration = () => {
     <section className="py-20 bg-gray-50 dark:bg-[#1a1e31] text-black dark:text-white">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-4">Platform Integration</h2>
-        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+        <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
           Founder NFTs are deeply integrated into the core functionality of our platform.
         </p>
         
@@ -456,15 +456,15 @@ const PlatformIntegration = () => {
 // FAQ section
 const FAQ = () => {
   return (
-    <section className="py-20 bg-gradient-to-t from-[#111827] to-[#1a1e31] text-white">
+    <section className="py-20 bg-gradient-to-t from-gray-100 to-white dark:from-[#111827] dark:to-[#1a1e31] text-black dark:text-white">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-4">Frequently Asked Questions</h2>
-        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+        <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
           Get answers to the most common questions about our Founder NFTs.
         </p>
         
         <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="w-full text-white">
+          <Accordion type="single" collapsible className="w-full text-black dark:text-white">
             <AccordionItem value="item-1">
               <AccordionTrigger>How do I mint a Founder NFT?</AccordionTrigger>
               <AccordionContent>
