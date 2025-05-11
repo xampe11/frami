@@ -468,44 +468,44 @@ const FAQ = () => {
             <AccordionItem value="item-1">
               <AccordionTrigger>How do I mint a Founder NFT?</AccordionTrigger>
               <AccordionContent>
-                <p className="mb-2">To mint a Founder NFT, follow these steps:</p>
-                <ol className="list-decimal pl-5 space-y-1 mb-2">
+                <p className="mb-2 text-gray-700 dark:text-gray-300">To mint a Founder NFT, follow these steps:</p>
+                <ol className="list-decimal pl-5 space-y-1 mb-2 text-gray-700 dark:text-gray-300">
                   <li>Connect your Ethereum wallet (MetaMask, WalletConnect, etc.)</li>
                   <li>Select the desired quantity (1-10 NFTs per transaction)</li>
                   <li>Click the "Mint" button and confirm the transaction in your wallet</li>
                   <li>Wait for the transaction to be confirmed on the blockchain</li>
                 </ol>
-                <p>Once minted, your NFTs will appear in your connected wallet and can be viewed on popular NFT marketplaces.</p>
+                <p className="text-gray-700 dark:text-gray-300">Once minted, your NFTs will appear in your connected wallet and can be viewed on popular NFT marketplaces.</p>
               </AccordionContent>
             </AccordionItem>
             
             <AccordionItem value="item-2">
               <AccordionTrigger>How is the fee distribution calculated?</AccordionTrigger>
               <AccordionContent>
-                <p>Fee distribution is calculated proportionally based on the number of Founder NFTs you hold. 30% of all platform fees are allocated to the Founder NFT holders pool. Distributions occur on a monthly basis and can be claimed through the platform dashboard.</p>
-                <p className="mt-2">For example, if you own 10 out of 1000 Founder NFTs (1%), you'll receive 1% of the 30% fee allocation, which equals 0.3% of the total platform fees.</p>
+                <p className="text-gray-700 dark:text-gray-300">Fee distribution is calculated proportionally based on the number of Founder NFTs you hold. 30% of all platform fees are allocated to the Founder NFT holders pool. Distributions occur on a monthly basis and can be claimed through the platform dashboard.</p>
+                <p className="mt-2 text-gray-700 dark:text-gray-300">For example, if you own 10 out of 1000 Founder NFTs (1%), you'll receive 1% of the 30% fee allocation, which equals 0.3% of the total platform fees.</p>
               </AccordionContent>
             </AccordionItem>
             
             <AccordionItem value="item-3">
               <AccordionTrigger>What governance rights do Founder NFT holders have?</AccordionTrigger>
               <AccordionContent>
-                <p>Founder NFT holders have significant governance rights, including:</p>
-                <ul className="list-disc pl-5 space-y-1 mt-2">
+                <p className="text-gray-700 dark:text-gray-300">Founder NFT holders have significant governance rights, including:</p>
+                <ul className="list-disc pl-5 space-y-1 mt-2 text-gray-700 dark:text-gray-300">
                   <li>Voting on platform upgrade proposals</li>
                   <li>Participating in feature prioritization</li>
                   <li>Providing input on fee structures</li>
                   <li>Voting on funding allocations for ecosystem development</li>
                 </ul>
-                <p className="mt-2">Each Founder NFT represents one vote in the governance system. Voting takes place through a secure on-chain mechanism.</p>
+                <p className="mt-2 text-gray-700 dark:text-gray-300">Each Founder NFT represents one vote in the governance system. Voting takes place through a secure on-chain mechanism.</p>
               </AccordionContent>
             </AccordionItem>
             
             <AccordionItem value="item-4">
               <AccordionTrigger>Can I sell my Founder NFT on secondary markets?</AccordionTrigger>
               <AccordionContent>
-                <p>Yes, Founder NFTs are fully transferable ERC-721 tokens that can be sold on secondary markets like OpenSea, Rarible, and LooksRare. All associated benefits transfer with the NFT to the new owner.</p>
-                <p className="mt-2">There is a 5% royalty fee on secondary sales that goes back to the platform treasury, helping to maintain the value of all Founder NFTs by funding ongoing development.</p>
+                <p className="text-gray-700 dark:text-gray-300">Yes, Founder NFTs are fully transferable ERC-721 tokens that can be sold on secondary markets like OpenSea, Rarible, and LooksRare. All associated benefits transfer with the NFT to the new owner.</p>
+                <p className="mt-2 text-gray-700 dark:text-gray-300">There is a 5% royalty fee on secondary sales that goes back to the platform treasury, helping to maintain the value of all Founder NFTs by funding ongoing development.</p>
               </AccordionContent>
             </AccordionItem>
             
