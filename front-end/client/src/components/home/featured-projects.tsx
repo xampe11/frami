@@ -86,7 +86,7 @@ export default function FeaturedProjects() {
   if (isLoading) {
     return (
       <section className="py-12 bg-gray-50 dark:bg-slate-900">
-        <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
+        <div className="container mx-auto px-4 sm:px-6 max-w-[110rem]">
           <div className="flex justify-between items-center mb-8">
             <Skeleton className="h-8 w-48 dark:bg-slate-700" />
             <div className="flex space-x-2">
