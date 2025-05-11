@@ -45,7 +45,7 @@ const CreateProjectCTA = () => {
   
   return (
     <section ref={sectionRef} className="py-16 gradient-bg text-white animate-on-scroll">
-      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem]">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold font-heading mb-6">Launch Your Project on Blockchain</h2>
           <p className="text-lg mb-8 opacity-90">
