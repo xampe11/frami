@@ -131,7 +131,7 @@ const HeroAndMintSection = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-[#8A63D2]/30 to-[#583c8e]/30 rounded-3xl blur-md"></div>
                 
                 {/* Main card container with border */}
-                <div className="relative bg-[#1a1e31] border border-[#f0d795]/30 rounded-3xl p-3 pb-6 shadow-xl overflow-hidden">
+                <div className="relative bg-white dark:bg-[#1a1e31] border border-[#f0d795]/30 rounded-3xl p-3 pb-6 shadow-xl overflow-hidden">
                   {/* Decorative top corners */}
                   <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-[#f0d795] rounded-tl-3xl opacity-60"></div>
                   <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-[#f0d795] rounded-tr-3xl opacity-60"></div>
@@ -164,7 +164,7 @@ const HeroAndMintSection = () => {
                     
                     {/* Badge */}
                     <div className="absolute bottom-[-10px] w-full flex justify-center z-20">
-                      <div className="bg-black/70 text-white px-4 py-1 rounded-full text-sm border border-[#f0d795]/30">
+                      <div className="bg-black/70 text-white dark:text-white px-4 py-1 rounded-full text-sm border border-[#f0d795]/30 backdrop-blur-sm">
                         Exclusive Collection
                       </div>
                     </div>
@@ -225,21 +225,21 @@ const HeroAndMintSection = () => {
                 {/* Price Information */}
                 <div className="space-y-2 pt-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">Price per NFT</span>
-                    <span className="font-medium text-white">0.1 ETH</span>
+                    <span className="text-gray-600 dark:text-gray-300">Price per NFT</span>
+                    <span className="font-medium text-black dark:text-white">0.1 ETH</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">Quantity</span>
-                    <span className="font-medium text-white">x{quantity}</span>
+                    <span className="text-gray-600 dark:text-gray-300">Quantity</span>
+                    <span className="font-medium text-black dark:text-white">x{quantity}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">Estimated Gas Fee</span>
-                    <span className="font-medium text-white">~0.005 ETH</span>
+                    <span className="text-gray-600 dark:text-gray-300">Estimated Gas Fee</span>
+                    <span className="font-medium text-black dark:text-white">~0.005 ETH</span>
                   </div>
-                  <div className="border-t border-gray-700 pt-2 mt-2">
+                  <div className="border-t border-gray-300 dark:border-gray-700 pt-2 mt-2">
                     <div className="flex justify-between font-bold">
-                      <span className="text-gray-200">Total</span>
-                      <span className="text-white">{(quantity * 0.1 + 0.005).toFixed(3)} ETH</span>
+                      <span className="text-gray-700 dark:text-gray-200">Total</span>
+                      <span className="text-black dark:text-white">{(quantity * 0.1 + 0.005).toFixed(3)} ETH</span>
                     </div>
                   </div>
                 </div>
@@ -247,9 +247,9 @@ const HeroAndMintSection = () => {
                 {/* Transaction Status */}
                 {transactionStatus && (
                   <div className={`p-3 rounded-md ${
-                    transactionStatus === 'pending' ? 'bg-yellow-900/30 text-yellow-200' :
-                    transactionStatus === 'success' ? 'bg-green-900/30 text-green-200' :
-                    'bg-red-900/30 text-red-200'
+                    transactionStatus === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200' :
+                    transactionStatus === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200' :
+                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200'
                   }`}>
                     <div className="flex items-center">
                       {transactionStatus === 'pending' && <Clock className="h-4 w-4 mr-2" />}
@@ -268,7 +268,7 @@ const HeroAndMintSection = () => {
               <CardFooter>
                 <Button 
                   onClick={handleMint} 
-                  className="w-3/5 mx-auto bg-[#8A63D2] hover:bg-[#7651c0] text-white rounded-md py-2 h-auto" 
+                  className="w-3/5 mx-auto bg-[#8A63D2] hover:bg-[#7651c0] text-white rounded-md py-2 h-auto shadow-md" 
                   disabled={isMinting}
                 >
                   {!isConnected ? "Connect Wallet to Mint" : 
