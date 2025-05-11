@@ -109,7 +109,7 @@ const HeroAndMintSection = () => {
 
   return (
     <section className="w-full py-16 md:py-24 lg:py-28 bg-white dark:bg-[#111827] text-black dark:text-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-10 max-w-[90rem]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left Side: NFT Showcase and Info */}
           <div>
@@ -268,7 +268,7 @@ const HeroAndMintSection = () => {
               <CardFooter>
                 <Button 
                   onClick={handleMint} 
-                  className="w-3/5 mx-auto bg-[#8A63D2] hover:bg-[#7651c0] text-white rounded-md py-2 h-auto shadow-md" 
+                  className="w-[30%] mx-auto bg-[#8A63D2] hover:bg-[#7651c0] text-white text-sm rounded-md py-1.5 h-auto shadow-md" 
                   disabled={isMinting}
                 >
                   {!isConnected ? "Connect Wallet to Mint" : 
@@ -329,7 +329,7 @@ const CoreBenefits = () => {
   
   return (
     <section ref={sectionRef} className="py-20 bg-gradient-to-b from-white to-gray-100 dark:from-[#111827] dark:to-[#1a1e31] text-black dark:text-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-10 max-w-[90rem]">
         <h2 className="text-3xl font-bold text-center mb-4">Core Benefits</h2>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
           Each Founder NFT unlocks exclusive benefits that increase in value as the platform grows.
@@ -361,7 +361,7 @@ const CoreBenefits = () => {
 const PlatformIntegration = () => {
   return (
     <section className="py-20 bg-gray-50 dark:bg-[#1a1e31] text-black dark:text-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-10 max-w-[90rem]">
         <h2 className="text-3xl font-bold text-center mb-4">Platform Integration</h2>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
           Founder NFTs are deeply integrated into the core functionality of our platform.
@@ -457,7 +457,7 @@ const PlatformIntegration = () => {
 const FAQ = () => {
   return (
     <section className="py-20 bg-gradient-to-t from-gray-100 to-white dark:from-[#111827] dark:to-[#1a1e31] text-black dark:text-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-10 max-w-[90rem]">
         <h2 className="text-3xl font-bold text-center mb-4">Frequently Asked Questions</h2>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
           Get answers to the most common questions about our Founder NFTs.
