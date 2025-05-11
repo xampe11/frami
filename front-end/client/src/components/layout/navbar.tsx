@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import RainbowWalletButton from '../wallet/rainbow-wallet-button';
 import { Menu, X, Search } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { FramiTextLogo } from '@/assets/logo';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -29,10 +28,10 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center">
-          {/* Logo */}
+          {/* Project Name */}
           <Link href="/">
             <div className="flex items-center cursor-pointer py-1">
-              <FramiTextLogo className="text-primary scale-125" />
+              <span className="text-[#8A63D2] font-bold text-2xl">FRAMI</span>
             </div>
           </Link>
 
