@@ -108,16 +108,16 @@ const HeroAndMintSection = () => {
   };
 
   return (
-    <section className="w-full py-16 md:py-24 lg:py-28 bg-[#111827] text-white">
+    <section className="w-full py-16 md:py-24 lg:py-28 bg-white dark:bg-[#111827] text-black dark:text-white">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left Side: NFT Showcase and Info */}
           <div>
             <div ref={textContentRef} className="space-y-6 mb-8">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black dark:text-white">
                 Founder NFT
               </h1>
-              <p className="text-xl md:text-2xl text-gray-300">
+              <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300">
                 Your exclusive access pass to platform governance, fee distribution, and early project access.
               </p>
             </div>
@@ -328,7 +328,7 @@ const CoreBenefits = () => {
   ];
   
   return (
-    <section ref={sectionRef} className="py-20 bg-gradient-to-b from-[#111827] to-[#1a1e31] text-white">
+    <section ref={sectionRef} className="py-20 bg-gradient-to-b from-white to-gray-100 dark:from-[#111827] dark:to-[#1a1e31] text-black dark:text-white">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-4">Core Benefits</h2>
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -339,14 +339,14 @@ const CoreBenefits = () => {
           {benefits.map((benefit, index) => (
             <div 
               key={index}
-              className="benefit-card flex flex-col p-6 bg-[#0f172a] rounded-xl shadow-md border border-gray-700 hover:shadow-lg transition-shadow text-white"
+              className="benefit-card flex flex-col p-6 bg-white dark:bg-[#0f172a] rounded-xl shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow text-black dark:text-white"
             >
               <div className="mb-4">{benefit.icon}</div>
               <h3 className="text-xl font-bold mb-2">{benefit.title}</h3>
-              <p className="text-muted-foreground mb-4">{benefit.description}</p>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">{benefit.description}</p>
               
               {/* Animated graphic placeholder */}
-              <div className="mt-auto h-32 rounded-md bg-[#1a1e31] flex items-center justify-center text-xs text-gray-400 italic p-2 text-center">
+              <div className="mt-auto h-32 rounded-md bg-gray-100 dark:bg-[#1a1e31] flex items-center justify-center text-xs text-gray-600 dark:text-gray-400 italic p-2 text-center">
                 {benefit.animation}
               </div>
             </div>
@@ -360,7 +360,7 @@ const CoreBenefits = () => {
 // Platform Integration section
 const PlatformIntegration = () => {
   return (
-    <section className="py-20 bg-[#1a1e31] text-white">
+    <section className="py-20 bg-gray-50 dark:bg-[#1a1e31] text-black dark:text-white">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-4">Platform Integration</h2>
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -369,7 +369,7 @@ const PlatformIntegration = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Infographic */}
-          <div className="rounded-xl bg-[#0f172a] p-6 aspect-square max-w-lg mx-auto w-full flex items-center justify-center border border-gray-700 shadow-md">
+          <div className="rounded-xl bg-white dark:bg-[#0f172a] p-6 aspect-square max-w-lg mx-auto w-full flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-md">
             <div className="relative w-full h-full">
               <div className="absolute inset-1/4 rounded-full border-4 border-primary/30 flex items-center justify-center">
                 <div className="absolute inset-1/4 rounded-full border-2 border-primary/50 bg-background/80 flex items-center justify-center p-2">
