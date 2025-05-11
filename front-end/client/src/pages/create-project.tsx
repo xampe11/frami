@@ -246,7 +246,7 @@ export default function CreateProject() {
   
   return (
     <div ref={sectionRef} className="pt-24 pb-12 bg-gray-50 dark:bg-slate-900">
-      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem] max-w-5xl">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold font-inter mb-2 dark:text-white">CREATE A PROJECT</h1>
         </div>
