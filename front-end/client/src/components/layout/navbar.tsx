@@ -31,8 +31,8 @@ export default function Navbar() {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link href="/">
-            <div className="flex items-center cursor-pointer">
-              <FramiTextLogo className="text-primary dark:text-white" />
+            <div className="flex items-center cursor-pointer py-1">
+              <FramiTextLogo className="text-primary scale-125" />
             </div>
           </Link>
 

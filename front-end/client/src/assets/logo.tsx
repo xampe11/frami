@@ -11,15 +11,15 @@ export function FramiLogo(props: SVGProps<SVGSVGElement>) {
       {...props}
     >
       <path 
-        d="M20 3L35 11.5V28.5L20 37L5 28.5V11.5L20 3Z" 
+        d="M29 14.5858V25.4142L20 30.8284L11 25.4142V14.5858L20 9.17157L29 14.5858Z" 
         stroke="currentColor" 
-        strokeWidth="2" 
+        strokeWidth="1.5" 
         fill="none"
       />
       <path 
-        d="M20 3L35 11.5M20 19.5V37M20 19.5L5 11.5M20 19.5L35 11.5M5 11.5V28.5M35 28.5V11.5" 
+        d="M20 20V30.8284M20 20L11 14.5858M20 20L29 14.5858M20 9.17157L29 14.5858M11 14.5858V25.4142" 
         stroke="currentColor" 
-        strokeWidth="2" 
+        strokeWidth="1.5" 
         fill="none"
       />
     </svg>
@@ -28,9 +28,9 @@ export function FramiLogo(props: SVGProps<SVGSVGElement>) {
 
 export function FramiTextLogo(props: SVGProps<SVGSVGElement> & { className?: string }) {
   return (
-    <div className={`flex items-center gap-2 ${props.className || ''}`}>
-      <FramiLogo className="h-8 w-8" />
-      <span className="font-sans font-bold text-2xl tracking-wider">FRAMI</span>
+    <div className={`flex items-center gap-3 ${props.className || ''}`}>
+      <FramiLogo className="h-9 w-9" />
+      <span className="font-sans font-medium text-2xl">FRAMI</span>
     </div>
   );
 }

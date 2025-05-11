@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Github, Twitter, MessageCircleCode, Send } from "lucide-react";
-import { FramiLogo } from "@/assets/logo";
+import { FramiTextLogo } from "@/assets/logo";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,10 +11,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           <div>
             <div className="flex items-center mb-4">
-              <FramiLogo className="h-8 w-8 text-primary" />
-              <span className="text-primary ml-2 text-xl font-bold tracking-wider">
-                FRAMI
-              </span>
+              <FramiTextLogo className="text-primary" />
             </div>
             <p className="text-gray-400 mb-4">
               Bringing creative projects to life with blockchain technology.
