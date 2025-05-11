@@ -67,7 +67,7 @@ const ProjectPage = () => {
   // Show loading state when any required data is loading
   if (isLoading || isLoadingCategory || isLoadingCreator) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem] py-16">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem] py-16">
         <div className="max-w-5xl mx-auto">
           <div className="w-full h-80 rounded-xl bg-gray-200 dark:bg-slate-700 animate-pulse" />
           <div className="mt-8 w-2/3 h-10 bg-gray-200 dark:bg-slate-700 animate-pulse rounded" />
@@ -79,7 +79,7 @@ const ProjectPage = () => {
   
   if (error || !project) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem] py-16">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem] py-16">
         <div className="max-w-5xl mx-auto text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-destructive" />
           <h2 className="mt-4 text-2xl font-bold dark:text-white">Project not found</h2>
@@ -158,7 +158,7 @@ const ProjectPage = () => {
   };
   
   return (
-    <div className="container mx-auto px-4 sm:px-6 max-w-[90rem] py-8 md:py-16">
+    <div className="container mx-auto px-4 sm:px-6 max-w-[110rem] py-8 md:py-16">
       <div className="max-w-5xl mx-auto">
         <Button
           variant="ghost"
