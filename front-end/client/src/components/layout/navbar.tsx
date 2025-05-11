@@ -26,7 +26,7 @@ export default function Navbar() {
           : "bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm py-4"
       }`}
     >
-      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem] max-w-[90rem]">
         <div className="flex justify-between items-center">
           {/* Project Name */}
           <Link href="/">

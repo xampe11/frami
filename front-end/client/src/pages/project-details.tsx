@@ -185,7 +185,7 @@ export default function ProjectDetails() {
   // If there's an error or project not found
   if (projectError || (!isLoadingProject && !project)) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 py-16 text-center">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem] py-16 text-center">
         <AlertCircle className="h-16 w-16 text-error mx-auto mb-4" />
         <h1 className="text-3xl font-bold mb-4">Project Not Found</h1>
         <p className="text-slate mb-8">
@@ -201,7 +201,7 @@ export default function ProjectDetails() {
   // Loading state
   if (isLoadingProject || isLoadingCreator || isLoadingCategory) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem] py-8">
         <div className="mb-6">
           <Button variant="ghost" size="sm" className="mb-6">
             <ChevronLeft className="mr-2 h-4 w-4" />
@@ -269,7 +269,7 @@ export default function ProjectDetails() {
 
   return (
     <section ref={sectionRef} className="py-12">
-      <div className="container mx-auto px-4 sm:px-6">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
         <div className="mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate("/explore")} className="group">
             <ChevronLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />

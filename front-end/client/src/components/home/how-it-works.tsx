@@ -70,7 +70,7 @@ export default function HowItWorks() {
       id="how-it-works"
       className="py-16 bg-light dark:bg-slate-900"
     >
-      <div className="container mx-auto px-4 sm:px-6">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold font-inter mb-4 dark:text-white">
             How It Works

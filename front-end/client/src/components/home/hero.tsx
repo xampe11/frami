@@ -43,7 +43,7 @@ const Hero = () => {
         <div className="absolute w-[800px] h-[800px] rounded-full bg-primary/10 -top-[400px] -left-[400px]"></div>
         <div className="absolute w-[600px] h-[600px] rounded-full bg-secondary/10 -bottom-[300px] -right-[300px]"></div>
       </div>
-      <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem] py-16 md:py-24 relative z-10 max-w-[90rem]">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold font-heading mb-6">
             <span className="text-gradient">Fund Projects On The Blockchain</span>

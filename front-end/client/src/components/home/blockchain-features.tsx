@@ -59,7 +59,7 @@ export default function BlockchainFeatures() {
 
   return (
     <section ref={sectionRef} className="py-16 bg-white dark:bg-slate-900 text-slate-800 dark:text-white">
-      <div className="container mx-auto px-4 sm:px-6">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold font-inter mb-4 dark:text-white">Why Blockchain Crowdfunding?</h2>
           <p className="text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-medium">

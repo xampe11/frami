@@ -20,7 +20,7 @@ export default function TrendingProjects() {
   if (isLoading) {
     return (
       <section className="py-12 bg-white dark:bg-slate-900">
-        <div className="container mx-auto px-4 sm:px-6">
+        <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
           <div className="flex justify-between items-center mb-8">
             <Skeleton className="h-8 w-48 dark:bg-slate-700" />
             <Skeleton className="h-6 w-32 dark:bg-slate-700" />
@@ -61,7 +61,7 @@ export default function TrendingProjects() {
 
   return (
     <section ref={sectionRef} className="pt-0 pb-12 bg-gray-50 dark:bg-slate-900">
-      <div className="container mx-auto px-4 sm:px-6">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[90rem]">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold font-inter dark:text-white">Trending Projects</h2>
           <Link 
