@@ -512,9 +512,9 @@ const FAQ = () => {
             <AccordionItem value="item-5">
               <AccordionTrigger>How are Founder NFT benefits activated?</AccordionTrigger>
               <AccordionContent>
-                <p>Founder NFT benefits are automatically activated when you hold the NFT in a connected wallet. There's no need for manual activation.</p>
-                <p className="mt-2">For fee distribution and governance participation, you'll need to connect your wallet to the platform dashboard. Early access benefits are applied automatically when new projects launch on the platform.</p>
-                <p className="mt-2">In some cases, you may need to stake your NFT to access specific benefits, which will be clearly communicated when those features become available.</p>
+                <p className="text-gray-700 dark:text-gray-300">Founder NFT benefits are automatically activated when you hold the NFT in a connected wallet. There's no need for manual activation.</p>
+                <p className="mt-2 text-gray-700 dark:text-gray-300">For fee distribution and governance participation, you'll need to connect your wallet to the platform dashboard. Early access benefits are applied automatically when new projects launch on the platform.</p>
+                <p className="mt-2 text-gray-700 dark:text-gray-300">In some cases, you may need to stake your NFT to access specific benefits, which will be clearly communicated when those features become available.</p>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
