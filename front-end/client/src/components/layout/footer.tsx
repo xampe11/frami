@@ -10,7 +10,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           <div>
             <div className="flex items-center mb-4">
-              <span className="text-[#8A63D2] font-bold text-2xl">FRAMI</span>
+              <span className="text-[#8A63D2] font-bold text-2xl md:text-2xl">
+                FRAMI
+              </span>
             </div>
             <p className="text-gray-400 mb-4">
               Bringing creative projects to life with blockchain technology.

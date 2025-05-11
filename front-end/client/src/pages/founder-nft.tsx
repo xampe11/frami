@@ -8,7 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight, PieChart, Users, VoteIcon, Clock, Info, AlertCircle } from "lucide-react";
 import gsap from "gsap";
-import founderNftImage from "../assets/images/founder-nft.png";
+import founderNftVideo from "../assets/videos/FounderNFT.mp4";
 
 // Hero Section component
 const HeroSection = () => {
@@ -46,10 +46,14 @@ const HeroSection = () => {
         >
           <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl p-1 max-w-md mx-auto w-full">
             <div className="w-full aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-purple-900/40 to-blue-900/40 shadow-xl relative flex items-center justify-center p-4">
-              <img 
-                src={founderNftImage} 
-                alt="Founder NFT" 
+              <video
+                src={founderNftVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
                 className="w-full h-full object-contain"
+                style={{ maxHeight: "100%" }}
               />
               <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
                 Exclusive Collection
@@ -143,9 +147,12 @@ const MintInterface = () => {
         <Card className="max-w-2xl mx-auto border-2 border-primary/20 shadow-lg overflow-hidden">
           <div className="flex items-center justify-center p-4 bg-gradient-to-r from-primary/10 to-purple-500/10">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-purple-900/40 to-blue-900/40">
-              <img 
-                src={founderNftImage} 
-                alt="Founder NFT" 
+              <video
+                src={founderNftVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
                 className="w-full h-full object-contain"
               />
             </div>
@@ -327,9 +334,12 @@ const PlatformIntegration = () => {
             <div className="relative w-full h-full">
               <div className="absolute inset-1/4 rounded-full border-4 border-primary/30 flex items-center justify-center">
                 <div className="absolute inset-1/4 rounded-full border-2 border-primary/50 bg-background/80 flex items-center justify-center p-2">
-                  <img 
-                    src={founderNftImage} 
-                    alt="Founder NFT" 
+                  <video 
+                    src={founderNftVideo} 
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
                     className="w-full h-full object-contain"
                   />
                 </div>

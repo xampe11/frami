@@ -67,7 +67,7 @@ const Header = () => {
         <div className="flex items-center">
           <Link href="/">
             <div className="flex items-center">
-              <span className="text-8xl font-bold font-heading text-gradient tracking-widest">
+              <span className="text-2xl font-bold font-heading text-gradient tracking-wide">
                 Frami
               </span>
             </div>

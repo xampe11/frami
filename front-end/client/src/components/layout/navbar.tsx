@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'wouter';
-import { Button } from '@/components/ui/button';
-import RainbowWalletButton from '../wallet/rainbow-wallet-button';
-import { Menu, X, Search } from 'lucide-react';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { useState, useEffect } from "react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import RainbowWalletButton from "../wallet/rainbow-wallet-button";
+import { Menu, X, Search } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -13,17 +13,17 @@ export default function Navbar() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <header 
+    <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-md py-3' 
-          : 'bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm py-4'
+        isScrolled
+          ? "bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-md py-3"
+          : "bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm py-4"
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6">
@@ -31,7 +31,9 @@ export default function Navbar() {
           {/* Project Name */}
           <Link href="/">
             <div className="flex items-center cursor-pointer py-1">
-              <span className="text-[#8A63D2] font-bold text-2xl">FRAMI</span>
+              <span className="text-[#8A63D2] font-bold text-4xl md:text-4xl">
+                FRAMI
+              </span>
             </div>
           </Link>
 
@@ -56,7 +58,11 @@ export default function Navbar() {
 
           {/* Right Side - Search, Theme Toggle & Wallet Connection */}
           <div className="hidden md:flex items-center space-x-3">
-            <Button variant="ghost" size="icon" className="text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
               <Search className="h-5 w-5" />
             </Button>
             <ThemeToggle />
@@ -65,9 +71,9 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
               className="text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
