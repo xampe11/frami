@@ -108,7 +108,7 @@ const HeroAndMintSection = () => {
   };
 
   return (
-    <section className="w-full py-16 md:py-24 lg:py-28 bg-[#111827] dark:bg-[#111827]">
+    <section className="w-full py-16 md:py-24 lg:py-28 bg-[#111827] text-white">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left Side: NFT Showcase and Info */}
@@ -178,20 +178,20 @@ const HeroAndMintSection = () => {
           <div className="space-y-6 mt-8 lg:mt-0">
             {/* NFT Stats - moved here */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700">
-                <div className="text-sm text-gray-400">Supply</div>
+              <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700 shadow-md">
+                <div className="text-sm text-gray-300">Supply</div>
                 <div className="text-xl font-bold text-white">1,000 / 1,000</div>
                 <Progress value={100} className="h-1.5 mt-2 bg-[#8A63D2]/50" />
               </div>
-              <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700">
-                <div className="text-sm text-gray-400">Price</div>
+              <div className="bg-[#1a1e31] p-4 rounded-xl border border-gray-700 shadow-md">
+                <div className="text-sm text-gray-300">Price</div>
                 <div className="text-xl font-bold text-white">0.1 ETH</div>
-                <div className="text-sm text-gray-400 mt-2">≈ $250 USD</div>
+                <div className="text-sm text-gray-300 mt-2">≈ $250 USD</div>
               </div>
             </div>
             
             {/* Minting Interface */}
-            <Card className="border border-gray-700 shadow-xl overflow-hidden bg-[#1a1e31]/80 text-white">
+            <Card className="border border-gray-700 shadow-xl overflow-hidden bg-[#1a1e31] text-white">
               <CardHeader className="pb-3">
                 <CardTitle className="text-xl font-bold">Mint Your Founder NFT</CardTitle>
                 <CardDescription className="text-gray-300">Select quantity and review gas fees before minting</CardDescription>
