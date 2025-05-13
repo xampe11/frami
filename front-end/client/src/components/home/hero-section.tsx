@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import founderNftVideo from "../../assets/videos/FounderNFT.mp4";
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -136,53 +137,92 @@ export default function HeroSection() {
             </div>
           </div>
           <div ref={imageRef} className="w-full md:w-1/2 relative">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl">
-              <img 
-                src="https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-                alt="Blockchain Crowdfunding" 
-                className="w-full rounded-2xl"
-              />
-              <div className="absolute bottom-0 left-0 right-0 p-6" style={{ background: "linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%)" }}>
-                <span className="bg-secondary text-white text-xs px-3 py-1 rounded-full uppercase font-medium">Featured</span>
-                <h3 className="text-white text-xl font-bold mt-2">Decentralized Innovation Hub</h3>
-                <div className="flex items-center mt-3">
-                  <div className="w-full bg-gray-300/30 rounded-full h-2 mr-2">
-                    <div className="bg-secondary h-2 rounded-full" style={{width: '75%'}}></div>
-                  </div>
-                  <span className="text-white font-medium text-sm">75%</span>
+            <div className="relative rounded-xl overflow-hidden shadow-xl bg-gradient-to-r from-[#130F40] to-[#000428] border border-primary/20 max-w-[480px] mx-auto">
+              {/* FounderNFT Promotional Banner */}
+              <div className="pt-12 pb-8 px-8 relative">
+                {/* Background Decorative Elements */}
+                <div className="absolute inset-0 z-0">
+                  <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/40 rounded-full blur-3xl opacity-20"></div>
+                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/30 rounded-full blur-3xl opacity-20"></div>
                 </div>
-                <div className="flex justify-between mt-2 text-sm">
-                  <span style={{ color: "#FFFFFF" }}>$75,000 raised</span>
-                  <span style={{ color: "#FFFFFF" }}>$100,000 goal</span>
+                
+                {/* Content Container */}
+                <div className="flex flex-col items-center relative z-10">
+                  {/* Limited Availability Tag */}
+                  <div className="text-primary/80 uppercase text-xs font-medium mb-6">LIMITED AVAILABILITY</div>
+                  
+                  {/* Card and Text Layout */}
+                  <div className="flex flex-col md:flex-row items-center md:items-start mb-6">
+                    {/* Founder NFT Card */}
+                    <div className="w-28 h-28 md:w-32 md:h-32 mr-0 md:mr-6 mb-4 md:mb-0 relative z-10">
+                      <video
+                        src={founderNftVideo}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-contain"
+                        onLoadedData={(e) => {
+                          e.currentTarget.playbackRate = 0.5;
+                        }}
+                      />
+                    </div>
+                    
+                    {/* Text Content */}
+                    <div className="text-center md:text-left">
+                      <h3 className="text-white text-2xl md:text-3xl font-bold mb-2 leading-tight">Founder NFT<br/>Pre-Sale Now Live</h3>
+                      <p className="text-gray-300 text-sm mb-4">Become a founding member with<br/>exclusive benefits and rewards.</p>
+                      <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-white font-medium rounded-md shadow-lg">
+                        <Link href="/founder-nft">Join Now</Link>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Information Bar */}
+              <div className="w-full py-2 px-6 flex items-center justify-between bg-black/30 border-t border-primary/20">
+                <div className="flex items-center">
+                  <div className="text-white font-medium text-sm">
+                    <span className="text-primary">750</span>/1000 Minted
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="text-white text-xs">
+                    <span className="font-medium">Price:</span> 0.1 ETH
+                  </div>
+                  <div className="text-white text-xs">
+                    <span className="font-medium">Ends in:</span> 14 days
+                  </div>
                 </div>
               </div>
             </div>
             
             {/* Floating Elements */}
-            <div ref={floatingRef1} className="absolute -top-6 -right-6 bg-white dark:bg-slate-800 p-3 rounded-lg shadow-lg rotate-3 hidden md:block">
+            <div ref={floatingRef1} className="absolute -top-8 -right-8 bg-white dark:bg-slate-800 p-3 rounded-lg shadow-lg rotate-3 hidden md:block">
               <div className="flex items-center space-x-2">
                 <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-full">
                   <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">Secured by</p>
-                  <p className="text-sm font-bold text-black dark:text-white">Blockchain</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">Exclusive</p>
+                  <p className="text-sm font-bold text-black dark:text-white">Governance Rights</p>
                 </div>
               </div>
             </div>
             
-            <div ref={floatingRef2} className="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 p-3 rounded-lg shadow-lg -rotate-3 hidden md:block">
+            <div ref={floatingRef2} className="absolute -bottom-8 -left-8 bg-white dark:bg-slate-800 p-3 rounded-lg shadow-lg -rotate-3 hidden md:block">
               <div className="flex items-center space-x-2">
                 <div className="bg-secondary/10 dark:bg-secondary/20 p-2 rounded-full">
                   <svg className="h-5 w-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">Global</p>
-                  <p className="text-sm font-bold text-black dark:text-white">Participation</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">Earn</p>
+                  <p className="text-sm font-bold text-black dark:text-white">Fee Distribution</p>
                 </div>
               </div>
             </div>
