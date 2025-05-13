@@ -455,11 +455,18 @@ const PlatformIntegration = () => {
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Infographic */}
-          <div className="rounded-xl bg-white dark:bg-[#0f172a] p-6 aspect-square max-w-lg mx-auto w-full flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-md">
+          {/* Enhanced Infographic */}
+          <div className="rounded-xl bg-white dark:bg-[#0f172a] p-8 aspect-square max-w-lg mx-auto w-full flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden relative">
+            {/* Decorative background elements */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/40 to-transparent rounded-full blur-2xl -translate-y-1/2 translate-x-1/4"></div>
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-primary/40 to-transparent rounded-full blur-2xl translate-y-1/2 -translate-x-1/4"></div>
+            </div>
+            
             <div className="relative w-full h-full">
-              <div className="absolute inset-1/4 rounded-full border-4 border-primary/30 flex items-center justify-center">
-                <div className="absolute inset-1/4 rounded-full border-2 border-primary/50 bg-background/80 flex items-center justify-center p-2">
+              {/* Central NFT */}
+              <div className="absolute inset-1/4 rounded-full border-4 border-primary/30 flex items-center justify-center shadow-[0_0_15px_rgba(138,99,210,0.3)] bg-white/5 dark:bg-black/10">
+                <div className="absolute inset-[15%] rounded-full border-2 border-primary/50 bg-background/80 flex items-center justify-center p-3 shadow-inner">
                   <video
                     src={founderNftVideo}
                     autoPlay
@@ -473,25 +480,36 @@ const PlatformIntegration = () => {
                   />
                 </div>
 
-                {/* Connection lines */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full h-16 border-l-2 border-dashed border-primary/30"></div>
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full h-16 border-l-2 border-dashed border-primary/30"></div>
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full w-16 border-t-2 border-dashed border-primary/30"></div>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full w-16 border-t-2 border-dashed border-primary/30"></div>
+                {/* Connection lines with animated pulse */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full h-20 flex items-center justify-center w-1">
+                  <div className="h-full w-0.5 bg-gradient-to-b from-transparent via-primary/50 to-transparent relative">
+                    <div className="absolute inset-0 bg-primary/30 animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full h-20 flex items-center justify-center w-1">
+                  <div className="h-full w-0.5 bg-gradient-to-t from-transparent via-primary/50 to-transparent relative">
+                    <div className="absolute inset-0 bg-primary/30 animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full w-20 flex items-center justify-center h-1">
+                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent relative">
+                    <div className="absolute inset-0 bg-primary/30 animate-pulse"></div>
+                  </div>
+                </div>
               </div>
 
-              {/* Connected elements */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background rounded-lg p-3 shadow-md border border-border">
-                <div className="text-sm font-medium">Governance</div>
+              {/* Connected elements with icons and enhanced styling */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/3 bg-background rounded-xl p-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105">
+                <VoteIcon className="h-5 w-5 text-primary" />
+                <div className="font-medium">Governance</div>
               </div>
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-background rounded-lg p-3 shadow-md border border-border">
-                <div className="text-sm font-medium">Fee Distribution</div>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/3 bg-background rounded-xl p-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105">
+                <PieChart className="h-5 w-5 text-primary" />
+                <div className="font-medium">Fee Distribution</div>
               </div>
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 bg-background rounded-lg p-3 shadow-md border border-border">
-                <div className="text-sm font-medium">Early Access</div>
-              </div>
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-background rounded-lg p-3 shadow-md border border-border">
-                <div className="text-sm font-medium">Staking</div>
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/3 bg-background rounded-xl p-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105">
+                <Clock className="h-5 w-5 text-primary" />
+                <div className="font-medium">Early Access</div>
               </div>
             </div>
           </div>
