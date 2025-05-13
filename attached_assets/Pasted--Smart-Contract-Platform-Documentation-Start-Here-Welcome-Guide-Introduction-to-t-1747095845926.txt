@@ -1,0 +1,170 @@
+# Smart Contract Platform Documentation
+
+## Start Here
+- **Welcome Guide**
+  - Introduction to the platform
+  - Target audience (creators, investors, developers)
+  - Key benefits and value proposition
+  
+- **Quick Start Guide**
+  - Step-by-step guide to create your first project
+  - How to invest in a project
+  - Basic platform navigation
+  
+- **Platform Overview**
+  - Platform architecture diagram
+  - Component interactions
+  - Key terminology
+
+## Core Concepts
+
+- **Smart Contract Architecture**
+  - UUPS (Universal Upgradeable Proxy Standard) explained
+  - Storage separation pattern
+  - Contract hierarchy and inheritance
+  
+- **Extension System**
+  - How extensions work
+  - Available extension types
+  - Adding custom extensions
+  
+- **Milestone-based Funding**
+  - Creating effective milestones
+  - Milestone verification process
+  - Voting mechanics for fund release
+  
+- **Platform Governance**
+  - Role-based permissions
+  - Fee structure
+  - Treasury management
+  - Future DAO governance
+
+## Guides
+
+- **For Project Creators**
+  - Planning your fundraising campaign
+  - Setting up effective milestones
+  - Managing your team members
+  - Reporting milestone completion
+  
+- **For Investors**
+  - Due diligence checklist
+  - Investment mechanics
+  - Participating in milestone voting
+  - Claiming refunds (if applicable)
+  
+- **For Developers**
+  - Local development environment setup
+  - Integration options
+  - Testing framework
+  - Best practices for contract interaction
+  
+- **For Extension Builders**
+  - Extension interface specifications
+  - Registration process
+  - Extension deployment guide
+  - Example implementations
+
+## Technical Documentation
+
+- **Contract Reference**
+  - **PlatformRegistry**
+    - Methods and events
+    - Storage structure
+    - Extension registration
+    - Access control
+    
+  - **ProjectFactory**
+    - Proxy deployment process
+    - Project creation parameters
+    - Implementation updates
+    
+  - **Project**
+    - Lifecycle states
+    - Investment handling
+    - Milestone management
+    - Fund distribution
+    
+  - **FounderNFT**
+    - Minting process
+    - Staking mechanics
+    - Fee distribution
+    - Early access privileges
+    
+- **Storage Patterns**
+  - Storage contract design
+  - Preventing storage collisions
+  - Future-proofing with storage gaps
+  - Upgrade considerations
+  
+- **Security Features**
+  - Reentrancy protection
+  - Access control implementation
+  - Emergency pause functionality
+  - Audit reports and fixes
+
+## Tutorials
+
+- **Creating Your First Project**
+  - Step-by-step walkthrough
+  - Setting project parameters
+  - Defining milestones
+  - Managing team members
+  
+- **Implementing Custom Extensions**
+  - Extension interface requirements
+  - Development workflow
+  - Testing and verification
+  - Registration process
+  
+- **Milestone Management**
+  - Creating effective milestones
+  - Submission process
+  - Handling investor voting
+  - Troubleshooting common issues
+
+## Resources
+
+- **SDK & API References**
+  - JavaScript SDK documentation
+  - API endpoints
+  - Code examples
+  
+- **Brand Kit**
+  - Logo usage guidelines
+  - Color palette
+  - Typography
+  - UI components
+  
+- **Community Guidelines**
+  - Code of conduct
+  - Contribution guidelines
+  - Support channels
+  
+- **FAQs**
+  - Platform mechanics
+  - Fees and payments
+  - Security concerns
+  - Troubleshooting
+
+## Tokenomics
+
+- **FounderNFT Mechanics**
+  - Token utility
+  - Acquisition methods
+  - Transfer restrictions
+  
+- **Fee Distribution**
+  - Platform fee structure
+  - Treasury allocation
+  - Rewards distribution
+  
+- **Staking System**
+  - Staking requirements
+  - Reward calculation
+  - Unstaking process
+  
+- **Governance Token**
+  - Future roadmap
+  - Transition process
+  - Voting mechanics
