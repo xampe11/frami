@@ -90,6 +90,7 @@ export default function DocsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSection, setActiveSection] = useState("start-here");
   const [activeDoc, setActiveDoc] = useState(docSections[0].items[0].id);
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   // Set page title
@@ -105,6 +106,14 @@ export default function DocsPage() {
   // Handle sidebar toggle
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+  
+  // Toggle section collapse
+  const toggleSectionCollapse = (sectionId: string) => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
   };
 
   // Get the current active document content
@@ -152,36 +161,36 @@ export default function DocsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground dark:bg-slate-900">
-      <div className="container mx-auto px-4 py-8 flex-grow flex flex-col">
+      <div className="container mx-auto px-4 pt-24 pb-8 flex-grow flex flex-col">
         <div className="flex items-center mb-4">
           <Button 
             variant="outline" 
             size="icon"
             onClick={toggleSidebar}
-            className="mr-2 md:hidden"
+            className="mr-2 md:hidden dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-700/50"
           >
             {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </Button>
           
-          <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+          <h1 className="text-2xl md:text-3xl font-bold">
             Platform Documentation
           </h1>
         </div>
         
-        <div className="flex flex-1 rounded-lg border overflow-hidden shadow-sm">
+        <div className="flex flex-1 rounded-lg border dark:border-slate-700/50 overflow-hidden shadow-sm">
           {/* Sidebar */}
           <div 
             className={`${
               sidebarOpen ? 'flex' : 'hidden'
-            } w-full md:w-72 lg:w-80 shrink-0 border-r bg-muted/50 dark:bg-slate-800/50 flex-col z-20 absolute md:relative inset-0 md:inset-auto h-[calc(100vh-10rem)] md:h-auto`}
+            } w-full md:w-72 lg:w-80 shrink-0 border-r bg-muted/50 dark:bg-slate-800/20 flex-col z-20 absolute md:relative inset-0 md:inset-auto h-[calc(100vh-10rem)] md:h-auto`}
           >
-            <div className="p-4 border-b">
+            <div className="p-4 border-b dark:border-slate-700/50">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="Search documentation..."
-                  className="pl-8 bg-background"
+                  className="pl-8 bg-background dark:bg-slate-800/50 dark:border-slate-700/50"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -192,30 +201,38 @@ export default function DocsPage() {
               <div className="space-y-6">
                 {filteredSections.map((section: DocSection) => (
                   <div key={section.id} className="space-y-2">
-                    <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
-                      {section.title}
-                    </h3>
-                    <ul className="space-y-1">
-                      {section.items.map((item: DocItem) => (
-                        <li key={item.id}>
-                          <button
-                            onClick={() => setActiveDocument(item.id)}
-                            className={`text-sm w-full text-left px-2 py-1.5 rounded-md hover:bg-muted flex items-center transition-colors ${
-                              activeDoc === item.id
-                                ? "bg-primary text-primary-foreground hover:bg-primary"
-                                : ""
-                            }`}
-                          >
-                            {activeDoc === item.id && (
-                              <ChevronRight className="mr-1 h-4 w-4" />
-                            )}
-                            <span className={activeDoc === item.id ? "ml-1" : "ml-5"}>
-                              {item.title}
-                            </span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+                    <button 
+                      onClick={() => toggleSectionCollapse(section.id)}
+                      className="flex items-center justify-between w-full text-left py-1 px-1 hover:bg-muted/40 rounded"
+                    >
+                      <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                        {section.title}
+                      </h3>
+                      <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${collapsedSections[section.id] ? '' : 'rotate-90'}`} />
+                    </button>
+                    {!collapsedSections[section.id] && (
+                      <ul className="space-y-1 pl-1 border-l-2 border-muted">
+                        {section.items.map((item: DocItem) => (
+                          <li key={item.id}>
+                            <button
+                              onClick={() => setActiveDocument(item.id)}
+                              className={`text-sm w-full text-left px-2 py-1.5 rounded-md hover:bg-muted flex items-center transition-colors ${
+                                activeDoc === item.id
+                                  ? "bg-primary text-primary-foreground hover:bg-primary"
+                                  : ""
+                              }`}
+                            >
+                              {activeDoc === item.id && (
+                                <ChevronRight className="mr-1 h-4 w-4" />
+                              )}
+                              <span className={activeDoc === item.id ? "ml-1" : "ml-5"}>
+                                {item.title}
+                              </span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 ))}
               </div>
@@ -223,11 +240,11 @@ export default function DocsPage() {
           </div>
           
           {/* Main Content */}
-          <div className="flex-1 overflow-auto" ref={mainContentRef}>
+          <div className="flex-1 overflow-auto dark:bg-slate-900" ref={mainContentRef}>
             {activeContent ? (
               <div className="p-6 md:p-8 prose prose-slate max-w-full dark:prose-invert">
                 <div className="mb-8">
-                  <h1 className="font-bold text-2xl sm:text-3xl">{activeContent.title}</h1>
+                  <h1 className="font-bold text-2xl sm:text-3xl dark:text-white">{activeContent.title}</h1>
                   {activeContent.description && (
                     <p className="text-muted-foreground text-lg mt-2">{activeContent.description}</p>
                   )}
@@ -258,8 +275,8 @@ export default function DocsPage() {
                     );
                   } else if (content.type === 'code') {
                     return (
-                      <div key={idx} className="my-4 bg-slate-900 dark:bg-slate-800 text-white rounded-md overflow-auto">
-                        <pre className="p-4 overflow-x-auto"><code>{content.code}</code></pre>
+                      <div key={idx} className="my-4 bg-slate-900 dark:bg-[#1e1e2e] text-white rounded-md overflow-auto border border-slate-700/50">
+                        <pre className="p-4 overflow-x-auto text-sm font-mono"><code>{content.code}</code></pre>
                       </div>
                     );
                   } else if (content.type === 'note') {
