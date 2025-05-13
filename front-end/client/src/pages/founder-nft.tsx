@@ -682,7 +682,7 @@ export default function FounderNFTPage() {
     <div className="min-h-screen">
       <HeroAndMintSection />
       <CoreBenefits />
-      <PlatformIntegration />
+      <PlatformDevelopmentRoadmap />
       <FAQ />
     </div>
   );
