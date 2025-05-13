@@ -465,15 +465,15 @@ const PlatformIntegration = () => {
             
             <div className="relative w-full h-full">
               {/* Central NFT */}
-              <div className="absolute inset-1/4 rounded-full border-4 border-primary/30 flex items-center justify-center shadow-[0_0_15px_rgba(138,99,210,0.3)] bg-white/5 dark:bg-black/10">
-                <div className="absolute inset-[15%] rounded-full border-2 border-primary/50 bg-background/80 flex items-center justify-center p-3 shadow-inner">
+              <div className="absolute inset-1/4 rounded-full border-4 border-primary/30 flex items-center justify-center shadow-[0_0_15px_rgba(138,99,210,0.3)] bg-white/5 dark:bg-black/10 overflow-hidden">
+                <div className="absolute inset-0 rounded-full border-2 border-primary/50 bg-background/80 flex items-center justify-center overflow-hidden">
                   <video
                     src={founderNftVideo}
                     autoPlay
                     loop
                     muted
                     playsInline
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover rounded-full"
                     onLoadedData={(e) => {
                       e.currentTarget.playbackRate = 0.5;
                     }}
@@ -496,20 +496,25 @@ const PlatformIntegration = () => {
                     <div className="absolute inset-0 bg-primary/30 animate-pulse"></div>
                   </div>
                 </div>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full w-20 flex items-center justify-center h-1">
+                  <div className="w-full h-0.5 bg-gradient-to-l from-transparent via-primary/50 to-transparent relative">
+                    <div className="absolute inset-0 bg-primary/30 animate-pulse"></div>
+                  </div>
+                </div>
               </div>
 
-              {/* Connected elements with icons and enhanced styling */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/3 bg-background rounded-xl p-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105">
-                <VoteIcon className="h-5 w-5 text-primary" />
-                <div className="font-medium">Governance</div>
+              {/* Connected elements with icons and enhanced styling - evenly distributed */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[20%] bg-background rounded-xl p-3 px-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105 z-10">
+                <VoteIcon className="h-5 w-5 min-w-5 text-primary" />
+                <div className="font-medium whitespace-nowrap">Governance</div>
               </div>
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/3 bg-background rounded-xl p-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105">
-                <PieChart className="h-5 w-5 text-primary" />
-                <div className="font-medium">Fee Distribution</div>
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-[20%] bg-background rounded-xl p-3 px-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105 z-10">
+                <PieChart className="h-5 w-5 min-w-5 text-primary" />
+                <div className="font-medium whitespace-nowrap">Fee Distribution</div>
               </div>
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/3 bg-background rounded-xl p-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105">
-                <Clock className="h-5 w-5 text-primary" />
-                <div className="font-medium">Early Access</div>
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[20%] bg-background rounded-xl p-3 px-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105 z-10">
+                <Clock className="h-5 w-5 min-w-5 text-primary" />
+                <div className="font-medium whitespace-nowrap">Early Access</div>
               </div>
             </div>
           </div>
