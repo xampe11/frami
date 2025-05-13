@@ -137,9 +137,9 @@ export default function HeroSection() {
             </div>
           </div>
           <div ref={imageRef} className="w-full md:w-1/2 relative">
-            <div className="relative rounded-xl overflow-hidden shadow-xl bg-gradient-to-r from-[#130F40] to-[#000428] border border-primary/20 max-w-[480px] mx-auto">
+            <div className="relative rounded-xl overflow-hidden shadow-xl bg-gradient-to-r from-[#130F40] to-[#000428] border border-primary/20 max-w-[580px] w-full mx-auto">
               {/* FounderNFT Promotional Banner */}
-              <div className="pt-12 pb-8 px-8 relative">
+              <div className="pt-16 pb-12 px-10 relative">
                 {/* Background Decorative Elements */}
                 <div className="absolute inset-0 z-0">
                   <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/40 rounded-full blur-3xl opacity-20"></div>
@@ -154,7 +154,7 @@ export default function HeroSection() {
                   {/* Card and Text Layout */}
                   <div className="flex flex-col md:flex-row items-center md:items-start mb-6">
                     {/* Founder NFT Card */}
-                    <div className="w-28 h-28 md:w-32 md:h-32 mr-0 md:mr-6 mb-4 md:mb-0 relative z-10">
+                    <div className="w-32 h-32 md:w-40 md:h-40 mr-0 md:mr-8 mb-4 md:mb-0 relative z-10">
                       <video
                         src={founderNftVideo}
                         autoPlay
@@ -170,9 +170,9 @@ export default function HeroSection() {
                     
                     {/* Text Content */}
                     <div className="text-center md:text-left">
-                      <h3 className="text-white text-2xl md:text-3xl font-bold mb-2 leading-tight">Founder NFT<br/>Pre-Sale Now Live</h3>
-                      <p className="text-gray-300 text-sm mb-4">Become a founding member with<br/>exclusive benefits and rewards.</p>
-                      <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-white font-medium rounded-md shadow-lg">
+                      <h3 className="text-white text-2xl md:text-4xl font-bold mb-3 leading-tight">Founder NFT<br/>Pre-Sale Now Live</h3>
+                      <p className="text-gray-300 text-sm md:text-base mb-5">Become a founding member with<br/>exclusive benefits and rewards.</p>
+                      <Button asChild size="default" className="bg-primary hover:bg-primary/90 text-white font-medium rounded-md shadow-lg px-6">
                         <Link href="/founder-nft">Join Now</Link>
                       </Button>
                     </div>
@@ -181,17 +181,17 @@ export default function HeroSection() {
               </div>
 
               {/* Information Bar */}
-              <div className="w-full py-2 px-6 flex items-center justify-between bg-black/30 border-t border-primary/20">
+              <div className="w-full py-3 px-8 flex items-center justify-between bg-black/30 border-t border-primary/20">
                 <div className="flex items-center">
-                  <div className="text-white font-medium text-sm">
+                  <div className="text-white font-medium text-sm md:text-base">
                     <span className="text-primary">750</span>/1000 Minted
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="text-white text-xs">
+                <div className="flex items-center space-x-6">
+                  <div className="text-white text-xs md:text-sm">
                     <span className="font-medium">Price:</span> 0.1 ETH
                   </div>
-                  <div className="text-white text-xs">
+                  <div className="text-white text-xs md:text-sm">
                     <span className="font-medium">Ends in:</span> 14 days
                   </div>
                 </div>
