@@ -10,6 +10,79 @@ import { useMediaQuery } from "@/hooks/use-mobile";
 // Documentation content
 import { docSections } from "@/lib/docs-content";
 
+// TypeScript interfaces for documentation content
+interface DocContentBase {
+  type: string;
+  title?: string;
+  text?: string;
+  items?: string[];
+  code?: string;
+  language?: string;
+  headers?: string[];
+  rows?: string[][];
+}
+
+interface DocContentHeading extends DocContentBase {
+  type: 'heading';
+  title: string;
+}
+
+interface DocContentSubheading extends DocContentBase {
+  type: 'subheading';
+  title: string;
+}
+
+interface DocContentList extends DocContentBase {
+  type: 'list';
+  items: string[];
+}
+
+interface DocContentNumberedList extends DocContentBase {
+  type: 'numbered-list';
+  items: string[];
+}
+
+interface DocContentCode extends DocContentBase {
+  type: 'code';
+  code: string;
+  language?: string;
+}
+
+interface DocContentNote extends DocContentBase {
+  type: 'note';
+  title: string;
+  text: string;
+}
+
+interface DocContentWarning extends DocContentBase {
+  type: 'warning';
+  title: string;
+  text: string;
+}
+
+interface DocContentTable extends DocContentBase {
+  type: 'table';
+  headers: string[];
+  rows: string[][];
+}
+
+type DocContent = string | DocContentHeading | DocContentSubheading | DocContentList | 
+                 DocContentNumberedList | DocContentCode | DocContentNote | 
+                 DocContentWarning | DocContentTable;
+
+interface DocItem {
+  id: string;
+  title: string;
+  description?: string;
+  content: DocContent[];
+}
+
+interface DocSection {
+  id: string;
+  title: string;
+  items: DocItem[];
+}
+
 export default function DocsPage() {
   const { theme } = useTheme();
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -36,10 +109,10 @@ export default function DocsPage() {
 
   // Get the current active document content
   const getActiveDocContent = () => {
-    let content = null;
+    let content: DocItem | null = null;
     
-    docSections.forEach(section => {
-      section.items.forEach(item => {
+    docSections.forEach((section: DocSection) => {
+      section.items.forEach((item: DocItem) => {
         if (item.id === activeDoc) {
           content = item;
         }
@@ -63,17 +136,17 @@ export default function DocsPage() {
   // Filter sections based on search query
   const filteredSections = searchQuery.trim() === "" 
     ? docSections 
-    : docSections.map(section => ({
+    : docSections.map((section: DocSection) => ({
         ...section,
-        items: section.items.filter(item => 
+        items: section.items.filter((item: DocItem) => 
           item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.content.some(c => 
+          item.content.some((c: DocContent) => 
             typeof c === 'string' 
               ? c.toLowerCase().includes(searchQuery.toLowerCase())
               : c.title?.toLowerCase().includes(searchQuery.toLowerCase()) || c.text?.toLowerCase().includes(searchQuery.toLowerCase())
           )
         )
-      })).filter(section => section.items.length > 0);
+      })).filter((section: DocSection) => section.items.length > 0);
 
   const activeContent = getActiveDocContent();
 
@@ -117,13 +190,13 @@ export default function DocsPage() {
             
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-6">
-                {filteredSections.map((section) => (
+                {filteredSections.map((section: DocSection) => (
                   <div key={section.id} className="space-y-2">
                     <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
                       {section.title}
                     </h3>
                     <ul className="space-y-1">
-                      {section.items.map((item) => (
+                      {section.items.map((item: DocItem) => (
                         <li key={item.id}>
                           <button
                             onClick={() => setActiveDocument(item.id)}
@@ -160,7 +233,7 @@ export default function DocsPage() {
                   )}
                 </div>
                 
-                {activeContent.content.map((content, idx) => {
+                {activeContent.content.map((content: DocContent, idx: number) => {
                   if (typeof content === 'string') {
                     return <p key={idx} className="my-4">{content}</p>;
                   } else if (content.type === 'heading') {
@@ -170,7 +243,7 @@ export default function DocsPage() {
                   } else if (content.type === 'list') {
                     return (
                       <ul key={idx} className="list-disc ml-6 my-4 space-y-2">
-                        {content.items.map((item, itemIdx) => (
+                        {content.items?.map((item: string, itemIdx: number) => (
                           <li key={itemIdx}>{item}</li>
                         ))}
                       </ul>
@@ -178,7 +251,7 @@ export default function DocsPage() {
                   } else if (content.type === 'numbered-list') {
                     return (
                       <ol key={idx} className="list-decimal ml-6 my-4 space-y-2">
-                        {content.items.map((item, itemIdx) => (
+                        {content.items?.map((item: string, itemIdx: number) => (
                           <li key={itemIdx}>{item}</li>
                         ))}
                       </ol>
@@ -209,15 +282,15 @@ export default function DocsPage() {
                         <table className="min-w-full border dark:border-slate-700 rounded-md">
                           <thead className="bg-slate-100 dark:bg-slate-800">
                             <tr>
-                              {content.headers.map((header, headerIdx) => (
+                              {content.headers?.map((header: string, headerIdx: number) => (
                                 <th key={headerIdx} className="border dark:border-slate-700 px-4 py-2 text-left">{header}</th>
                               ))}
                             </tr>
                           </thead>
                           <tbody>
-                            {content.rows.map((row, rowIdx) => (
+                            {content.rows?.map((row: string[], rowIdx: number) => (
                               <tr key={rowIdx} className={rowIdx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/50'}>
-                                {row.map((cell, cellIdx) => (
+                                {row.map((cell: string, cellIdx: number) => (
                                   <td key={cellIdx} className="border dark:border-slate-700 px-4 py-2">{cell}</td>
                                 ))}
                               </tr>

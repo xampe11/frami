@@ -112,6 +112,11 @@ export default function Navbar() {
                 Founder NFT
               </span>
             </Link>
+            <Link href="/docs">
+              <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors block py-2">
+                Docs
+              </span>
+            </Link>
             <div className="pt-2 flex items-center space-x-2">
               <ThemeToggle />
               <RainbowWalletButton />
