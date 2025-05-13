@@ -441,131 +441,91 @@ const CoreBenefits = () => {
   );
 };
 
-// Platform Integration section
-const PlatformIntegration = () => {
+// Platform Development Roadmap section
+const PlatformDevelopmentRoadmap = () => {
   return (
     <section className="py-20 bg-gray-50 dark:bg-[#1a1e31] text-black dark:text-white">
       <div className="container mx-auto px-10 max-w-[110rem]">
         <h2 className="text-3xl font-bold text-center mb-4">
-          Platform Integration
+          Platform Development Roadmap
         </h2>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
-          Founder NFTs are deeply integrated into the core functionality of our
-          platform.
+          Our strategic plan for implementing Founder NFT features and benefits.
         </p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Enhanced Infographic */}
-          <div className="rounded-xl bg-white dark:bg-[#0f172a] p-8 aspect-square max-w-lg mx-auto w-full flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden relative">
-            {/* Decorative background elements */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/40 to-transparent rounded-full blur-2xl -translate-y-1/2 translate-x-1/4"></div>
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-primary/40 to-transparent rounded-full blur-2xl translate-y-1/2 -translate-x-1/4"></div>
-            </div>
+        {/* Horizontal Roadmap */}
+        <div className="max-w-5xl mx-auto">
+          <div className="relative">
+            {/* Horizontal line */}
+            <div className="absolute top-1/2 left-0 w-full h-0.5 bg-primary/30 -translate-y-1/2"></div>
             
-            <div className="relative w-full h-full">
-              {/* Central NFT */}
-              <div className="absolute inset-1/4 rounded-full border-4 border-primary/30 flex items-center justify-center shadow-[0_0_15px_rgba(138,99,210,0.3)] bg-white/5 dark:bg-black/10 overflow-hidden">
-                <div className="absolute inset-0 rounded-full border-2 border-primary/50 bg-background/80 flex items-center justify-center overflow-hidden">
-                  <video
-                    src={founderNftVideo}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover rounded-full"
-                    onLoadedData={(e) => {
-                      e.currentTarget.playbackRate = 0.5;
-                    }}
-                  />
-                </div>
-
-                {/* Connection lines with animated pulse */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full h-20 flex items-center justify-center w-1">
-                  <div className="h-full w-0.5 bg-gradient-to-b from-transparent via-primary/50 to-transparent relative">
-                    <div className="absolute inset-0 bg-primary/30 animate-pulse"></div>
-                  </div>
-                </div>
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full h-20 flex items-center justify-center w-1">
-                  <div className="h-full w-0.5 bg-gradient-to-t from-transparent via-primary/50 to-transparent relative">
-                    <div className="absolute inset-0 bg-primary/30 animate-pulse"></div>
-                  </div>
-                </div>
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full w-20 flex items-center justify-center h-1">
-                  <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent relative">
-                    <div className="absolute inset-0 bg-primary/30 animate-pulse"></div>
-                  </div>
-                </div>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full w-20 flex items-center justify-center h-1">
-                  <div className="w-full h-0.5 bg-gradient-to-l from-transparent via-primary/50 to-transparent relative">
-                    <div className="absolute inset-0 bg-primary/30 animate-pulse"></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Connected elements with icons and enhanced styling - evenly distributed */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[20%] bg-background rounded-xl p-3 px-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105 z-10">
-                <VoteIcon className="h-5 w-5 min-w-5 text-primary" />
-                <div className="font-medium whitespace-nowrap">Governance</div>
-              </div>
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-[20%] bg-background rounded-xl p-3 px-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105 z-10">
-                <PieChart className="h-5 w-5 min-w-5 text-primary" />
-                <div className="font-medium whitespace-nowrap">Fee Distribution</div>
-              </div>
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[20%] bg-background rounded-xl p-3 px-4 shadow-lg border border-primary/20 flex items-center gap-2 group transition-all duration-300 hover:shadow-primary/20 hover:border-primary/40 hover:scale-105 z-10">
-                <Clock className="h-5 w-5 min-w-5 text-primary" />
-                <div className="font-medium whitespace-nowrap">Early Access</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Roadmap */}
-          <div className="space-y-8">
-            <h3 className="text-2xl font-bold">Platform Development Roadmap</h3>
-
-            <div className="space-y-4">
+            {/* Timeline items */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
               {/* Q2 2025 */}
-              <div className="relative pl-8 pb-8 border-l-2 border-primary/50">
-                <div className="absolute left-0 top-0 w-4 h-4 rounded-full bg-primary -translate-x-1/2"></div>
-                <h4 className="text-xl font-bold">Q2 2025</h4>
-                <p className="text-muted-foreground">
-                  Founder NFT launch with initial governance capabilities
-                </p>
+              <div className="relative pt-10">
+                <div className="absolute top-0 left-1/2 w-4 h-4 rounded-full bg-primary -translate-x-1/2 z-10"></div>
+                <div className="absolute top-0 left-1/2 w-8 h-8 rounded-full bg-primary/20 -translate-x-1/2 animate-pulse"></div>
+                <div className="absolute top-4 left-1/2 h-8 w-0.5 bg-primary/30 -translate-x-1/2"></div>
+                <div className="bg-white dark:bg-[#0f172a] p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 h-full">
+                  <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
+                    <span className="text-primary">Q2 2025</span>
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Founder NFT launch with initial governance capabilities
+                  </p>
+                </div>
               </div>
 
               {/* Q3 2025 */}
-              <div className="relative pl-8 pb-8 border-l-2 border-primary/50">
-                <div className="absolute left-0 top-0 w-4 h-4 rounded-full bg-primary -translate-x-1/2"></div>
-                <h4 className="text-xl font-bold">Q3 2025</h4>
-                <p className="text-muted-foreground">
-                  Fee distribution system activation and early access privileges
-                </p>
+              <div className="relative pt-10">
+                <div className="absolute top-0 left-1/2 w-4 h-4 rounded-full bg-primary -translate-x-1/2 z-10"></div>
+                <div className="absolute top-0 left-1/2 w-8 h-8 rounded-full bg-primary/20 -translate-x-1/2 animate-pulse"></div>
+                <div className="absolute top-4 left-1/2 h-8 w-0.5 bg-primary/30 -translate-x-1/2"></div>
+                <div className="bg-white dark:bg-[#0f172a] p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 h-full">
+                  <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
+                    <span className="text-primary">Q3 2025</span>
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Fee distribution system activation and early access privileges
+                  </p>
+                </div>
               </div>
 
               {/* Q4 2025 */}
-              <div className="relative pl-8 pb-8 border-l-2 border-primary/50">
-                <div className="absolute left-0 top-0 w-4 h-4 rounded-full bg-primary -translate-x-1/2"></div>
-                <h4 className="text-xl font-bold">Q4 2025</h4>
-                <p className="text-muted-foreground">
-                  Full staking functionality and expanded governance features
-                </p>
+              <div className="relative pt-10">
+                <div className="absolute top-0 left-1/2 w-4 h-4 rounded-full bg-primary -translate-x-1/2 z-10"></div>
+                <div className="absolute top-0 left-1/2 w-8 h-8 rounded-full bg-primary/20 -translate-x-1/2 animate-pulse"></div>
+                <div className="absolute top-4 left-1/2 h-8 w-0.5 bg-primary/30 -translate-x-1/2"></div>
+                <div className="bg-white dark:bg-[#0f172a] p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 h-full">
+                  <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
+                    <span className="text-primary">Q4 2025</span>
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Transition to decentralized governance structure
+                  </p>
+                </div>
               </div>
 
               {/* Q1 2026 */}
-              <div className="relative pl-8">
-                <div className="absolute left-0 top-0 w-4 h-4 rounded-full bg-primary -translate-x-1/2"></div>
-                <h4 className="text-xl font-bold">Q1 2026</h4>
-                <p className="text-muted-foreground">
-                  Cross-platform integration and enhanced utility features
-                </p>
+              <div className="relative pt-10">
+                <div className="absolute top-0 left-1/2 w-4 h-4 rounded-full bg-primary -translate-x-1/2 z-10"></div>
+                <div className="absolute top-0 left-1/2 w-8 h-8 rounded-full bg-primary/20 -translate-x-1/2 animate-pulse"></div>
+                <div className="absolute top-4 left-1/2 h-8 w-0.5 bg-primary/30 -translate-x-1/2"></div>
+                <div className="bg-white dark:bg-[#0f172a] p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 h-full">
+                  <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
+                    <span className="text-primary">Q1 2026</span>
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Cross-chain integration and extended benefits
+                  </p>
+                </div>
               </div>
             </div>
-
-            <p className="text-sm text-muted-foreground pt-4">
-              This roadmap is subject to change based on market conditions and
-              community feedback.
-            </p>
           </div>
+          
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-8">
+            This roadmap is subject to change based on market conditions and community feedback.
+          </p>
         </div>
       </div>
     </section>
