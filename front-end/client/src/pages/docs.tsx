@@ -90,7 +90,21 @@ export default function DocsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSection, setActiveSection] = useState("start-here");
   const [activeDoc, setActiveDoc] = useState(docSections[0].items[0].id);
-  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+  // Initialize with all sections collapsed except the one containing the active doc
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
+    const initialState: Record<string, boolean> = {};
+    docSections.forEach(section => {
+      initialState[section.id] = true; // true means collapsed
+    });
+    // Find which section contains the active doc and uncollapse it
+    const activeSectionId = docSections.find(section => 
+      section.items.some(item => item.id === activeDoc)
+    )?.id;
+    if (activeSectionId) {
+      initialState[activeSectionId] = false; // false means expanded
+    }
+    return initialState;
+  });
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   // Set page title
@@ -134,9 +148,23 @@ export default function DocsPage() {
   // Set the active document and scroll to top
   const setActiveDocument = (docId: string) => {
     setActiveDoc(docId);
+    
+    // Find which section contains this document and make sure it's expanded
+    const sectionId = docSections.find(section => 
+      section.items.some(item => item.id === docId)
+    )?.id;
+    
+    if (sectionId) {
+      setCollapsedSections(prev => ({
+        ...prev,
+        [sectionId]: false // Uncollapse the section
+      }));
+    }
+    
     if (mainContentRef.current) {
       mainContentRef.current.scrollTop = 0;
     }
+    
     if (isMobile) {
       setSidebarOpen(false);
     }
@@ -218,7 +246,7 @@ export default function DocsPage() {
                               onClick={() => setActiveDocument(item.id)}
                               className={`text-sm w-full text-left px-2 py-1.5 rounded-md hover:bg-muted flex items-center transition-colors ${
                                 activeDoc === item.id
-                                  ? "bg-primary text-primary-foreground hover:bg-primary"
+                                  ? "bg-primary/60 text-primary-foreground hover:bg-primary/70 dark:bg-purple-800/60 dark:hover:bg-purple-800/70"
                                   : ""
                               }`}
                             >
