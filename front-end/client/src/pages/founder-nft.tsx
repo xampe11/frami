@@ -444,8 +444,8 @@ const CoreBenefits = () => {
 // Platform Development Roadmap section
 const PlatformDevelopmentRoadmap = () => {
   return (
-    <section className="py-20 bg-gray-50 dark:bg-[#1a1e31] text-black dark:text-white">
-      <div className="container mx-auto px-10 max-w-[110rem]">
+    <section className="py-20 dark:bg-[#111827] text-black dark:text-white">
+      <div className="container mx-auto px-4 max-w-[110rem]">
         <h2 className="text-3xl font-bold text-center mb-4">
           Platform Development Roadmap
         </h2>
@@ -453,201 +453,304 @@ const PlatformDevelopmentRoadmap = () => {
           Our strategic plan for implementing Founder NFT features and benefits.
         </p>
 
-        {/* Horizontal Roadmap */}
-        <div className="max-w-5xl mx-auto">
-          <div className="relative">
-            {/* Horizontal line */}
-            <div className="absolute top-1/2 left-0 w-full h-0.5 bg-primary/30 -translate-y-1/2"></div>
+        {/* Roadmap Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mx-auto">
+          {/* Q2 2025 */}
+          <div className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1e2b] rounded-xl overflow-hidden">
+            {/* Quarter header with dot */}
+            <div className="relative bg-[#1a1e2b] p-4 border-b border-gray-700">
+              <div className="absolute top-4 left-4 w-4 h-4 rounded-full bg-[#8A63D2]"></div>
+              <h3 className="text-xl font-bold ml-8 text-white">Q2 2025</h3>
+              <h4 className="text-base text-purple-300 font-medium ml-8">Foundation Launch</h4>
+            </div>
             
-            {/* Timeline items */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
-              {/* Q2 2025 */}
-              <div className="relative pt-10">
-                <div className="absolute top-0 left-1/2 w-4 h-4 rounded-full bg-primary -translate-x-1/2 z-10"></div>
-                <div className="absolute top-0 left-1/2 w-8 h-8 rounded-full bg-primary/20 -translate-x-1/2 animate-pulse"></div>
-                <div className="absolute top-4 left-1/2 h-8 w-0.5 bg-primary/30 -translate-x-1/2"></div>
-                <div className="bg-white dark:bg-[#0f172a] p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 h-full">
-                  <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
-                    <span className="text-primary">Q2 2025</span>
-                  </h4>
-                  <div className="space-y-2">
-                    <p className="text-gray-600 dark:text-gray-300 font-semibold">
-                      Foundation Launch
-                    </p>
-                    <ul className="text-gray-600 dark:text-gray-300 text-sm space-y-2">
-                      <li>• Website Launch: Intuitive platform for project creation, discovery, and milestone tracking</li>
-                      <li className="flex items-start">
-                        <span className="mr-1">•</span>
-                        <span>
-                          <span className="font-semibold">FounderNFT Launch</span> 
-                          <span className="text-yellow-500 ml-1">🌟</span>
-                          <ul className="pl-4 mt-1 space-y-1">
-                            <li>- Exclusive first-access to premium projects</li>
-                            <li>- Higher fee sharing for early holders</li>
-                            <li>- Limited collection representing early platform supporters</li>
-                          </ul>
-                        </span>
-                      </li>
-                      <li>• Core Functionality: Smart contracts for milestone-based funding, transparent progress tracking</li>
-                      <li>• First 10 Projects: Curated selection of high-quality inaugural projects</li>
-                      <li>• Security Audit: Comprehensive third-party audit ensuring platform safety</li>
-                      <li>• Community Building: Ambassador program and educational initiatives</li>
-                    </ul>
+            {/* Content */}
+            <div className="p-4 text-sm">
+              <ul className="space-y-3 text-gray-700 dark:text-gray-300">
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Website Launch: Intuitive platform for project creation, discovery, and milestone tracking</span>
+                </li>
+                
+                <li>
+                  <div className="flex items-center">
+                    <span className="mr-2">•</span>
+                    <span className="font-semibold">FounderNFT Launch</span>
+                    <span className="text-yellow-500 ml-1">★</span>
                   </div>
-                </div>
-              </div>
-
-              {/* Q3 2025 */}
-              <div className="relative pt-10">
-                <div className="absolute top-0 left-1/2 w-4 h-4 rounded-full bg-primary -translate-x-1/2 z-10"></div>
-                <div className="absolute top-0 left-1/2 w-8 h-8 rounded-full bg-primary/20 -translate-x-1/2 animate-pulse"></div>
-                <div className="absolute top-4 left-1/2 h-8 w-0.5 bg-primary/30 -translate-x-1/2"></div>
-                <div className="bg-white dark:bg-[#0f172a] p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 h-full">
-                  <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
-                    <span className="text-primary">Q3 2025</span>
-                  </h4>
-                  <div className="space-y-2">
-                    <p className="text-gray-600 dark:text-gray-300 font-semibold">
-                      Feature Expansion
-                    </p>
-                    <ul className="text-gray-600 dark:text-gray-300 text-sm space-y-2">
-                      <li>• Token (ERC20) Creator: No-code tool for project-specific tokens</li>
-                      <li>• NFT (ERC721) Creator: Simple interface for project reward NFTs</li>
-                      <li>• Multi-Currency Support: Add USDC, USDT, and other currencies</li>
-                      <li>• Analytics Dashboard: Real-time project metrics and funding visualization</li>
-                      <li>• Additional Wallet Integrations: Expanded support for popular Web3 wallets</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Q4 2025 */}
-              <div className="relative pt-10">
-                <div className="absolute top-0 left-1/2 w-4 h-4 rounded-full bg-primary -translate-x-1/2 z-10"></div>
-                <div className="absolute top-0 left-1/2 w-8 h-8 rounded-full bg-primary/20 -translate-x-1/2 animate-pulse"></div>
-                <div className="absolute top-4 left-1/2 h-8 w-0.5 bg-primary/30 -translate-x-1/2"></div>
-                <div className="bg-white dark:bg-[#0f172a] p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 h-full">
-                  <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
-                    <span className="text-primary">Q4 2025</span>
-                  </h4>
-                  <div className="space-y-2">
-                    <p className="text-gray-600 dark:text-gray-300 font-semibold">
-                      Advanced Ecosystem
-                    </p>
-                    <ul className="text-gray-600 dark:text-gray-300 text-sm space-y-2">
-                      <li className="flex items-start">
-                        <span className="mr-1">•</span>
-                        <span>
-                          <span className="font-semibold">Validator Economy</span> 
-                          <span className="text-yellow-500 ml-1">🌟</span>
-                          <ul className="pl-4 mt-1 space-y-1">
-                            <li>- Priority validator status for FounderNFT holders</li>
-                            <li>- Enhanced rewards for NFT holders</li>
-                          </ul>
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="mr-1">•</span>
-                        <span>
-                          <span className="font-semibold">FounderNFT Staking</span> 
-                          <span className="text-yellow-500 ml-1">🌟</span>
-                          <ul className="pl-4 mt-1 space-y-1">
-                            <li>- Compounding rewards system</li>
-                            <li>- Fee distribution proportional to stake</li>
-                          </ul>
-                        </span>
-                      </li>
-                      <li>• Cross-Chain Bridge: Interoperability between major blockchains</li>
-                      <li>• Reputation System: Dynamic scoring for project creators</li>
-                      <li>• Automated Milestone Verification: AI-assisted validation process</li>
-                      <li>• AI Risk Assessment: Project viability analysis for investor protection</li>
-                      <li className="flex items-start">
-                        <span className="mr-1">•</span>
-                        <span>
-                          <span className="font-semibold">Enhanced Governance</span> 
-                          <span className="text-yellow-500 ml-1">🌟</span>
-                          <ul className="pl-4 mt-1 space-y-1">
-                            <li>- Voting weight boost for FounderNFT holders</li>
-                          </ul>
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="mr-1">•</span>
-                        <span>
-                          <span className="font-semibold">Whitelist System</span> 
-                          <span className="text-yellow-500 ml-1">🌟</span>
-                          <ul className="pl-4 mt-1 space-y-1">
-                            <li>- Priority access to high-demand projects for NFT holders</li>
-                          </ul>
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Q1 2026 */}
-              <div className="relative pt-10">
-                <div className="absolute top-0 left-1/2 w-4 h-4 rounded-full bg-primary -translate-x-1/2 z-10"></div>
-                <div className="absolute top-0 left-1/2 w-8 h-8 rounded-full bg-primary/20 -translate-x-1/2 animate-pulse"></div>
-                <div className="absolute top-4 left-1/2 h-8 w-0.5 bg-primary/30 -translate-x-1/2"></div>
-                <div className="bg-white dark:bg-[#0f172a] p-6 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 h-full">
-                  <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
-                    <span className="text-primary">Q1 2026</span>
-                  </h4>
-                  <div className="space-y-2">
-                    <p className="text-gray-600 dark:text-gray-300 font-semibold">
-                      Ecosystem Maturity
-                    </p>
-                    <ul className="text-gray-600 dark:text-gray-300 text-sm space-y-2">
-                      <li className="flex items-start">
-                        <span className="mr-1">•</span>
-                        <span>
-                          <span className="font-semibold">DAO Implementation</span> 
-                          <span className="text-yellow-500 ml-1">🌟</span>
-                          <ul className="pl-4 mt-1 space-y-1">
-                            <li>- Enhanced voting power for FounderNFT holders</li>
-                            <li>- Complete decentralization of platform governance</li>
-                          </ul>
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="mr-1">•</span>
-                        <span>
-                          <span className="font-semibold">Extension Economy</span> 
-                          <span className="text-yellow-500 ml-1">🌟</span>
-                          <ul className="pl-4 mt-1 space-y-1">
-                            <li>- Revenue sharing from extensions to FounderNFT holders</li>
-                            <li>- Early access to new extensions for NFT holders</li>
-                          </ul>
-                        </span>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="mr-1">•</span>
-                        <span>
-                          <span className="font-semibold">LayerZero Integration</span>
-                          <ul className="pl-4 mt-1 space-y-1">
-                            <li>- Cross-chain funding and deployment</li>
-                            <li>- Chain-agnostic governance</li>
-                            <li>- Omnichain NFT compatibility</li>
-                            <li>- Cross-chain fee distribution</li>
-                          </ul>
-                        </span>
-                      </li>
-                      <li>• Decentralized Identity: Self-sovereign identity solutions</li>
-                      <li>• Fiat On-ramps: Direct fiat currency contribution options</li>
-                      <li>• Developer API & SDK: Tools for platform integration and extension</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
+                  <ul className="ml-5 mt-1 space-y-1">
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Exclusive first-access to premium projects</span>
+                    </li>
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Higher fee sharing for early holders</span>
+                    </li>
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Limited collection representing early platform supporters</span>
+                    </li>
+                  </ul>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Core Functionality: Smart contracts for milestone-based funding, transparent progress tracking</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>First 10 Projects: Curated selection of high-quality inaugural projects</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Security Audit: Comprehensive third-party audit ensuring platform safety</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Community Building: Ambassador program and educational initiatives</span>
+                </li>
+              </ul>
             </div>
           </div>
-          
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-8">
-            <span className="text-yellow-500 mr-1">🌟</span> Indicates special benefits for FounderNFT holders. This roadmap is subject to change based on market conditions and community feedback.
-          </p>
+
+          {/* Q3 2025 */}
+          <div className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1e2b] rounded-xl overflow-hidden">
+            {/* Quarter header with dot */}
+            <div className="relative bg-[#1a1e2b] p-4 border-b border-gray-700">
+              <div className="absolute top-4 left-4 w-4 h-4 rounded-full bg-[#8A63D2]"></div>
+              <h3 className="text-xl font-bold ml-8 text-white">Q3 2025</h3>
+              <h4 className="text-base text-purple-300 font-medium ml-8">Feature Expansion</h4>
+            </div>
+            
+            {/* Content */}
+            <div className="p-4 text-sm">
+              <ul className="space-y-3 text-gray-700 dark:text-gray-300">
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Token (ERC20) Creator: No-code tool for project-specific tokens</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>NFT (ERC721) Creator: Simple interface for project reward NFTs</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Multi-Currency Support: Add USDC, USDT, and other currencies</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Analytics Dashboard: Real-time project metrics and funding visualization</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Additional Wallet Integrations: Expanded support for popular Web3 wallets</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Q4 2025 */}
+          <div className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1e2b] rounded-xl overflow-hidden">
+            {/* Quarter header with dot */}
+            <div className="relative bg-[#1a1e2b] p-4 border-b border-gray-700">
+              <div className="absolute top-4 left-4 w-4 h-4 rounded-full bg-[#8A63D2]"></div>
+              <h3 className="text-xl font-bold ml-8 text-white">Q4 2025</h3>
+              <h4 className="text-base text-purple-300 font-medium ml-8">Advanced Ecosystem</h4>
+            </div>
+            
+            {/* Content */}
+            <div className="p-4 text-sm">
+              <ul className="space-y-3 text-gray-700 dark:text-gray-300">
+                <li>
+                  <div className="flex items-center">
+                    <span className="mr-2">•</span>
+                    <span className="font-semibold">Validator Economy</span>
+                    <span className="text-yellow-500 ml-1">★</span>
+                  </div>
+                  <ul className="ml-5 mt-1 space-y-1">
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Priority validator status for FounderNFT holders</span>
+                    </li>
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Enhanced rewards for NFT holders</span>
+                    </li>
+                  </ul>
+                </li>
+                
+                <li>
+                  <div className="flex items-center">
+                    <span className="mr-2">•</span>
+                    <span className="font-semibold">FounderNFT Staking</span>
+                    <span className="text-yellow-500 ml-1">★</span>
+                  </div>
+                  <ul className="ml-5 mt-1 space-y-1">
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Compounding rewards system</span>
+                    </li>
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Fee distribution proportional to stake</span>
+                    </li>
+                  </ul>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Cross-Chain Bridge: Interoperability between major blockchains</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Reputation System: Dynamic scoring for project creators</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Automated Milestone Verification: AI-assisted validation</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>AI Risk Assessment: Project viability analysis for investor protection</span>
+                </li>
+                
+                <li>
+                  <div className="flex items-center">
+                    <span className="mr-2">•</span>
+                    <span className="font-semibold">Enhanced Governance</span>
+                    <span className="text-yellow-500 ml-1">★</span>
+                  </div>
+                  <ul className="ml-5 mt-1 space-y-1">
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Voting weight boost for FounderNFT holders</span>
+                    </li>
+                  </ul>
+                </li>
+                
+                <li>
+                  <div className="flex items-center">
+                    <span className="mr-2">•</span>
+                    <span className="font-semibold">Whitelist System</span>
+                    <span className="text-yellow-500 ml-1">★</span>
+                  </div>
+                  <ul className="ml-5 mt-1 space-y-1">
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Priority access to high-demand projects for NFT holders</span>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Q1 2026 */}
+          <div className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1e2b] rounded-xl overflow-hidden">
+            {/* Quarter header with dot */}
+            <div className="relative bg-[#1a1e2b] p-4 border-b border-gray-700">
+              <div className="absolute top-4 left-4 w-4 h-4 rounded-full bg-[#8A63D2]"></div>
+              <h3 className="text-xl font-bold ml-8 text-white">Q1 2026</h3>
+              <h4 className="text-base text-purple-300 font-medium ml-8">Ecosystem Maturity</h4>
+            </div>
+            
+            {/* Content */}
+            <div className="p-4 text-sm">
+              <ul className="space-y-3 text-gray-700 dark:text-gray-300">
+                <li>
+                  <div className="flex items-center">
+                    <span className="mr-2">•</span>
+                    <span className="font-semibold">DAO Implementation</span>
+                    <span className="text-yellow-500 ml-1">★</span>
+                  </div>
+                  <ul className="ml-5 mt-1 space-y-1">
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Enhanced voting power for FounderNFT holders</span>
+                    </li>
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Complete decentralization of platform governance</span>
+                    </li>
+                  </ul>
+                </li>
+                
+                <li>
+                  <div className="flex items-center">
+                    <span className="mr-2">•</span>
+                    <span className="font-semibold">Extension Economy</span>
+                    <span className="text-yellow-500 ml-1">★</span>
+                  </div>
+                  <ul className="ml-5 mt-1 space-y-1">
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Revenue sharing from extensions to FounderNFT holders</span>
+                    </li>
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Early access to new extensions for NFT holders</span>
+                    </li>
+                  </ul>
+                </li>
+                
+                <li>
+                  <div className="flex items-center">
+                    <span className="mr-2">•</span>
+                    <span className="font-semibold">LayerZero Integration</span>
+                  </div>
+                  <ul className="ml-5 mt-1 space-y-1">
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Cross-chain funding and deployment</span>
+                    </li>
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Chain-agnostic governance</span>
+                    </li>
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Omnichain NFT compatibility</span>
+                    </li>
+                    <li className="flex">
+                      <span className="mr-2">-</span>
+                      <span>Cross-chain fee distribution</span>
+                    </li>
+                  </ul>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Decentralized Identity: Self-sovereign identity solutions</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Fiat On-ramps: Direct fiat currency contribution options</span>
+                </li>
+                
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Developer API & SDK: Tools for platform integration and extension</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
+        
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-8">
+          <span className="text-yellow-500 mr-1">★</span> Indicates special benefits for FounderNFT holders. This roadmap is subject to change based on market conditions and community feedback.
+        </p>
       </div>
     </section>
   );
