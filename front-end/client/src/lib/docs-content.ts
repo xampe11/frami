@@ -26,6 +26,306 @@ type DocSection = {
 // Documentation sections and content
 export const docSections: DocSection[] = [
   {
+    id: "roadmap",
+    title: "Roadmap",
+    items: [
+      {
+        id: "platform-roadmap",
+        title: "Platform Development Roadmap",
+        description: "Detailed timeline of Frami platform development for 2025-2026",
+        content: [
+          { type: "heading", title: "Our Vision" },
+          "Frami is revolutionizing decentralized crowdfunding through a milestone-based, transparent platform that aligns incentives between project creators, investors, and the broader community. Our upgradeable smart contract infrastructure enables continuous innovation while maintaining robust security and governance.",
+          
+          { type: "heading", title: "Q2 - 2025: Foundation Launch" },
+          { type: "subheading", title: "Website Launch" },
+          {
+            type: "list",
+            items: [
+              "Intuitive UI/UX focused on both creator and investor experiences",
+              "Project discovery and filtering capabilities",
+              "Interactive milestone visualization and tracking",
+              "Responsive design for mobile and desktop users",
+              "Integration with Web3 wallets"
+            ]
+          },
+          
+          { type: "subheading", title: "FounderNFT Launch" },
+          "Limited collection of NFTs representing early platform supporters",
+          { type: "subheading", title: "Exclusive Benefits:" },
+          {
+            type: "list",
+            items: [
+              "Priority access to premium projects before public rounds",
+              "Enhanced fee sharing (Starting from 50% of all total fees)",
+              "Governance voting rights for platform decisions"
+            ]
+          },
+          
+          { type: "subheading", title: "Core Contract Functionality" },
+          {
+            type: "list",
+            items: [
+              "Implementation of upgradeable smart contract architecture (UUPS pattern)",
+              "Project creation and configuration capabilities",
+              "Milestone-based funding with transparent progress tracking",
+              "Investor contribution and withdrawal mechanisms",
+              "Secure fund management with milestone-based release"
+            ]
+          },
+          
+          { type: "subheading", title: "First 10 Projects Curation" },
+          {
+            type: "list",
+            items: [
+              "Selection of diverse, high-quality inaugural projects",
+              "Founder-led evaluation process to ensure project viability",
+              "Ranging across multiple sectors (technology, creative, social impact)",
+              "Special promotion and support for these foundational projects"
+            ]
+          },
+          
+          { type: "subheading", title: "Security Audit" },
+          {
+            type: "list",
+            items: [
+              "Comprehensive third-party audit of all smart contracts",
+              "Penetration testing of platform infrastructure",
+              "Implementation of security recommendations",
+              "Publication of audit reports for community transparency"
+            ]
+          },
+          
+          { type: "heading", title: "Q3 - 2025: Feature Expansion" },
+          { type: "subheading", title: "Community Building Initiatives" },
+          {
+            type: "list",
+            items: [
+              "Ambassador program for community-led growth",
+              "Educational webinars on platform usage and benefits",
+              "Social media and content strategy implementation",
+              "Community forums and support channels establishment"
+            ]
+          },
+          
+          { type: "subheading", title: "Token (ERC20) Creator" },
+          {
+            type: "list",
+            items: [
+              "No-code tool for project-specific token creation",
+              "Customizable tokenomics parameters",
+              "Automated vesting and distribution schedules",
+              "Integration with project milestones for token release"
+            ]
+          },
+          
+          { type: "subheading", title: "NFT (ERC721) Creator" },
+          {
+            type: "list",
+            items: [
+              "Simple interface for project-related NFT collections",
+              "Customizable traits and rarity settings",
+              "Metadata and asset management tools",
+              "Integration with funding tiers and rewards"
+            ]
+          },
+          
+          { type: "subheading", title: "Multi-Currency Support" },
+          {
+            type: "list",
+            items: [
+              "Expansion beyond ETH to include stable coins (USDC, USDT)",
+              "Smart contract adaptations for multi-currency handling",
+              "Conversion and exchange rate management",
+              "Gas optimization for various token standards"
+            ]
+          },
+          
+          { type: "subheading", title: "Analytics Dashboard" },
+          {
+            type: "list",
+            items: [
+              "Real-time project performance metrics",
+              "Funding progress visualization",
+              "Milestone completion statistics",
+              "Investor engagement and contribution analytics",
+              "Customizable reporting for project creators"
+            ]
+          },
+          
+          { type: "subheading", title: "Additional Wallet Integrations" },
+          "Improved onboarding flow for non-crypto native users",
+          
+          { type: "heading", title: "Q4 - 2025: Advanced Ecosystem" },
+          { type: "subheading", title: "Validator Economy" },
+          {
+            type: "list",
+            items: [
+              "Establishment of validator node system for milestone verification",
+              "Incentive structure for honest validation",
+              "FounderNFT Benefits: Priority validator status with enhanced rewards",
+              "Slashing mechanisms for dishonest validation",
+              "Distributed validation to ensure fairness"
+            ]
+          },
+          
+          { type: "subheading", title: "FounderNFT Staking Rewards Improvement" },
+          {
+            type: "list",
+            items: [
+              "Staking mechanism for compounding rewards",
+              "Fee distribution proportional to stake duration and amount",
+              "Special rewards for long-term stakers"
+            ]
+          },
+          
+          { type: "subheading", title: "Cross-Chain Bridge Functionality" },
+          {
+            type: "list",
+            items: [
+              "Interoperability between Ethereum and other major chains",
+              "Secure bridge contracts for cross-chain asset transfer",
+              "Multi-chain project contribution capabilities",
+              "Chain-specific optimization for lower fees and faster transactions"
+            ]
+          },
+          
+          { type: "subheading", title: "Reputation System" },
+          {
+            type: "list",
+            items: [
+              "Dynamic reputation scoring for project creators",
+              "Historical performance metrics",
+              "Verification badges and trust indicators",
+              "Community feedback integration",
+              "Impact on future project parameters (fees, limits)"
+            ]
+          },
+          
+          { type: "subheading", title: "Automated Milestone Verification" },
+          {
+            type: "list",
+            items: [
+              "AI-assisted milestone validation",
+              "Integration with external data sources for verification",
+              "Reduction in manual verification requirements",
+              "Transparent verification criteria and processes"
+            ]
+          },
+          
+          { type: "subheading", title: "Risk Assessment System" },
+          {
+            type: "list",
+            items: [
+              "AI-powered analysis of project viability",
+              "Risk scoring based on multiple factors",
+              "Historical data comparison and pattern recognition",
+              "Recommendation engine for investors",
+              "Due diligence automation and assistance"
+            ]
+          },
+          
+          { type: "subheading", title: "Enhanced Governance for NFT Holders" },
+          {
+            type: "list",
+            items: [
+              "Voting weight boost for FounderNFT holders",
+              "Proposal creation and management system",
+              "Transparent voting mechanism",
+              "Implementation of executable outcomes based on votes"
+            ]
+          },
+          
+          { type: "subheading", title: "Whitelist Access System" },
+          {
+            type: "list",
+            items: [
+              "Priority access mechanisms for high-demand projects",
+              "FounderNFT tier-based allocation system",
+              "Fair distribution algorithms",
+              "Anti-Sybil mechanisms to prevent gaming the system"
+            ]
+          },
+          
+          { type: "heading", title: "Q1 - 2026: Ecosystem Maturity" },
+          { type: "subheading", title: "DAO Implementation" },
+          {
+            type: "list",
+            items: [
+              "Complete decentralization of platform governance",
+              "Multi-tiered proposal and voting system",
+              "Treasury management by DAO",
+              "Enhanced voting power for FounderNFT holders",
+              "Working groups and specialized committees"
+            ]
+          },
+          
+          { type: "subheading", title: "Extension Economy" },
+          {
+            type: "list",
+            items: [
+              "Marketplace for third-party platform extensions",
+              "Developer tools and documentation",
+              "Revenue sharing from extension usage to FounderNFT holders",
+              "Quality assurance and security processes",
+              "Early access to new extensions for FounderNFT holders"
+            ]
+          },
+          
+          { type: "subheading", title: "LayerZero Integration" },
+          {
+            type: "list",
+            items: [
+              "Cross-chain Project Funding: Investments from multiple chains into single projects",
+              "Multi-chain Project Deployment: Simultaneous deployment across networks",
+              "Chain-agnostic Governance: Voting capabilities across different blockchains",
+              "Omnichain NFT Compatibility: FounderNFTs with cross-chain utility",
+              "Cross-chain Fee Distribution: Platform fees distributed regardless of chain"
+            ]
+          },
+          
+          { type: "subheading", title: "Decentralized Identity Integration" },
+          {
+            type: "list",
+            items: [
+              "Self-sovereign identity solutions",
+              "Privacy-preserving verification",
+              "Reputation portability across platforms",
+              "Credential-based access control",
+              "Integration with existing DID standards"
+            ]
+          },
+          
+          { type: "subheading", title: "Fiat On-ramp Partnerships" },
+          {
+            type: "list",
+            items: [
+              "Direct fiat currency contribution options",
+              "Compliant KYC/AML processes",
+              "Banking partnerships for seamless transfers",
+              "Lower barriers for non-crypto users",
+              "Support for multiple currencies and payment methods"
+            ]
+          },
+          
+          { type: "subheading", title: "Developer API & SDK" },
+          {
+            type: "list",
+            items: [
+              "Comprehensive documentation for integration",
+              "Webhooks for platform events",
+              "Client libraries in multiple languages",
+              "Sample applications and use cases",
+              "Developer community support"
+            ]
+          },
+          
+          { type: "note", title: "Roadmap Flexibility", text: "This roadmap represents our current development priorities, though we remain agile and responsive to market conditions and community feedback. The Frami team is committed to building a platform that empowers creators, rewards early supporters, and advances the possibilities of decentralized funding." }
+        ]
+      }
+    ]
+  },
+  {
     id: "start-here",
     title: "Start Here",
     items: [
