@@ -26,8 +26,104 @@ type DocSection = {
 // Documentation sections and content
 export const docSections: DocSection[] = [
   {
+    id: "start-here",
+    title: "Start Here",
+    items: [
+      {
+        id: "welcome-guide",
+        title: "Welcome Guide",
+        description: "Get started with the Frami platform",
+        content: [
+          { type: "heading", title: "Introduction to the platform" },
+          "Welcome to the Frami Platform, a blockchain-powered crowdfunding ecosystem that brings creative projects to life with the power of Web3 technology. Our platform creates an immersive, interactive space for project creators and backers to discover, fund, and track innovative initiatives.",
+          "The Frami platform uses blockchain technology to ensure transparency, security, and efficiency in the crowdfunding process. This creates a trusted environment where creators can showcase their projects and backers can support initiatives with confidence.",
+
+          { type: "heading", title: "Key benefits and value proposition" },
+          {
+            type: "list",
+            items: [
+              "Blockchain Security: Smart contract-powered funding ensures all transactions are secure, transparent, and immutable.",
+              "Milestone-Based Funding: Project funds are released based on preset milestones, creating accountability and reducing risk.",
+              "Community Governance: Backers can participate in project decisions through voting mechanics.",
+              "Founder NFTs: Exclusive benefits for early adopters and consistent supporters of the platform.",
+              "Transparent Tracking: All project developments and fund allocations are visible on the blockchain.",
+            ],
+          },
+
+          {
+            type: "note",
+            title: "New to blockchain?",
+            text: "Don't worry if you're new to blockchain technology. Our platform is designed to be user-friendly while leveraging the benefits of blockchain. You'll find helpful guides throughout the documentation to get you up to speed.",
+          },
+        ],
+      },
+      {
+        id: "quick-start-guide",
+        title: "Quick Start Guide",
+        content: [
+          {
+            type: "heading",
+            title: "Step-by-step guide to create your first project",
+          },
+          "Creating a project on Frami is simple. Follow these steps to get started:",
+
+          {
+            type: "numbered-list",
+            items: [
+              "Sign in with your digital wallet by clicking 'Connect Wallet' in the top right corner.",
+              "Navigate to 'Create Project' in the main navigation menu.",
+              "Fill out the project creation form, including title, description, funding goal, and timeline.",
+              "Define your project milestones with clear deliverables and funding requirements.",
+              "Add team members if applicable, setting appropriate permission levels.",
+              "Upload any supporting media such as images, videos, or documents.",
+              "Review and submit your project for approval.",
+              "Once approved, share your project with potential backers.",
+            ],
+          },
+
+          { type: "heading", title: "How to invest in a project" },
+          "Backing projects on Frami is straightforward and secure:",
+
+          {
+            type: "numbered-list",
+            items: [
+              "Connect your wallet using the 'Connect Wallet' button.",
+              "Browse projects or use search to find initiatives that interest you.",
+              "Review the project details, milestones, team, and funding progress.",
+              "Click the 'Back This Project' button on the project page.",
+              "Enter the amount you wish to contribute.",
+              "Confirm the transaction through your connected wallet.",
+              "You'll receive a receipt of your contribution and any applicable tokens or rewards.",
+            ],
+          },
+
+          { type: "heading", title: "Basic platform navigation" },
+          "Navigating the Frami platform is intuitive:",
+
+          {
+            type: "list",
+            items: [
+              "Home: Overview of the platform with featured projects and latest updates.",
+              "Explore: Browse all projects with filtering options by category, funding stage, and more.",
+              "Create Project: Access the project creation flow (requires wallet connection).",
+              "Project Page: Detailed view of a specific project, including updates, milestones, and backer information.",
+              "Profile: View and manage your backed projects and created initiatives.",
+              "Docs: You are here! Comprehensive documentation on using the platform.",
+            ],
+          },
+
+          {
+            type: "warning",
+            title: "Important Note",
+            text: "Always ensure you're connected to the correct wallet address when backing projects or creating new initiatives. Transactions on the blockchain are irreversible.",
+          },
+        ],
+      }
+    ]
+  },
+  {
     id: "roadmap",
-    title: "Roadmap",
+    title: "Road Map",
     items: [
       {
         id: "platform-roadmap",
@@ -501,6 +597,157 @@ export const docSections: DocSection[] = [
         ],
       },
     ],
+  },
+  {
+    id: "guides",
+    title: "Guides",
+    items: [
+      {
+        id: "for-project-creators",
+        title: "For Project Creators",
+        content: [
+          { type: "heading", title: "Creating a successful funding campaign" },
+          "Building a compelling crowdfunding campaign on Frami requires careful planning and execution. Here are key strategies for success:",
+          
+          {
+            type: "list",
+            items: [
+              "Define clear, achievable milestones with measurable outcomes",
+              "Create engaging project content including high-quality images and videos",
+              "Set a realistic funding goal based on your project requirements",
+              "Craft an enticing value proposition for potential backers",
+              "Develop a comprehensive marketing strategy",
+              "Plan for regular project updates throughout the campaign"
+            ]
+          },
+          
+          { type: "heading", title: "Setting up effective milestones" },
+          "Milestones are central to Frami's funding model. They help backers track progress and manage risk. When creating milestones:",
+          
+          {
+            type: "list",
+            items: [
+              "Break down your project into logical, sequential phases",
+              "Define clear deliverables for each milestone",
+              "Set realistic timeframes for completion",
+              "Align funding needs with each development phase",
+              "Include verification methods for milestone completion",
+              "Balance detail with flexibility to adapt to changing conditions"
+            ]
+          },
+          
+          { type: "heading", title: "Project page best practices" },
+          "Your project page is your pitch to potential backers. Make it count:",
+          
+          {
+            type: "list",
+            items: [
+              "Use a clear, compelling project title that communicates your vision",
+              "Write a concise but detailed project description",
+              "Include high-quality visual assets (images, videos, prototypes)",
+              "Highlight your team's expertise and background",
+              "Clearly explain the problem you're solving and your solution",
+              "Outline key milestones and how funds will be used",
+              "Address potential risks and how you plan to mitigate them"
+            ]
+          },
+          
+          { type: "heading", title: "Community engagement strategies" },
+          "Building and maintaining an active community around your project is crucial for success:",
+          
+          {
+            type: "list",
+            items: [
+              "Respond promptly to questions and feedback",
+              "Schedule regular AMAs (Ask Me Anything) sessions",
+              "Share behind-the-scenes updates of your development process",
+              "Create exclusive content for backers",
+              "Recognize and highlight active community members",
+              "Use social media to amplify your project's reach",
+              "Collect and incorporate community feedback"
+            ]
+          },
+          
+          {
+            type: "note",
+            title: "Transparency matters",
+            text: "Blockchain technology enables unprecedented transparency. Embrace this by being open about your progress, challenges, and how funds are being used. This builds trust with your backers and increases long-term support."
+          }
+        ]
+      },
+      {
+        id: "for-investors",
+        title: "For Investors",
+        content: [
+          { type: "heading", title: "Evaluating project potential" },
+          "Due diligence is essential when investing in blockchain projects. Here's how to assess a project's potential on Frami:",
+          
+          {
+            type: "list",
+            items: [
+              "Review the team's background, experience, and track record",
+              "Evaluate the project's value proposition and market need",
+              "Assess the technology and implementation approach",
+              "Examine milestone structure and funding allocation",
+              "Check community engagement and social proof",
+              "Research the competitive landscape",
+              "Consider the tokenomics model (if applicable)"
+            ]
+          },
+          
+          { type: "heading", title: "Understanding risk factors" },
+          "All investments carry risk, and blockchain projects have unique considerations:",
+          
+          {
+            type: "list",
+            items: [
+              "Execution risk: The team's ability to deliver on promises",
+              "Market risk: Demand for the final product or service",
+              "Technology risk: Technical feasibility and security concerns",
+              "Regulatory risk: Potential legal challenges or changes",
+              "Liquidity risk: Ability to exit your investment if needed",
+              "Fork risk: Potential for blockchain protocol changes"
+            ]
+          },
+          
+          { type: "heading", title: "Portfolio diversification strategies" },
+          "Building a balanced investment portfolio on Frami:",
+          
+          {
+            type: "list",
+            items: [
+              "Diversify across different project categories",
+              "Allocate capital across various development stages",
+              "Mix short-term and long-term investment horizons",
+              "Balance high-risk/high-reward with more established projects",
+              "Consider geographic diversification",
+              "Invest across different blockchain ecosystems"
+            ]
+          },
+          
+          { type: "heading", title: "Monitoring your investments" },
+          "Stay informed about your portfolio's performance:",
+          
+          {
+            type: "list",
+            items: [
+              "Track milestone completions and project updates",
+              "Participate in governance votes for important decisions",
+              "Join project communities to gauge sentiment and progress",
+              "Set up notifications for major project events",
+              "Regularly reassess your investment thesis",
+              "Document lessons learned from each investment"
+            ]
+          },
+          
+          {
+            type: "warning",
+            title: "Investment Disclaimer",
+            text: "Investing in blockchain projects involves significant risk. Never invest more than you can afford to lose, and consider consulting with a financial advisor before making investment decisions."
+          }
+        ]
+      }
+    ]
   },
   {
     id: "core-concepts",
@@ -1497,6 +1744,158 @@ function releaseMilestoneFunds(uint256 milestoneIndex) external {
   {
     id: "resources",
     title: "Resources",
+    items: [
+      {
+        id: "community-guidelines",
+        title: "Community Guidelines",
+        content: [
+          { type: "heading", title: "Code of Conduct" },
+          "Our community is built on respect, transparency, and collaboration. We expect all participants to adhere to these guidelines when interacting on the Frami platform:",
+          
+          {
+            type: "list",
+            items: [
+              "Treat all community members with respect and courtesy",
+              "Communicate openly and constructively",
+              "Provide honest feedback without personal attacks",
+              "Respect intellectual property and give proper attribution",
+              "Report inappropriate behavior through proper channels",
+              "Maintain professionalism in all interactions"
+            ]
+          },
+          
+          { type: "heading", title: "Communication channels" },
+          "Frami offers several official communication channels for community engagement:",
+          
+          {
+            type: "list",
+            items: [
+              "Platform Forums: Discuss projects, share ideas, and connect with other members",
+              "Discord Server: Real-time conversations and community support",
+              "Twitter: Latest updates and announcements",
+              "Medium Blog: In-depth articles and thought leadership",
+              "Project Comment Sections: Project-specific discussions"
+            ]
+          },
+          
+          { type: "heading", title: "Dispute resolution process" },
+          "In the event of disagreements or disputes, we follow a structured resolution process:",
+          
+          {
+            type: "numbered-list",
+            items: [
+              "Direct Communication: Parties should first attempt to resolve issues directly",
+              "Mediation: If needed, a community moderator can facilitate discussion",
+              "Formal Review: Unresolved disputes can be escalated to the platform governance team",
+              "Governance Vote: For significant disputes, a platform-wide vote may be conducted",
+              "Binding Decision: The outcome of the governance vote is final and binding"
+            ]
+          },
+          
+          {
+            type: "warning",
+            title: "Important",
+            text: "Harassment, hate speech, discrimination, and abuse are not tolerated on the Frami platform. Violations may result in temporary or permanent removal from the community."
+          }
+        ]
+      },
+      {
+        id: "faqs",
+        title: "FAQs",
+        content: [
+          { type: "heading", title: "General Platform Questions" },
+          
+          { type: "subheading", title: "What is Frami?" },
+          "Frami is a blockchain-powered crowdfunding platform that enables creators to raise funds for their projects through a transparent, secure, and milestone-based approach. The platform leverages blockchain technology to ensure accountability and align incentives between project creators and backers.",
+          
+          { type: "subheading", title: "How does Frami differ from traditional crowdfunding platforms?" },
+          "Unlike traditional platforms, Frami utilizes blockchain technology for transparent fund management, releases funding based on verified milestone completion, enables community governance through voting mechanisms, and provides exclusive benefits to early supporters through FounderNFTs.",
+          
+          { type: "subheading", title: "Do I need technical blockchain knowledge to use Frami?" },
+          "No, Frami is designed to be user-friendly for both technical and non-technical users. While understanding blockchain basics can be helpful, our platform handles the technical complexity so you can focus on creating or supporting projects.",
+          
+          { type: "heading", title: "Project Creation" },
+          
+          { type: "subheading", title: "How do I start a project on Frami?" },
+          "To create a project, connect your wallet, navigate to the 'Create Project' section, fill out the required information (project details, funding goals, milestones), and submit for review. Once approved, your project will be live on the platform.",
+          
+          { type: "subheading", title: "What types of projects are allowed on Frami?" },
+          "Frami supports a wide range of projects including technology, creative arts, community initiatives, and more. Projects must comply with our terms of service and not involve illegal activities, hate speech, or harmful content.",
+          
+          { type: "subheading", title: "How are project milestones verified?" },
+          "Milestone verification depends on the project's configuration. Options include community voting, designated validators, automated verification through oracles, or a combination of these methods. The verification process is transparent and results are recorded on the blockchain.",
+          
+          { type: "heading", title: "Investing & Backing" },
+          
+          { type: "subheading", title: "What currencies can I use to back projects?" },
+          "Currently, you can back projects using ETH and select stablecoins (USDC, USDT). We plan to expand supported currencies in future updates.",
+          
+          { type: "subheading", title: "Can I get a refund if a project fails?" },
+          "Yes, if a project fails to meet its milestones, unused funds are returned to backers proportionally according to their contribution. This is managed automatically through smart contracts.",
+          
+          { type: "subheading", title: "What fees does Frami charge?" },
+          "Frami charges a 5% platform fee on successfully funded projects. There may also be blockchain gas fees for transactions, which vary based on network conditions and are not controlled by Frami."
+        ]
+      },
+      {
+        id: "audits",
+        title: "Audits",
+        content: [
+          { type: "heading", title: "Smart contract audit reports" },
+          "Our smart contracts undergo rigorous security audits by independent third-party firms to ensure the highest standards of security and reliability:",
+          
+          {
+            type: "list",
+            items: [
+              "CertiK Audit (March 2025): Comprehensive review of core platform contracts",
+              "Trail of Bits Audit (April 2025): Focused assessment of the milestone verification system",
+              "ChainSecurity Review (May 2025): Complete audit of FounderNFT functionality",
+              "OpenZeppelin Security Analysis (Quarterly): Ongoing security monitoring and risk assessment"
+            ]
+          },
+          
+          { type: "heading", title: "Methodology and scope" },
+          "Our audit process includes:",
+          
+          {
+            type: "list",
+            items: [
+              "Static code analysis to identify potential vulnerabilities",
+              "Dynamic testing to validate contract behavior",
+              "Formal verification of critical system components",
+              "Economic attack vector analysis",
+              "Gas optimization assessment",
+              "Upgrade mechanism security review"
+            ]
+          },
+          
+          { type: "heading", title: "Findings and resolutions" },
+          "Summary of key findings from our audit reports:",
+          
+          {
+            type: "table",
+            headers: ["Severity", "Issue Type", "Status", "Resolution"],
+            rows: [
+              ["High", "Reentrancy vulnerability in fund distribution", "Resolved", "Implemented checks-effects-interactions pattern and reentrancy guards"],
+              ["Medium", "Timestamp manipulation risk", "Resolved", "Replaced timestamp dependency with block number-based logic"],
+              ["Medium", "Access control weakness", "Resolved", "Implemented role-based access control with time locks"],
+              ["Low", "Gas optimization opportunities", "Resolved", "Refactored code to reduce gas costs by 30%"],
+              ["Informational", "Code documentation improvements", "Implemented", "Enhanced inline documentation and technical specifications"]
+            ]
+          },
+          
+          {
+            type: "note",
+            title: "Continuous Security",
+            text: "Security is an ongoing process. We maintain a bug bounty program to incentivize responsible disclosure of potential vulnerabilities and perform regular security reviews as the platform evolves."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "tokenomics",
+    title: "Tokenomics",
     items: [
       {
         id: "sdk-api-references",
