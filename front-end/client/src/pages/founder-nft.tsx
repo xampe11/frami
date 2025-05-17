@@ -470,9 +470,30 @@ const PlatformDevelopmentRoadmap = () => {
                   <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
                     <span className="text-primary">Q2 2025</span>
                   </h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Founder NFT launch with initial governance capabilities
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-gray-600 dark:text-gray-300 font-semibold">
+                      Foundation Launch
+                    </p>
+                    <ul className="text-gray-600 dark:text-gray-300 text-sm space-y-2">
+                      <li>• Website Launch: Intuitive platform for project creation, discovery, and milestone tracking</li>
+                      <li className="flex items-start">
+                        <span className="mr-1">•</span>
+                        <span>
+                          <span className="font-semibold">FounderNFT Launch</span> 
+                          <span className="text-yellow-500 ml-1">🌟</span>
+                          <ul className="pl-4 mt-1 space-y-1">
+                            <li>- Exclusive first-access to premium projects</li>
+                            <li>- Higher fee sharing for early holders</li>
+                            <li>- Limited collection representing early platform supporters</li>
+                          </ul>
+                        </span>
+                      </li>
+                      <li>• Core Functionality: Smart contracts for milestone-based funding, transparent progress tracking</li>
+                      <li>• First 10 Projects: Curated selection of high-quality inaugural projects</li>
+                      <li>• Security Audit: Comprehensive third-party audit ensuring platform safety</li>
+                      <li>• Community Building: Ambassador program and educational initiatives</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
 
@@ -485,9 +506,18 @@ const PlatformDevelopmentRoadmap = () => {
                   <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
                     <span className="text-primary">Q3 2025</span>
                   </h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Fee distribution system activation and early access privileges
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-gray-600 dark:text-gray-300 font-semibold">
+                      Feature Expansion
+                    </p>
+                    <ul className="text-gray-600 dark:text-gray-300 text-sm space-y-2">
+                      <li>• Token (ERC20) Creator: No-code tool for project-specific tokens</li>
+                      <li>• NFT (ERC721) Creator: Simple interface for project reward NFTs</li>
+                      <li>• Multi-Currency Support: Add USDC, USDT, and other currencies</li>
+                      <li>• Analytics Dashboard: Real-time project metrics and funding visualization</li>
+                      <li>• Additional Wallet Integrations: Expanded support for popular Web3 wallets</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
 
@@ -500,9 +530,59 @@ const PlatformDevelopmentRoadmap = () => {
                   <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
                     <span className="text-primary">Q4 2025</span>
                   </h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Transition to decentralized governance structure
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-gray-600 dark:text-gray-300 font-semibold">
+                      Advanced Ecosystem
+                    </p>
+                    <ul className="text-gray-600 dark:text-gray-300 text-sm space-y-2">
+                      <li className="flex items-start">
+                        <span className="mr-1">•</span>
+                        <span>
+                          <span className="font-semibold">Validator Economy</span> 
+                          <span className="text-yellow-500 ml-1">🌟</span>
+                          <ul className="pl-4 mt-1 space-y-1">
+                            <li>- Priority validator status for FounderNFT holders</li>
+                            <li>- Enhanced rewards for NFT holders</li>
+                          </ul>
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-1">•</span>
+                        <span>
+                          <span className="font-semibold">FounderNFT Staking</span> 
+                          <span className="text-yellow-500 ml-1">🌟</span>
+                          <ul className="pl-4 mt-1 space-y-1">
+                            <li>- Compounding rewards system</li>
+                            <li>- Fee distribution proportional to stake</li>
+                          </ul>
+                        </span>
+                      </li>
+                      <li>• Cross-Chain Bridge: Interoperability between major blockchains</li>
+                      <li>• Reputation System: Dynamic scoring for project creators</li>
+                      <li>• Automated Milestone Verification: AI-assisted validation process</li>
+                      <li>• AI Risk Assessment: Project viability analysis for investor protection</li>
+                      <li className="flex items-start">
+                        <span className="mr-1">•</span>
+                        <span>
+                          <span className="font-semibold">Enhanced Governance</span> 
+                          <span className="text-yellow-500 ml-1">🌟</span>
+                          <ul className="pl-4 mt-1 space-y-1">
+                            <li>- Voting weight boost for FounderNFT holders</li>
+                          </ul>
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-1">•</span>
+                        <span>
+                          <span className="font-semibold">Whitelist System</span> 
+                          <span className="text-yellow-500 ml-1">🌟</span>
+                          <ul className="pl-4 mt-1 space-y-1">
+                            <li>- Priority access to high-demand projects for NFT holders</li>
+                          </ul>
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
 
@@ -515,16 +595,57 @@ const PlatformDevelopmentRoadmap = () => {
                   <h4 className="text-xl font-bold flex items-center gap-2 mb-2">
                     <span className="text-primary">Q1 2026</span>
                   </h4>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    Cross-chain integration and extended benefits
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-gray-600 dark:text-gray-300 font-semibold">
+                      Ecosystem Maturity
+                    </p>
+                    <ul className="text-gray-600 dark:text-gray-300 text-sm space-y-2">
+                      <li className="flex items-start">
+                        <span className="mr-1">•</span>
+                        <span>
+                          <span className="font-semibold">DAO Implementation</span> 
+                          <span className="text-yellow-500 ml-1">🌟</span>
+                          <ul className="pl-4 mt-1 space-y-1">
+                            <li>- Enhanced voting power for FounderNFT holders</li>
+                            <li>- Complete decentralization of platform governance</li>
+                          </ul>
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-1">•</span>
+                        <span>
+                          <span className="font-semibold">Extension Economy</span> 
+                          <span className="text-yellow-500 ml-1">🌟</span>
+                          <ul className="pl-4 mt-1 space-y-1">
+                            <li>- Revenue sharing from extensions to FounderNFT holders</li>
+                            <li>- Early access to new extensions for NFT holders</li>
+                          </ul>
+                        </span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="mr-1">•</span>
+                        <span>
+                          <span className="font-semibold">LayerZero Integration</span>
+                          <ul className="pl-4 mt-1 space-y-1">
+                            <li>- Cross-chain funding and deployment</li>
+                            <li>- Chain-agnostic governance</li>
+                            <li>- Omnichain NFT compatibility</li>
+                            <li>- Cross-chain fee distribution</li>
+                          </ul>
+                        </span>
+                      </li>
+                      <li>• Decentralized Identity: Self-sovereign identity solutions</li>
+                      <li>• Fiat On-ramps: Direct fiat currency contribution options</li>
+                      <li>• Developer API & SDK: Tools for platform integration and extension</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           
           <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-8">
-            This roadmap is subject to change based on market conditions and community feedback.
+            <span className="text-yellow-500 mr-1">🌟</span> Indicates special benefits for FounderNFT holders. This roadmap is subject to change based on market conditions and community feedback.
           </p>
         </div>
       </div>

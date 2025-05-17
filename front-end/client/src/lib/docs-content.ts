@@ -27,7 +27,7 @@ type DocSection = {
 export const docSections: DocSection[] = [
   {
     id: "start-here",
-    title: "Start Here",
+    title: "START HERE",
     items: [
       {
         id: "welcome-guide",
@@ -118,21 +118,22 @@ export const docSections: DocSection[] = [
             text: "Always ensure you're connected to the correct wallet address when backing projects or creating new initiatives. Transactions on the blockchain are irreversible.",
           },
         ],
-      }
-    ]
+      },
+    ],
   },
   {
     id: "roadmap",
-    title: "Road Map",
+    title: "ROAD MAP",
     items: [
       {
         id: "platform-roadmap",
         title: "Platform Development Roadmap",
-        description: "Detailed timeline of Frami platform development for 2025-2026",
+        description:
+          "Detailed timeline of Frami platform development for 2025-2026",
         content: [
           { type: "heading", title: "Our Vision" },
           "Frami is revolutionizing decentralized crowdfunding through a milestone-based, transparent platform that aligns incentives between project creators, investors, and the broader community. Our upgradeable smart contract infrastructure enables continuous innovation while maintaining robust security and governance.",
-          
+
           { type: "heading", title: "Q2 - 2025: Foundation Launch" },
           { type: "subheading", title: "Website Launch" },
           {
@@ -142,10 +143,10 @@ export const docSections: DocSection[] = [
               "Project discovery and filtering capabilities",
               "Interactive milestone visualization and tracking",
               "Responsive design for mobile and desktop users",
-              "Integration with Web3 wallets"
-            ]
+              "Integration with Web3 wallets",
+            ],
           },
-          
+
           { type: "subheading", title: "FounderNFT Launch" },
           "Limited collection of NFTs representing early platform supporters",
           { type: "subheading", title: "Exclusive Benefits:" },
@@ -154,10 +155,10 @@ export const docSections: DocSection[] = [
             items: [
               "Priority access to premium projects before public rounds",
               "Enhanced fee sharing (Starting from 50% of all total fees)",
-              "Governance voting rights for platform decisions"
-            ]
+              "Governance voting rights for platform decisions",
+            ],
           },
-          
+
           { type: "subheading", title: "Core Contract Functionality" },
           {
             type: "list",
@@ -166,10 +167,10 @@ export const docSections: DocSection[] = [
               "Project creation and configuration capabilities",
               "Milestone-based funding with transparent progress tracking",
               "Investor contribution and withdrawal mechanisms",
-              "Secure fund management with milestone-based release"
-            ]
+              "Secure fund management with milestone-based release",
+            ],
           },
-          
+
           { type: "subheading", title: "First 10 Projects Curation" },
           {
             type: "list",
@@ -177,10 +178,10 @@ export const docSections: DocSection[] = [
               "Selection of diverse, high-quality inaugural projects",
               "Founder-led evaluation process to ensure project viability",
               "Ranging across multiple sectors (technology, creative, social impact)",
-              "Special promotion and support for these foundational projects"
-            ]
+              "Special promotion and support for these foundational projects",
+            ],
           },
-          
+
           { type: "subheading", title: "Security Audit" },
           {
             type: "list",
@@ -188,10 +189,10 @@ export const docSections: DocSection[] = [
               "Comprehensive third-party audit of all smart contracts",
               "Penetration testing of platform infrastructure",
               "Implementation of security recommendations",
-              "Publication of audit reports for community transparency"
-            ]
+              "Publication of audit reports for community transparency",
+            ],
           },
-          
+
           { type: "heading", title: "Q3 - 2025: Feature Expansion" },
           { type: "subheading", title: "Community Building Initiatives" },
           {
@@ -200,10 +201,10 @@ export const docSections: DocSection[] = [
               "Ambassador program for community-led growth",
               "Educational webinars on platform usage and benefits",
               "Social media and content strategy implementation",
-              "Community forums and support channels establishment"
-            ]
+              "Community forums and support channels establishment",
+            ],
           },
-          
+
           { type: "subheading", title: "Token (ERC20) Creator" },
           {
             type: "list",
@@ -211,10 +212,10 @@ export const docSections: DocSection[] = [
               "No-code tool for project-specific token creation",
               "Customizable tokenomics parameters",
               "Automated vesting and distribution schedules",
-              "Integration with project milestones for token release"
-            ]
+              "Integration with project milestones for token release",
+            ],
           },
-          
+
           { type: "subheading", title: "NFT (ERC721) Creator" },
           {
             type: "list",
@@ -222,10 +223,10 @@ export const docSections: DocSection[] = [
               "Simple interface for project-related NFT collections",
               "Customizable traits and rarity settings",
               "Metadata and asset management tools",
-              "Integration with funding tiers and rewards"
-            ]
+              "Integration with funding tiers and rewards",
+            ],
           },
-          
+
           { type: "subheading", title: "Multi-Currency Support" },
           {
             type: "list",
@@ -233,10 +234,10 @@ export const docSections: DocSection[] = [
               "Expansion beyond ETH to include stable coins (USDC, USDT)",
               "Smart contract adaptations for multi-currency handling",
               "Conversion and exchange rate management",
-              "Gas optimization for various token standards"
-            ]
+              "Gas optimization for various token standards",
+            ],
           },
-          
+
           { type: "subheading", title: "Analytics Dashboard" },
           {
             type: "list",
@@ -245,13 +246,13 @@ export const docSections: DocSection[] = [
               "Funding progress visualization",
               "Milestone completion statistics",
               "Investor engagement and contribution analytics",
-              "Customizable reporting for project creators"
-            ]
+              "Customizable reporting for project creators",
+            ],
           },
-          
+
           { type: "subheading", title: "Additional Wallet Integrations" },
           "Improved onboarding flow for non-crypto native users",
-          
+
           { type: "heading", title: "Q4 - 2025: Advanced Ecosystem" },
           { type: "subheading", title: "Validator Economy" },
           {
@@ -261,20 +262,23 @@ export const docSections: DocSection[] = [
               "Incentive structure for honest validation",
               "FounderNFT Benefits: Priority validator status with enhanced rewards",
               "Slashing mechanisms for dishonest validation",
-              "Distributed validation to ensure fairness"
-            ]
+              "Distributed validation to ensure fairness",
+            ],
           },
-          
-          { type: "subheading", title: "FounderNFT Staking Rewards Improvement" },
+
+          {
+            type: "subheading",
+            title: "FounderNFT Staking Rewards Improvement",
+          },
           {
             type: "list",
             items: [
               "Staking mechanism for compounding rewards",
               "Fee distribution proportional to stake duration and amount",
-              "Special rewards for long-term stakers"
-            ]
+              "Special rewards for long-term stakers",
+            ],
           },
-          
+
           { type: "subheading", title: "Cross-Chain Bridge Functionality" },
           {
             type: "list",
@@ -282,10 +286,10 @@ export const docSections: DocSection[] = [
               "Interoperability between Ethereum and other major chains",
               "Secure bridge contracts for cross-chain asset transfer",
               "Multi-chain project contribution capabilities",
-              "Chain-specific optimization for lower fees and faster transactions"
-            ]
+              "Chain-specific optimization for lower fees and faster transactions",
+            ],
           },
-          
+
           { type: "subheading", title: "Reputation System" },
           {
             type: "list",
@@ -294,10 +298,10 @@ export const docSections: DocSection[] = [
               "Historical performance metrics",
               "Verification badges and trust indicators",
               "Community feedback integration",
-              "Impact on future project parameters (fees, limits)"
-            ]
+              "Impact on future project parameters (fees, limits)",
+            ],
           },
-          
+
           { type: "subheading", title: "Automated Milestone Verification" },
           {
             type: "list",
@@ -305,10 +309,10 @@ export const docSections: DocSection[] = [
               "AI-assisted milestone validation",
               "Integration with external data sources for verification",
               "Reduction in manual verification requirements",
-              "Transparent verification criteria and processes"
-            ]
+              "Transparent verification criteria and processes",
+            ],
           },
-          
+
           { type: "subheading", title: "Risk Assessment System" },
           {
             type: "list",
@@ -317,10 +321,10 @@ export const docSections: DocSection[] = [
               "Risk scoring based on multiple factors",
               "Historical data comparison and pattern recognition",
               "Recommendation engine for investors",
-              "Due diligence automation and assistance"
-            ]
+              "Due diligence automation and assistance",
+            ],
           },
-          
+
           { type: "subheading", title: "Enhanced Governance for NFT Holders" },
           {
             type: "list",
@@ -328,10 +332,10 @@ export const docSections: DocSection[] = [
               "Voting weight boost for FounderNFT holders",
               "Proposal creation and management system",
               "Transparent voting mechanism",
-              "Implementation of executable outcomes based on votes"
-            ]
+              "Implementation of executable outcomes based on votes",
+            ],
           },
-          
+
           { type: "subheading", title: "Whitelist Access System" },
           {
             type: "list",
@@ -339,10 +343,10 @@ export const docSections: DocSection[] = [
               "Priority access mechanisms for high-demand projects",
               "FounderNFT tier-based allocation system",
               "Fair distribution algorithms",
-              "Anti-Sybil mechanisms to prevent gaming the system"
-            ]
+              "Anti-Sybil mechanisms to prevent gaming the system",
+            ],
           },
-          
+
           { type: "heading", title: "Q1 - 2026: Ecosystem Maturity" },
           { type: "subheading", title: "DAO Implementation" },
           {
@@ -352,10 +356,10 @@ export const docSections: DocSection[] = [
               "Multi-tiered proposal and voting system",
               "Treasury management by DAO",
               "Enhanced voting power for FounderNFT holders",
-              "Working groups and specialized committees"
-            ]
+              "Working groups and specialized committees",
+            ],
           },
-          
+
           { type: "subheading", title: "Extension Economy" },
           {
             type: "list",
@@ -364,10 +368,10 @@ export const docSections: DocSection[] = [
               "Developer tools and documentation",
               "Revenue sharing from extension usage to FounderNFT holders",
               "Quality assurance and security processes",
-              "Early access to new extensions for FounderNFT holders"
-            ]
+              "Early access to new extensions for FounderNFT holders",
+            ],
           },
-          
+
           { type: "subheading", title: "LayerZero Integration" },
           {
             type: "list",
@@ -376,10 +380,10 @@ export const docSections: DocSection[] = [
               "Multi-chain Project Deployment: Simultaneous deployment across networks",
               "Chain-agnostic Governance: Voting capabilities across different blockchains",
               "Omnichain NFT Compatibility: FounderNFTs with cross-chain utility",
-              "Cross-chain Fee Distribution: Platform fees distributed regardless of chain"
-            ]
+              "Cross-chain Fee Distribution: Platform fees distributed regardless of chain",
+            ],
           },
-          
+
           { type: "subheading", title: "Decentralized Identity Integration" },
           {
             type: "list",
@@ -388,10 +392,10 @@ export const docSections: DocSection[] = [
               "Privacy-preserving verification",
               "Reputation portability across platforms",
               "Credential-based access control",
-              "Integration with existing DID standards"
-            ]
+              "Integration with existing DID standards",
+            ],
           },
-          
+
           { type: "subheading", title: "Fiat On-ramp Partnerships" },
           {
             type: "list",
@@ -400,10 +404,10 @@ export const docSections: DocSection[] = [
               "Compliant KYC/AML processes",
               "Banking partnerships for seamless transfers",
               "Lower barriers for non-crypto users",
-              "Support for multiple currencies and payment methods"
-            ]
+              "Support for multiple currencies and payment methods",
+            ],
           },
-          
+
           { type: "subheading", title: "Developer API & SDK" },
           {
             type: "list",
@@ -412,187 +416,14 @@ export const docSections: DocSection[] = [
               "Webhooks for platform events",
               "Client libraries in multiple languages",
               "Sample applications and use cases",
-              "Developer community support"
-            ]
-          },
-          
-          { type: "note", title: "Roadmap Flexibility", text: "This roadmap represents our current development priorities, though we remain agile and responsive to market conditions and community feedback. The Frami team is committed to building a platform that empowers creators, rewards early supporters, and advances the possibilities of decentralized funding." }
-        ]
-      }
-    ]
-  },
-  {
-    id: "start-here",
-    title: "Start Here",
-    items: [
-      {
-        id: "welcome-guide",
-        title: "Welcome Guide",
-        description: "Get started with the Frami platform",
-        content: [
-          { type: "heading", title: "Introduction to the platform" },
-          "Welcome to the Frami Platform, a blockchain-powered crowdfunding ecosystem that brings creative projects to life with the power of Web3 technology. Our platform creates an immersive, interactive space for project creators and backers to discover, fund, and track innovative initiatives.",
-          "The Frami platform uses blockchain technology to ensure transparency, security, and efficiency in the crowdfunding process. This creates a trusted environment where creators can showcase their projects and backers can support initiatives with confidence.",
-
-          { type: "heading", title: "Key benefits and value proposition" },
-          {
-            type: "list",
-            items: [
-              "Blockchain Security: Smart contract-powered funding ensures all transactions are secure, transparent, and immutable.",
-              "Milestone-Based Funding: Project funds are released based on preset milestones, creating accountability and reducing risk.",
-              "Community Governance: Backers can participate in project decisions through voting mechanics.",
-              "Founder NFTs: Exclusive benefits for early adopters and consistent supporters of the platform.",
-              "Transparent Tracking: All project developments and fund allocations are visible on the blockchain.",
+              "Developer community support",
             ],
           },
 
           {
             type: "note",
-            title: "New to blockchain?",
-            text: "Don't worry if you're new to blockchain technology. Our platform is designed to be user-friendly while leveraging the benefits of blockchain. You'll find helpful guides throughout the documentation to get you up to speed.",
-          },
-        ],
-      },
-      {
-        id: "quick-start-guide",
-        title: "Quick Start Guide",
-        content: [
-          {
-            type: "heading",
-            title: "Step-by-step guide to create your first project",
-          },
-          "Creating a project on Frami is simple. Follow these steps to get started:",
-
-          {
-            type: "numbered-list",
-            items: [
-              "Sign in with your digital wallet by clicking 'Connect Wallet' in the top right corner.",
-              "Navigate to 'Create Project' in the main navigation menu.",
-              "Fill out the project creation form, including title, description, funding goal, and timeline.",
-              "Define your project milestones with clear deliverables and funding requirements.",
-              "Add team members if applicable, setting appropriate permission levels.",
-              "Upload any supporting media such as images, videos, or documents.",
-              "Review and submit your project for approval.",
-              "Once approved, share your project with potential backers.",
-            ],
-          },
-
-          { type: "heading", title: "How to invest in a project" },
-          "Backing projects on Frami is straightforward and secure:",
-
-          {
-            type: "numbered-list",
-            items: [
-              "Connect your wallet using the 'Connect Wallet' button.",
-              "Browse projects or use search to find initiatives that interest you.",
-              "Review the project details, milestones, team, and funding progress.",
-              "Click the 'Back This Project' button on the project page.",
-              "Enter the amount you wish to contribute.",
-              "Confirm the transaction through your connected wallet.",
-              "You'll receive a receipt of your contribution and any applicable tokens or rewards.",
-            ],
-          },
-
-          { type: "heading", title: "Basic platform navigation" },
-          "Navigating the Frami platform is intuitive:",
-
-          {
-            type: "list",
-            items: [
-              "Home: Overview of the platform with featured projects and latest updates.",
-              "Explore: Browse all projects with filtering options by category, funding stage, and more.",
-              "Create Project: Access the project creation flow (requires wallet connection).",
-              "Project Page: Detailed view of a specific project, including updates, milestones, and backer information.",
-              "Profile: View and manage your backed projects and created initiatives.",
-              "Docs: You are here! Comprehensive documentation on using the platform.",
-            ],
-          },
-
-          {
-            type: "warning",
-            title: "Important Note",
-            text: "Always ensure you're connected to the correct wallet address when backing projects or creating new initiatives. Transactions on the blockchain are irreversible.",
-          },
-        ],
-      },
-      {
-        id: "platform-overview",
-        title: "Platform Overview",
-        content: [
-          { type: "heading", title: "Platform architecture diagram" },
-          "The Frami platform consists of several interconnected components working together to deliver a seamless crowdfunding experience:",
-
-          {
-            type: "code",
-            code: `
-┌─────────────────────────────────────────┐
-│              User Interface             │
-│  (React.js, TypeScript, Tailwind CSS)   │
-└───────────────┬─────────────────────────┘
-                │
-┌───────────────▼─────────────────────────┐
-│         Blockchain Integration          │
-│  (RainbowKit/Wagmi, Web3.js/Ethers.js)  │
-└───────────────┬─────────────────────────┘
-                │
-    ┌───────────▼───────────┐     ┌────────────────────────┐
-    │   Smart Contracts     │     │    Backend Services    │
-    │ (Project, Milestones, ├─────┤   (Express, graphQL,   │
-    │    Tokens, Voting)    │     │        mongoBD)        │
-    └───────────┬───────────┘     └────────────────────────┘
-                │
-    ┌───────────▼───────────┐
-    │     Blockchain        │
-    │  (Ethereum, Polygon)  │
-    └───────────────────────┘`,
-          },
-
-          { type: "heading", title: "Component interactions" },
-          {
-            type: "list",
-            items: [
-              "User Interface: Provides an intuitive experience for creating and browsing projects, built with React.js and TypeScript.",
-              "Blockchain Integration: Connects user actions to blockchain transactions using RainbowKit/Wagmi and Web3.js/Ethers.js libraries.",
-              "Smart Contracts: Handle project creation, milestone management, fund distribution, and voting mechanisms on the blockchain.",
-              "Backend Services: Manage data storage, user authentication, and integrate with external services.",
-              "Blockchain: The underlying distributed ledger technology that ensures transparency and security of all transactions.",
-            ],
-          },
-
-          { type: "heading", title: "Key terminology" },
-          {
-            type: "table",
-            headers: ["Term", "Definition"],
-            rows: [
-              [
-                "Project",
-                "A creative initiative seeking funding on the platform. Each project has specific goals, milestones, and funding requirements.",
-              ],
-              [
-                "Milestone",
-                "A defined checkpoint in a project's development, with specific deliverables that, when verified, trigger the release of a portion of funds.",
-              ],
-              [
-                "Smart Contract",
-                "Self-executing code on the blockchain that enforces and automates the rules of project funding and milestone verification.",
-              ],
-              [
-                "Gas Fee",
-                "A small fee paid to the blockchain network for processing transactions. Required for operations like backing a project or releasing milestone funds.",
-              ],
-              [
-                "Wallet",
-                "A digital tool that stores your cryptocurrency and allows you to interact with blockchain applications.",
-              ],
-              [
-                "FounderNFT",
-                "Non-fungible tokens that represent exclusive membership and benefits on the Frami platform.",
-              ],
-              [
-                "Governance",
-                "The process by which project backers can participate in voting on milestone completion and other key decisions.",
-              ],
-            ],
+            title: "Roadmap Flexibility",
+            text: "This roadmap represents our current development priorities, though we remain agile and responsive to market conditions and community feedback. The Frami team is committed to building a platform that empowers creators, rewards early supporters, and advances the possibilities of decentralized funding.",
           },
         ],
       },
@@ -600,7 +431,7 @@ export const docSections: DocSection[] = [
   },
   {
     id: "guides",
-    title: "Guides",
+    title: "GUIDES",
     items: [
       {
         id: "for-project-creators",
@@ -608,7 +439,7 @@ export const docSections: DocSection[] = [
         content: [
           { type: "heading", title: "Creating a successful funding campaign" },
           "Building a compelling crowdfunding campaign on Frami requires careful planning and execution. Here are key strategies for success:",
-          
+
           {
             type: "list",
             items: [
@@ -617,13 +448,13 @@ export const docSections: DocSection[] = [
               "Set a realistic funding goal based on your project requirements",
               "Craft an enticing value proposition for potential backers",
               "Develop a comprehensive marketing strategy",
-              "Plan for regular project updates throughout the campaign"
-            ]
+              "Plan for regular project updates throughout the campaign",
+            ],
           },
-          
+
           { type: "heading", title: "Setting up effective milestones" },
           "Milestones are central to Frami's funding model. They help backers track progress and manage risk. When creating milestones:",
-          
+
           {
             type: "list",
             items: [
@@ -632,13 +463,13 @@ export const docSections: DocSection[] = [
               "Set realistic timeframes for completion",
               "Align funding needs with each development phase",
               "Include verification methods for milestone completion",
-              "Balance detail with flexibility to adapt to changing conditions"
-            ]
+              "Balance detail with flexibility to adapt to changing conditions",
+            ],
           },
-          
+
           { type: "heading", title: "Project page best practices" },
           "Your project page is your pitch to potential backers. Make it count:",
-          
+
           {
             type: "list",
             items: [
@@ -648,13 +479,13 @@ export const docSections: DocSection[] = [
               "Highlight your team's expertise and background",
               "Clearly explain the problem you're solving and your solution",
               "Outline key milestones and how funds will be used",
-              "Address potential risks and how you plan to mitigate them"
-            ]
+              "Address potential risks and how you plan to mitigate them",
+            ],
           },
-          
+
           { type: "heading", title: "Community engagement strategies" },
           "Building and maintaining an active community around your project is crucial for success:",
-          
+
           {
             type: "list",
             items: [
@@ -664,16 +495,16 @@ export const docSections: DocSection[] = [
               "Create exclusive content for backers",
               "Recognize and highlight active community members",
               "Use social media to amplify your project's reach",
-              "Collect and incorporate community feedback"
-            ]
+              "Collect and incorporate community feedback",
+            ],
           },
-          
+
           {
             type: "note",
             title: "Transparency matters",
-            text: "Blockchain technology enables unprecedented transparency. Embrace this by being open about your progress, challenges, and how funds are being used. This builds trust with your backers and increases long-term support."
-          }
-        ]
+            text: "Blockchain technology enables unprecedented transparency. Embrace this by being open about your progress, challenges, and how funds are being used. This builds trust with your backers and increases long-term support.",
+          },
+        ],
       },
       {
         id: "for-investors",
@@ -681,7 +512,7 @@ export const docSections: DocSection[] = [
         content: [
           { type: "heading", title: "Evaluating project potential" },
           "Due diligence is essential when investing in blockchain projects. Here's how to assess a project's potential on Frami:",
-          
+
           {
             type: "list",
             items: [
@@ -691,13 +522,13 @@ export const docSections: DocSection[] = [
               "Examine milestone structure and funding allocation",
               "Check community engagement and social proof",
               "Research the competitive landscape",
-              "Consider the tokenomics model (if applicable)"
-            ]
+              "Consider the tokenomics model (if applicable)",
+            ],
           },
-          
+
           { type: "heading", title: "Understanding risk factors" },
           "All investments carry risk, and blockchain projects have unique considerations:",
-          
+
           {
             type: "list",
             items: [
@@ -706,13 +537,13 @@ export const docSections: DocSection[] = [
               "Technology risk: Technical feasibility and security concerns",
               "Regulatory risk: Potential legal challenges or changes",
               "Liquidity risk: Ability to exit your investment if needed",
-              "Fork risk: Potential for blockchain protocol changes"
-            ]
+              "Fork risk: Potential for blockchain protocol changes",
+            ],
           },
-          
+
           { type: "heading", title: "Portfolio diversification strategies" },
           "Building a balanced investment portfolio on Frami:",
-          
+
           {
             type: "list",
             items: [
@@ -721,13 +552,13 @@ export const docSections: DocSection[] = [
               "Mix short-term and long-term investment horizons",
               "Balance high-risk/high-reward with more established projects",
               "Consider geographic diversification",
-              "Invest across different blockchain ecosystems"
-            ]
+              "Invest across different blockchain ecosystems",
+            ],
           },
-          
+
           { type: "heading", title: "Monitoring your investments" },
           "Stay informed about your portfolio's performance:",
-          
+
           {
             type: "list",
             items: [
@@ -736,22 +567,22 @@ export const docSections: DocSection[] = [
               "Join project communities to gauge sentiment and progress",
               "Set up notifications for major project events",
               "Regularly reassess your investment thesis",
-              "Document lessons learned from each investment"
-            ]
+              "Document lessons learned from each investment",
+            ],
           },
-          
+
           {
             type: "warning",
             title: "Investment Disclaimer",
-            text: "Investing in blockchain projects involves significant risk. Never invest more than you can afford to lose, and consider consulting with a financial advisor before making investment decisions."
-          }
-        ]
-      }
-    ]
+            text: "Investing in blockchain projects involves significant risk. Never invest more than you can afford to lose, and consider consulting with a financial advisor before making investment decisions.",
+          },
+        ],
+      },
+    ],
   },
   {
     id: "core-concepts",
-    title: "Core Concepts",
+    title: "CORE CONCEPTS",
     items: [
       {
         id: "smart-contract-architecture",
@@ -832,7 +663,7 @@ export const docSections: DocSection[] = [
       },
       {
         id: "extension-system",
-        title: "Extension System",
+        title: "Extension System (Coming Soon)",
         content: [
           { type: "heading", title: "How extensions work" },
           "The Frami platform features a modular extension system that allows for customizing and enhancing project functionality:",
@@ -909,833 +740,140 @@ export const docSections: DocSection[] = [
             items: [
               "Specific: Clearly defined with measurable deliverables.",
               "Achievable: Realistic given the project's resources and timeline.",
-              "Relevant: Directly contributing to the project's overall goals.",
-              "Time-bound: Having a defined completion timeframe.",
-              "Verifiable: Producing outputs that can be objectively assessed.",
-            ],
-          },
-
-          "Examples of well-defined milestones:",
-
-          {
-            type: "table",
-            headers: ["Milestone", "Deliverables", "Funding %"],
-            rows: [
-              [
-                "Prototype Development",
-                "Working software prototype with core functionality, GitHub repository, demo video",
-                "20%",
-              ],
-              [
-                "Beta Release",
-                "Testable beta version, user documentation, initial user testing results",
-                "30%",
-              ],
-              [
-                "Launch Preparation",
-                "Final product, complete documentation, marketing materials, launch plan",
-                "25%",
-              ],
-              [
-                "Public Launch",
-                "Live product, user onboarding system, support infrastructure",
-                "25%",
-              ],
+              "Relevant: Directly related to the project's overall goals.",
+              "Time-bound: Include clear deadlines for completion.",
+              "Verifiable: Include methods to validate completion.",
             ],
           },
 
           { type: "heading", title: "Milestone verification process" },
-          "When a project creator claims a milestone is complete, the following verification process occurs:",
+          "When a milestone is marked as complete, the following verification process is triggered:",
 
           {
             type: "numbered-list",
             items: [
-              "Creator submits evidence of milestone completion through the platform.",
-              "Verification period begins (typically 3-7 days, set during project creation).",
-              "Backers and designated verifiers review the submitted evidence.",
-              "Stakeholders cast votes to approve or reject the milestone completion.",
-              "If approved by the required threshold, funds for that milestone are released.",
-              "If rejected, the creator can address concerns and resubmit for verification.",
+              "Creator submits evidence of milestone completion.",
+              "Verification method is activated based on project settings (community vote, designated validators, or automated checks).",
+              "Verification period begins (typically 3-7 days).",
+              "If approved, funds allocated to the milestone are released to the project.",
+              "If rejected, the creator can address concerns and resubmit, or dispute the rejection.",
             ],
           },
 
-          { type: "heading", title: "Voting mechanics for fund release" },
-          "Fund release is determined through a transparent voting system:",
+          { type: "heading", title: "Fund distribution mechanics" },
+          "The Frami platform employs a secure and transparent fund distribution system:",
 
           {
             type: "list",
             items: [
-              "Voting Power: Based on the proportion of funds contributed to the project.",
-              "Approval Threshold: Typically set at 51% of voting power, but can be customized during project setup.",
-              "Voting Period: Limited timeframe during which votes must be cast (default: 5 days).",
-              "Delegation: Backers can delegate their voting power to trusted experts or representatives.",
-              "Automatic Release: If the verification period expires without sufficient rejection votes, funds are automatically released.",
+              "Escrow: Funds are held in a smart contract escrow until milestones are verified.",
+              "Proportional Release: Each milestone releases a predetermined percentage of the total funds.",
+              "Backer Protection: If a project fails to complete milestones within the specified timeframe, unused funds can be returned to backers.",
+              "Creator Incentives: Successfully completing milestones on time can unlock bonuses or additional benefits.",
+              "Transparent Tracking: All fund movements are recorded on the blockchain and visible to backers.",
             ],
           },
 
           {
             type: "warning",
-            title: "Important",
-            text: "Once funds are released for a milestone, the transaction cannot be reversed. This ensures finality on the blockchain but makes the verification process critically important.",
+            title: "Important Consideration",
+            text: "When defining milestones, ensure that early milestones provide demonstrable value to backers. This builds trust and establishes credibility for later, more complex development phases.",
           },
         ],
       },
       {
         id: "platform-governance",
-        title: "Platform Governance",
+        title: "Platform Governance (Coming Soon)",
         content: [
-          { type: "heading", title: "Role-based permissions" },
-          "The Frami platform implements a comprehensive role-based permission system to ensure secure and appropriate access for all participants:",
+          { type: "heading", title: "Governance structure" },
+          "Frami employs a multi-level governance structure to ensure platform decisions are made fairly and transparently:",
+
+          {
+            type: "list",
+            items: [
+              "FounderNFT Holders: Have primary voting rights on platform upgrades and major decisions.",
+              "Active Backers: Can vote on specific project-related matters and milestone verifications.",
+              "Project Creators: Have decision-making authority within their own projects, subject to platform rules.",
+              "Core Team: Maintains operational oversight during the platform's early stages.",
+            ],
+          },
+
+          { type: "heading", title: "Voting mechanisms" },
+          "Various voting mechanisms are employed based on the type and impact of decisions:",
 
           {
             type: "table",
-            headers: ["Role", "Permissions"],
+            headers: [
+              "Decision Type",
+              "Voting Mechanism",
+              "Required Threshold",
+              "Duration",
+            ],
             rows: [
               [
-                "Platform Admin",
-                "Manage platform settings, approve new extension types, execute emergency controls",
+                "Protocol Upgrades",
+                "FounderNFT Weighted Voting",
+                "66% Majority",
+                "7 Days",
               ],
               [
-                "Project Creator",
-                "Create and manage projects, define milestones, submit verification evidence, receive funds",
+                "Parameter Changes",
+                "FounderNFT Weighted Voting",
+                "51% Majority",
+                "5 Days",
               ],
               [
-                "Project Team Member",
-                "Access based on creator-assigned permissions (view, edit, submit updates)",
+                "Project Milestone Verification",
+                "Backer Token-weighted Voting",
+                "51% Majority",
+                "3 Days",
               ],
               [
-                "Backer",
-                "Contribute funds, vote on milestones, receive project updates, participate in governance",
+                "Community Fund Allocation",
+                "Quadratic Voting",
+                "51% Majority",
+                "5 Days",
               ],
               [
-                "Verifier",
-                "Specialized role for validating milestone completion with enhanced voting power",
+                "Emergency Actions",
+                "Multi-sig Council",
+                "7/10 Signatures",
+                "24 Hours",
               ],
             ],
           },
 
-          { type: "heading", title: "Fee structure" },
-          "The Frami platform utilizes a fair and transparent fee structure to maintain sustainability while maximizing value for creators and backers:",
+          { type: "heading", title: "Proposal process" },
+          "The governance proposal process follows these steps:",
 
           {
-            type: "list",
+            type: "numbered-list",
             items: [
-              "Platform Fee: 5% of funds raised, applied only when milestones are successfully completed.",
-              "Extension Fees: Vary based on the extensions used, typically 0-2% additional fee.",
-              "Gas Optimization: Our smart contracts are designed to minimize blockchain transaction fees.",
-              "FounderNFT Discount: Holders of FounderNFTs receive reduced platform fees (up to 40% reduction).",
-              "Volume Benefits: Projects raising over certain thresholds may qualify for reduced fees.",
+              "Proposal Creation: Any FounderNFT holder can create a governance proposal.",
+              "Discussion Period: 2-day period for community discussion and proposal refinement.",
+              "Voting Period: Voting opens for the duration specified based on proposal type.",
+              "Execution: If approved, proposals are executed automatically through smart contracts.",
+              "Implementation: Technical changes are implemented according to the proposal timeline.",
             ],
           },
 
-          { type: "heading", title: "Treasury management" },
-          "Collected fees are managed through a transparent treasury system:",
+          { type: "heading", title: "Governance evolution" },
+          "The Frami governance system will evolve over time toward greater decentralization:",
 
           {
             type: "list",
             items: [
-              "Development Allocation: 60% of fees fund ongoing platform development and improvements.",
-              "Security: 15% dedicated to security audits and bug bounty programs.",
-              "Community Initiatives: 15% for community growth, education, and events.",
-              "Ecosystem Grants: 10% to support promising projects and extensions.",
-            ],
-          },
-
-          { type: "heading", title: "Future DAO governance" },
-          "The Frami platform roadmap includes a transition to full DAO (Decentralized Autonomous Organization) governance:",
-
-          {
-            type: "list",
-            items: [
-              "Governance Token: Future introduction of a governance token giving holders voting rights on platform decisions.",
-              "Proposal System: Mechanism for community members to suggest and vote on platform changes.",
-              "Progressive Decentralization: Phased approach to transitioning platform control to the community.",
-              "Governance Mining: Early platform users and FounderNFT holders will receive governance benefits.",
+              "Phase 1 (Launch): Core team maintains veto power for safety and security concerns.",
+              "Phase 2 (Stabilization): Transition to community voting with safeguards.",
+              "Phase 3 (Decentralization): Full DAO governance with optimistic governance model.",
+              "Phase 4 (Maturity): Multi-chain governance allowing cross-chain decision-making.",
             ],
           },
 
           {
             type: "note",
-            title: "Roadmap Item",
-            text: "DAO governance is scheduled for implementation in Phase 3 of our platform roadmap (estimated Q4 2025). Current governance is managed by the founding team with community input.",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "guides",
-    title: "Guides",
-    items: [
-      {
-        id: "for-project-creators",
-        title: "For Project Creators",
-        content: [
-          { type: "heading", title: "Planning your fundraising campaign" },
-          "A successful fundraising campaign on Frami requires careful planning and preparation:",
-
-          {
-            type: "numbered-list",
-            items: [
-              "Define your project scope clearly, with specific goals and deliverables.",
-              "Research similar projects for benchmarking funding goals and timelines.",
-              "Create a detailed budget breakdown showing how funds will be utilized.",
-              "Develop a compelling narrative that communicates your project's value proposition.",
-              "Prepare high-quality visuals including images, videos, and possibly prototypes.",
-              "Build an audience before launching through social media and community engagement.",
-              "Create a marketing plan for driving traffic to your project page.",
-              "Plan your milestone structure to align with natural project development phases.",
-            ],
-          },
-
-          { type: "heading", title: "Setting up effective milestones" },
-          "Milestones are critical to project success. Follow these guidelines for creating effective milestones:",
-
-          {
-            type: "list",
-            items: [
-              "Create 3-5 clearly defined milestones for most projects (fewer for smaller projects, more for complex ones).",
-              "Allocate funding proportionally to the work involved in each milestone.",
-              "Include both development activities and demonstrable outcomes in each milestone.",
-              "Set realistic timeframes that account for potential delays.",
-              "Define specific, measurable success criteria for milestone completion.",
-              "Consider dependencies between milestones and how they affect your timeline.",
-              "Include testing and feedback phases in your milestone plan.",
-            ],
-          },
-
-          {
-            type: "note",
-            title: "Best Practice",
-            text: "Many successful projects allocate a smaller percentage (15-20%) to the first milestone to demonstrate commitment and reduce initial risk for backers.",
-          },
-
-          { type: "heading", title: "Managing your team members" },
-          "For projects with multiple team members, proper role management is essential:",
-
-          {
-            type: "list",
-            items: [
-              "Invite team members by their wallet addresses through the project dashboard.",
-              "Assign appropriate permission levels based on responsibilities.",
-              "Document clear responsibilities for each team member within the project.",
-              "Establish internal communication and coordination processes.",
-              "Create a shared calendar for milestone deadlines and deliverables.",
-              "Regularly update team members on project progress and backer feedback.",
-              "Implement a review process for all public communications and updates.",
-            ],
-          },
-
-          { type: "heading", title: "Reporting milestone completion" },
-          "When submitting evidence for milestone completion, include the following:",
-
-          {
-            type: "list",
-            items: [
-              "Comprehensive summary of work completed during the milestone period.",
-              "Direct links to deliverables (e.g., GitHub repositories, design files, documentation).",
-              "Before/after comparisons highlighting progress made.",
-              "Video demonstrations of functional components or features.",
-              "Test results or performance metrics demonstrating quality.",
-              "Explanation of any deviations from the original milestone plan.",
-              "Preview of upcoming work in the next milestone phase.",
-            ],
-          },
-
-          {
-            type: "warning",
-            title: "Important",
-            text: "Submit milestone completion evidence well before you require funds, as the verification process takes time (typically 3-7 days depending on your project settings).",
-          },
-        ],
-      },
-      {
-        id: "for-investors",
-        title: "For Investors",
-        content: [
-          { type: "heading", title: "Due diligence checklist" },
-          "Before backing a project on Frami, consider the following due diligence checklist:",
-
-          {
-            type: "list",
-            items: [
-              "Team background: Verify the experience and credentials of the project team.",
-              "Project feasibility: Assess if the project goals are realistic given the team, timeline, and budget.",
-              "Milestone quality: Check if milestones are specific, measurable, and properly sequenced.",
-              "Budget appropriateness: Evaluate if the funding request aligns with project scope.",
-              "Community engagement: Gauge the project's community support and communication quality.",
-              "Uniqueness: Consider how the project differentiates from existing solutions.",
-              "Market potential: Assess the target market size and growth prospects.",
-              "Risk factors: Identify potential challenges that could affect project success.",
-            ],
-          },
-
-          { type: "heading", title: "Investment mechanics" },
-          "Understanding how investments work on Frami will help you make informed decisions:",
-
-          {
-            type: "list",
-            items: [
-              "Contributions are made in cryptocurrency (primarily ETH and supported ERC-20 tokens).",
-              "Funds are held in a secure smart contract and released according to milestone completion.",
-              "Your contribution is recorded on the blockchain, providing transparent proof of backing.",
-              "The minimum contribution amount is set by each project (typically 0.01 ETH or equivalent).",
-              "Project backing comes with voting rights proportional to your contribution amount.",
-              "Some projects may offer additional rewards or tokens for backers at various levels.",
-              "If a project fails to meet a milestone within the specified timeframe, you may be eligible for a partial refund.",
-            ],
-          },
-
-          { type: "heading", title: "Participating in milestone voting" },
-          "As a backer, you play a critical role in project governance through milestone voting:",
-
-          {
-            type: "numbered-list",
-            items: [
-              "You'll receive notifications when a project you've backed submits a milestone for verification.",
-              "Review the evidence provided by the project team for milestone completion.",
-              "Cast your vote (approve or reject) within the specified voting period.",
-              "Your voting power is proportional to your contribution to the project.",
-              "If you choose to reject, provide constructive feedback explaining your decision.",
-              "Monitor the overall voting progress through the project dashboard.",
-              "If you don't vote within the specified period, your vote won't be counted in the final tally.",
-            ],
-          },
-
-          { type: "heading", title: "Claiming refunds (if applicable)" },
-          "In certain circumstances, you may be eligible for a refund of your contribution:",
-
-          {
-            type: "list",
-            items: [
-              "Failed milestone: If a milestone is rejected by the voting process, funds allocated to that milestone remain secured.",
-              "Project cancellation: If a project is officially canceled, remaining funds are returned to backers proportionally.",
-              "Expired timeline: If a project exceeds its maximum timeline without completing milestones, remaining funds may be eligible for refund.",
-              "Emergency intervention: In rare cases of detected fraud, the platform may enable emergency refund mechanisms.",
-            ],
-          },
-
-          {
-            type: "note",
-            title: "Important",
-            text: "Refunds are processed automatically by the smart contract when conditions are met. No manual claim is needed in most cases.",
-          },
-        ],
-      },
-      {
-        id: "for-developers",
-        title: "For Developers",
-        content: [
-          { type: "heading", title: "Local development environment setup" },
-          "To start developing with or for the Frami platform, set up your local environment:",
-
-          {
-            type: "numbered-list",
-            items: [
-              "Clone the Frami SDK repository: `git clone https://github.com/frami-platform/frami-sdk`",
-              "Install dependencies: `npm install`",
-              "Create a .env file based on the provided .env.example",
-              "Set up a local blockchain environment (we recommend Hardhat)",
-              "Deploy local test contracts: `npm run deploy:local`",
-              "Run the development interface: `npm run dev`",
-              "Connect your development wallet (MetaMask recommended) to your local network",
-            ],
-          },
-
-          {
-            type: "code",
-            code: `// Example .env file for local development
-PRIVATE_KEY=your_test_wallet_private_key
-INFURA_API_KEY=your_infura_api_key
-ETHERSCAN_API_KEY=your_etherscan_api_key
-POLYGON_SCAN_API_KEY=your_polygonscan_api_key
-LOCAL_RPC_URL=http://localhost:8545`,
-          },
-
-          { type: "heading", title: "Integration options" },
-          "There are several ways to integrate with the Frami platform:",
-
-          {
-            type: "list",
-            items: [
-              "JavaScript SDK: Our comprehensive SDK for web applications",
-              "REST API: For backend integrations and data retrieval",
-              "Smart Contract Interfaces: Direct interaction with platform contracts",
-              "GraphQL API: For efficient data querying (currently in beta)",
-              "Webhook System: For event-based integrations",
-            ],
-          },
-
-          {
-            type: "code",
-            code: `// Example: Using the Frami SDK to get project details
-import { FramiSDK } from '@frami/sdk';
-
-// Initialize the SDK
-const frami = new FramiSDK({
-  provider: window.ethereum, // or any Web3 provider
-  network: 'mainnet' // or 'testnet', 'polygon', etc.
-});
-
-// Get project details
-async function getProjectDetails(projectId) {
-  try {
-    const project = await frami.projects.getById(projectId);
-    console.log('Project details:', project);
-    return project;
-  } catch (error) {
-    console.error('Error fetching project:', error);
-  }
-}`,
-          },
-
-          { type: "heading", title: "Testing framework" },
-          "The Frami platform provides a comprehensive testing framework for developers:",
-
-          {
-            type: "list",
-            items: [
-              "Unit testing suite for smart contract interactions",
-              "Integration test helpers for end-to-end workflow testing",
-              "Mock data generators for simulating various platform scenarios",
-              "Test network connections for Ethereum and Polygon testnets",
-              "Gas usage optimization tools and benchmarks",
-            ],
-          },
-
-          {
-            type: "code",
-            code: `// Example: Running a test for a custom extension
-import { expect } from 'chai';
-import { ethers } from 'hardhat';
-import { FramiTestHelper } from '@frami/testing';
-
-describe('MyCustomExtension', function() {
-  let extension, project, owner, backer;
-  
-  beforeEach(async function() {
-    // Deploy test environment
-    const helper = await FramiTestHelper.setup();
-    [owner, backer] = await ethers.getSigners();
-    
-    // Create a test project
-    project = await helper.createTestProject(owner.address);
-    
-    // Deploy your custom extension
-    const ExtensionFactory = await ethers.getContractFactory('MyCustomExtension');
-    extension = await ExtensionFactory.deploy();
-    await extension.initialize(project.address);
-  });
-  
-  it('should correctly integrate with project', async function() {
-    // Your test logic here
-    await project.connect(owner).addExtension(extension.address);
-    expect(await project.hasExtension(extension.address)).to.be.true;
-  });
-});`,
-          },
-
-          { type: "heading", title: "Best practices for contract interaction" },
-          {
-            type: "list",
-            items: [
-              "Always use the latest version of the SDK for security updates",
-              "Implement proper error handling for all blockchain transactions",
-              "Cache data when possible to reduce redundant blockchain calls",
-              "Monitor gas costs and optimize transactions for efficiency",
-              "Implement retry logic for failed transactions with exponential backoff",
-              "Use event listeners for real-time updates rather than polling",
-              "Always validate user input before sending transactions to the blockchain",
-            ],
-          },
-
-          {
-            type: "warning",
-            title: "Security Note",
-            text: "Never store private keys in your application code. Use secure key management solutions and environment variables for sensitive information.",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "technical-docs",
-    title: "Technical Documentation",
-    items: [
-      {
-        id: "contract-reference",
-        title: "Contract Reference",
-        content: [
-          { type: "heading", title: "PlatformRegistry" },
-          "The PlatformRegistry is the central hub of the Frami ecosystem, responsible for managing all platform components and their interactions.",
-
-          { type: "subheading", title: "Methods and events" },
-          {
-            type: "table",
-            headers: ["Method/Event", "Description", "Parameters"],
-            rows: [
-              [
-                "registerExtension",
-                "Registers a new extension in the platform registry",
-                "address extension, string name, string category",
-              ],
-              [
-                "removeExtension",
-                "Removes an extension from the registry",
-                "address extension",
-              ],
-              [
-                "getExtensionsByCategory",
-                "Returns all extensions in a specific category",
-                "string category",
-              ],
-              [
-                "setImplementation",
-                "Updates the implementation address for a contract type",
-                "string contractType, address implementation",
-              ],
-              [
-                "getImplementation",
-                "Gets the current implementation address for a contract type",
-                "string contractType",
-              ],
-              [
-                "ExtensionRegistered",
-                "Event emitted when a new extension is registered",
-                "address extension, string name, string category",
-              ],
-              [
-                "ExtensionRemoved",
-                "Event emitted when an extension is removed",
-                "address extension",
-              ],
-              [
-                "ImplementationUpdated",
-                "Event emitted when a contract implementation is updated",
-                "string contractType, address implementation",
-              ],
-            ],
-          },
-
-          { type: "subheading", title: "Storage structure" },
-          {
-            type: "code",
-            code: `// PlatformRegistry storage layout
-struct PlatformRegistryStorage {
-    // Implementation mappings
-    mapping(string => address) implementations;
-    
-    // Extension registry
-    mapping(address => ExtensionInfo) extensions;
-    mapping(string => address[]) extensionsByCategory;
-    
-    // Access control
-    mapping(address => bool) admins;
-    mapping(address => bool) upgraders;
-    
-    // Configuration
-    uint256 platformFee;
-    address treasury;
-    
-    // Reserved storage slots for future upgrades
-    uint256[50] __gap;
-}
-
-struct ExtensionInfo {
-    string name;
-    string category;
-    bool active;
-}`,
-          },
-
-          { type: "subheading", title: "Access control" },
-          "The PlatformRegistry implements a robust access control system:",
-
-          {
-            type: "list",
-            items: [
-              "ADMIN_ROLE: Can add/remove extensions and modify platform settings",
-              "UPGRADER_ROLE: Can update contract implementations",
-              "Multi-sig security for critical operations",
-              "Time-locked upgrades for major platform changes",
-              "Emergency controls with appropriate checks and balances",
-            ],
-          },
-
-          { type: "heading", title: "ProjectFactory" },
-          "The ProjectFactory creates and manages project instances across the platform.",
-
-          { type: "subheading", title: "Proxy deployment process" },
-          "When a new project is created, the ProjectFactory follows this process:",
-
-          {
-            type: "numbered-list",
-            items: [
-              "Validates project parameters against platform requirements",
-              "Retrieves the current Project implementation from PlatformRegistry",
-              "Deploys a new proxy contract pointing to the implementation",
-              "Initializes the proxy with project parameters and creator information",
-              "Registers the new project in the platform's project registry",
-              "Assigns appropriate roles to the project creator",
-              "Emits a ProjectCreated event with project details",
-            ],
-          },
-
-          { type: "subheading", title: "Project creation parameters" },
-          {
-            type: "table",
-            headers: ["Parameter", "Description", "Validation Rules"],
-            rows: [
-              ["name", "Project display name", "Non-empty, max 100 characters"],
-              [
-                "description",
-                "Brief project description",
-                "Max 1000 characters",
-              ],
-              [
-                "fundingGoal",
-                "Total funding target",
-                "Greater than minimum (0.1 ETH)",
-              ],
-              [
-                "duration",
-                "Maximum project duration in days",
-                "Between 1 and 365 days",
-              ],
-              [
-                "milestones",
-                "Array of milestone objects",
-                "At least 1 milestone, total funding % must equal 100",
-              ],
-              [
-                "category",
-                "Project category identifier",
-                "Must be from approved list",
-              ],
-              [
-                "creator",
-                "Address of project creator",
-                "Must be transaction sender or approved delegate",
-              ],
-            ],
-          },
-
-          { type: "subheading", title: "Implementation updates" },
-          "The platform supports upgrading the Project implementation to add features and fix bugs:",
-
-          {
-            type: "list",
-            items: [
-              "New implementations must be compatible with existing storage layout",
-              "Upgrades are permissioned to platform admins through PlatformRegistry",
-              "All projects automatically benefit from implementation upgrades",
-              "Upgrade events are transparent and visible on the blockchain",
-              "Critical upgrades undergo a security review and public announcement",
-            ],
-          },
-        ],
-      },
-      {
-        id: "project-contract",
-        title: "Project Contract",
-        content: [
-          { type: "heading", title: "Lifecycle states" },
-          "A project can exist in one of the following states:",
-
-          {
-            type: "table",
-            headers: ["State", "Description", "Transitions"],
-            rows: [
-              [
-                "Draft",
-                "Initial creation state, not yet published",
-                "Can move to Active when published",
-              ],
-              [
-                "Active",
-                "Project is published and accepting funds",
-                "Can move to Successful, Failed, or Canceled",
-              ],
-              [
-                "Successful",
-                "Project reached its funding goal and completed all milestones",
-                "Terminal state",
-              ],
-              [
-                "Failed",
-                "Project did not reach minimum funding or failed critical milestone",
-                "Terminal state",
-              ],
-              [
-                "Canceled",
-                "Project was canceled by creator or admin",
-                "Terminal state",
-              ],
-            ],
-          },
-
-          { type: "heading", title: "Investment handling" },
-          "The Project contract manages investment flows with the following mechanisms:",
-
-          {
-            type: "list",
-            items: [
-              "Secure escrow of all contributed funds in the contract until milestone completion",
-              "Support for multiple investment currencies (ETH and approved ERC-20 tokens)",
-              "Minimum and maximum investment amounts configurable per project",
-              "Investment tracking with detailed records of all backers and amounts",
-              "Automatic issuance of backer benefits based on contribution levels",
-              "Refund capabilities in case of project failure or cancellation",
-            ],
-          },
-
-          {
-            type: "code",
-            code: `// Example investment flow
-function invest() external payable {
-    // Validate project state
-    require(state == ProjectState.Active, "Project not active");
-    
-    // Validate investment amount
-    require(msg.value >= minimumInvestment, "Below minimum investment");
-    require(
-        totalInvested + msg.value <= fundingGoal, 
-        "Exceeds funding goal"
-    );
-    
-    // Record investment
-    investments[msg.sender] += msg.value;
-    totalInvested += msg.value;
-    
-    // Update backer status
-    if (!isBackerRegistered[msg.sender]) {
-        backers.push(msg.sender);
-        isBackerRegistered[msg.sender] = true;
-    }
-    
-    // Issue any applicable rewards
-    _issueRewards(msg.sender, msg.value);
-    
-    // Emit event
-    emit InvestmentReceived(msg.sender, msg.value);
-}`,
-          },
-
-          { type: "heading", title: "Milestone management" },
-          "Milestones are a critical component of the Project contract:",
-
-          {
-            type: "list",
-            items: [
-              "Each milestone has funding percentage, description, and completion criteria",
-              "Milestone funds are locked until verification process completes",
-              "Verification requires sufficient positive votes from backers",
-              "Voting power is proportional to investment amount",
-              "Automatic fund release to project creator upon successful verification",
-              "Platform fees are deducted at the time of fund release",
-            ],
-          },
-
-          {
-            type: "code",
-            code: `// Simplified milestone verification process
-function submitMilestoneForVerification(
-    uint256 milestoneIndex,
-    string calldata evidenceUri
-) external onlyCreator {
-    Milestone storage milestone = milestones[milestoneIndex];
-    
-    require(milestone.status == MilestoneStatus.Pending, "Invalid status");
-    require(milestoneIndex == currentMilestoneIndex, "Not current milestone");
-    
-    milestone.evidenceUri = evidenceUri;
-    milestone.status = MilestoneStatus.InVerification;
-    milestone.verificationDeadline = block.timestamp + verificationPeriod;
-    
-    emit MilestoneSubmitted(milestoneIndex, evidenceUri);
-}
-
-function voteOnMilestone(
-    uint256 milestoneIndex,
-    bool approve
-) external onlyBacker {
-    Milestone storage milestone = milestones[milestoneIndex];
-    require(milestone.status == MilestoneStatus.InVerification, "Not in verification");
-    require(block.timestamp < milestone.verificationDeadline, "Voting period ended");
-    
-    uint256 votingPower = investments[msg.sender];
-    
-    if (approve) {
-        milestone.approvalVotes += votingPower;
-    } else {
-        milestone.rejectionVotes += votingPower;
-    }
-    
-    milestone.hasVoted[msg.sender] = true;
-    
-    emit MilestoneVoteCast(milestoneIndex, msg.sender, approve, votingPower);
-}`,
-          },
-
-          { type: "heading", title: "Fund distribution" },
-          "Upon successful milestone verification, funds are distributed as follows:",
-
-          {
-            type: "list",
-            items: [
-              "Calculator determines the exact amount based on milestone percentage and total funds raised",
-              "Platform fee (default 5%) is deducted and sent to platform treasury",
-              "Remaining funds are transferred to the project creator's address",
-              "Transfer events are emitted with detailed breakdown",
-              "Milestone status is updated to Completed",
-              "If all milestones are completed, project state changes to Successful",
-            ],
-          },
-
-          {
-            type: "code",
-            code: `// Simplified fund release process
-function releaseMilestoneFunds(uint256 milestoneIndex) external {
-    Milestone storage milestone = milestones[milestoneIndex];
-    
-    // Validate milestone can be released
-    require(milestone.status == MilestoneStatus.InVerification, "Not in verification");
-    require(
-        block.timestamp >= milestone.verificationDeadline || 
-        _hasSufficientApproval(milestone),
-        "Verification not complete"
-    );
-    require(
-        milestone.approvalVotes > milestone.rejectionVotes,
-        "Milestone rejected"
-    );
-    
-    // Calculate amounts
-    uint256 totalAmount = (totalInvested * milestone.fundingPercentage) / 100;
-    uint256 platformFeeAmount = (totalAmount * platformFee) / 10000; // fee in basis points
-    uint256 creatorAmount = totalAmount - platformFeeAmount;
-    
-    // Update milestone status
-    milestone.status = MilestoneStatus.Completed;
-    if (milestoneIndex < milestones.length - 1) {
-        currentMilestoneIndex = milestoneIndex + 1;
-    } else {
-        state = ProjectState.Successful;
-    }
-    
-    // Transfer funds
-    if (platformFeeAmount > 0) {
-        payable(platformTreasury).transfer(platformFeeAmount);
-    }
-    payable(creator).transfer(creatorAmount);
-    
-    emit MilestoneFundsReleased(
-        milestoneIndex, 
-        totalAmount, 
-        platformFeeAmount, 
-        creatorAmount
-    );
-}`,
+            title: "Governance Participation",
+            text: "Active participation in governance is incentivized through reputation scoring and governance rewards, ensuring ongoing engagement from the community.",
           },
         ],
       },
@@ -1743,7 +881,7 @@ function releaseMilestoneFunds(uint256 milestoneIndex) external {
   },
   {
     id: "resources",
-    title: "Resources",
+    title: "RESOURCES",
     items: [
       {
         id: "community-guidelines",
@@ -1751,7 +889,7 @@ function releaseMilestoneFunds(uint256 milestoneIndex) external {
         content: [
           { type: "heading", title: "Code of Conduct" },
           "Our community is built on respect, transparency, and collaboration. We expect all participants to adhere to these guidelines when interacting on the Frami platform:",
-          
+
           {
             type: "list",
             items: [
@@ -1760,13 +898,13 @@ function releaseMilestoneFunds(uint256 milestoneIndex) external {
               "Provide honest feedback without personal attacks",
               "Respect intellectual property and give proper attribution",
               "Report inappropriate behavior through proper channels",
-              "Maintain professionalism in all interactions"
-            ]
+              "Maintain professionalism in all interactions",
+            ],
           },
-          
+
           { type: "heading", title: "Communication channels" },
           "Frami offers several official communication channels for community engagement:",
-          
+
           {
             type: "list",
             items: [
@@ -1774,13 +912,13 @@ function releaseMilestoneFunds(uint256 milestoneIndex) external {
               "Discord Server: Real-time conversations and community support",
               "Twitter: Latest updates and announcements",
               "Medium Blog: In-depth articles and thought leadership",
-              "Project Comment Sections: Project-specific discussions"
-            ]
+              "Project Comment Sections: Project-specific discussions",
+            ],
           },
-          
+
           { type: "heading", title: "Dispute resolution process" },
           "In the event of disagreements or disputes, we follow a structured resolution process:",
-          
+
           {
             type: "numbered-list",
             items: [
@@ -1788,75 +926,91 @@ function releaseMilestoneFunds(uint256 milestoneIndex) external {
               "Mediation: If needed, a community moderator can facilitate discussion",
               "Formal Review: Unresolved disputes can be escalated to the platform governance team",
               "Governance Vote: For significant disputes, a platform-wide vote may be conducted",
-              "Binding Decision: The outcome of the governance vote is final and binding"
-            ]
+              "Binding Decision: The outcome of the governance vote is final and binding",
+            ],
           },
-          
+
           {
             type: "warning",
             title: "Important",
-            text: "Harassment, hate speech, discrimination, and abuse are not tolerated on the Frami platform. Violations may result in temporary or permanent removal from the community."
-          }
-        ]
+            text: "Harassment, hate speech, discrimination, and abuse are not tolerated on the Frami platform. Violations may result in temporary or permanent removal from the community.",
+          },
+        ],
       },
       {
         id: "faqs",
         title: "FAQs",
         content: [
           { type: "heading", title: "General Platform Questions" },
-          
+
           { type: "subheading", title: "What is Frami?" },
           "Frami is a blockchain-powered crowdfunding platform that enables creators to raise funds for their projects through a transparent, secure, and milestone-based approach. The platform leverages blockchain technology to ensure accountability and align incentives between project creators and backers.",
-          
-          { type: "subheading", title: "How does Frami differ from traditional crowdfunding platforms?" },
+
+          {
+            type: "subheading",
+            title:
+              "How does Frami differ from traditional crowdfunding platforms?",
+          },
           "Unlike traditional platforms, Frami utilizes blockchain technology for transparent fund management, releases funding based on verified milestone completion, enables community governance through voting mechanisms, and provides exclusive benefits to early supporters through FounderNFTs.",
-          
-          { type: "subheading", title: "Do I need technical blockchain knowledge to use Frami?" },
+
+          {
+            type: "subheading",
+            title: "Do I need technical blockchain knowledge to use Frami?",
+          },
           "No, Frami is designed to be user-friendly for both technical and non-technical users. While understanding blockchain basics can be helpful, our platform handles the technical complexity so you can focus on creating or supporting projects.",
-          
+
           { type: "heading", title: "Project Creation" },
-          
+
           { type: "subheading", title: "How do I start a project on Frami?" },
           "To create a project, connect your wallet, navigate to the 'Create Project' section, fill out the required information (project details, funding goals, milestones), and submit for review. Once approved, your project will be live on the platform.",
-          
-          { type: "subheading", title: "What types of projects are allowed on Frami?" },
+
+          {
+            type: "subheading",
+            title: "What types of projects are allowed on Frami?",
+          },
           "Frami supports a wide range of projects including technology, creative arts, community initiatives, and more. Projects must comply with our terms of service and not involve illegal activities, hate speech, or harmful content.",
-          
+
           { type: "subheading", title: "How are project milestones verified?" },
-          "Milestone verification depends on the project's configuration. Options include community voting, designated validators, automated verification through oracles, or a combination of these methods. The verification process is transparent and results are recorded on the blockchain.",
-          
+          "Milestone verification depends on the project's configuration. Options include community voting, designated validators, automated verification through oracles, or a combination of these methods. The verification process is transparent and results are recorded on the blockchain. The first version of Frami will include community voting only, all the other options will be added as the roadmap advances!",
+
           { type: "heading", title: "Investing & Backing" },
-          
-          { type: "subheading", title: "What currencies can I use to back projects?" },
-          "Currently, you can back projects using ETH and select stablecoins (USDC, USDT). We plan to expand supported currencies in future updates.",
-          
-          { type: "subheading", title: "Can I get a refund if a project fails?" },
+
+          {
+            type: "subheading",
+            title: "What currencies can I use to back projects?",
+          },
+          "Currently, you can back projects using ETH. Select stablecoins (USDC, USDT, etc) will be added in future updates.",
+
+          {
+            type: "subheading",
+            title: "Can I get a refund if a project fails?",
+          },
           "Yes, if a project fails to meet its milestones, unused funds are returned to backers proportionally according to their contribution. This is managed automatically through smart contracts.",
-          
+
           { type: "subheading", title: "What fees does Frami charge?" },
-          "Frami charges a 5% platform fee on successfully funded projects. There may also be blockchain gas fees for transactions, which vary based on network conditions and are not controlled by Frami."
-        ]
+          "Currently, Frami charges a 5% platform fee on successfully funded projects. There may also be blockchain gas fees for transactions, which vary based on network conditions and are not controlled by Frami. Also, 5% transaction fee on secondary NFT sales.",
+        ],
       },
       {
         id: "audits",
-        title: "Audits",
+        title: "Audits (Coming Soon)",
         content: [
           { type: "heading", title: "Smart contract audit reports" },
-          "Our smart contracts undergo rigorous security audits by independent third-party firms to ensure the highest standards of security and reliability:",
-          
+          "Our smart contracts will undergo rigorous security audits by independent third-party firms to ensure the highest standards of security and reliability:",
+
           {
             type: "list",
             items: [
-              "CertiK Audit (March 2025): Comprehensive review of core platform contracts",
-              "Trail of Bits Audit (April 2025): Focused assessment of the milestone verification system",
-              "ChainSecurity Review (May 2025): Complete audit of FounderNFT functionality",
-              "OpenZeppelin Security Analysis (Quarterly): Ongoing security monitoring and risk assessment"
-            ]
+              "CertiK Audit: Comprehensive review of core platform contracts",
+              "Trail of Bits Audit: Focused assessment of the milestone verification system",
+              "ChainSecurity Review: Complete audit of FounderNFT functionality",
+              "OpenZeppelin Security Analysis: Ongoing security monitoring and risk assessment",
+            ],
           },
-          
+
           { type: "heading", title: "Methodology and scope" },
-          "Our audit process includes:",
-          
+          "Our audit process will include:",
+
           {
             type: "list",
             items: [
@@ -1865,302 +1019,286 @@ function releaseMilestoneFunds(uint256 milestoneIndex) external {
               "Formal verification of critical system components",
               "Economic attack vector analysis",
               "Gas optimization assessment",
-              "Upgrade mechanism security review"
-            ]
+              "Upgrade mechanism security review",
+            ],
           },
-          
-          { type: "heading", title: "Findings and resolutions" },
+
+          { type: "heading", title: "Findings and resolutions (Example)" },
           "Summary of key findings from our audit reports:",
-          
+
           {
             type: "table",
             headers: ["Severity", "Issue Type", "Status", "Resolution"],
             rows: [
-              ["High", "Reentrancy vulnerability in fund distribution", "Resolved", "Implemented checks-effects-interactions pattern and reentrancy guards"],
-              ["Medium", "Timestamp manipulation risk", "Resolved", "Replaced timestamp dependency with block number-based logic"],
-              ["Medium", "Access control weakness", "Resolved", "Implemented role-based access control with time locks"],
-              ["Low", "Gas optimization opportunities", "Resolved", "Refactored code to reduce gas costs by 30%"],
-              ["Informational", "Code documentation improvements", "Implemented", "Enhanced inline documentation and technical specifications"]
-            ]
+              [
+                "High",
+                "Reentrancy vulnerability in fund distribution",
+                "Resolved",
+                "Implemented checks-effects-interactions pattern and reentrancy guards",
+              ],
+              [
+                "Medium",
+                "Timestamp manipulation risk",
+                "Resolved",
+                "Replaced timestamp dependency with block number-based logic",
+              ],
+              [
+                "Medium",
+                "Access control weakness",
+                "Resolved",
+                "Implemented role-based access control with time locks",
+              ],
+              [
+                "Low",
+                "Gas optimization opportunities",
+                "Resolved",
+                "Refactored code to reduce gas costs by 30%",
+              ],
+            ],
           },
-          
+
           {
             type: "note",
             title: "Continuous Security",
-            text: "Security is an ongoing process. We maintain a bug bounty program to incentivize responsible disclosure of potential vulnerabilities and perform regular security reviews as the platform evolves."
-          }
-        ]
-      }
-    ]
+            text: "Security is an ongoing process. We maintain a bug bounty program to incentivize responsible disclosure of potential vulnerabilities and perform regular security reviews as the platform evolves.",
+          },
+        ],
+      },
+    ],
   },
   {
     id: "tokenomics",
-    title: "Tokenomics",
+    title: "TOKENOMICS",
     items: [
       {
-        id: "sdk-api-references",
-        title: "SDK & API References",
+        id: "foundernft-mechanics",
+        title: "FounderNFT Mechanics",
         content: [
-          { type: "heading", title: "JavaScript SDK documentation" },
-          "The Frami JavaScript SDK provides a comprehensive set of tools for interacting with the platform:",
+          { type: "heading", title: "FounderNFT overview" },
+          "FounderNFTs represent special membership and governance rights in the Frami platform. As a limited collection, they provide holders with exclusive benefits and platform participation opportunities.",
 
-          {
-            type: "code",
-            code: `// Installing the SDK
-npm install @frami/sdk
-
-// Basic usage
-import { FramiSDK } from '@frami/sdk';
-
-// Initialize with provider
-const frami = new FramiSDK({
-  provider: window.ethereum, // or any Web3 provider
-  network: 'mainnet' // or 'testnet', 'polygon', etc.
-});
-
-// Example: Get all projects
-const projects = await frami.projects.getAll();
-
-// Example: Get specific project
-const project = await frami.projects.getById('project-id');
-
-// Example: Create a project
-const newProject = await frami.projects.create({
-  name: 'My Amazing Project',
-  description: 'This project will change the world',
-  fundingGoal: ethers.utils.parseEther('10'), // 10 ETH
-  duration: 60, // 60 days
-  milestones: [
-    {
-      title: 'Initial prototype',
-      description: 'Develop the first working prototype',
-      fundingPercentage: 20
-    },
-    {
-      title: 'Beta release',
-      description: 'Launch beta version with core features',
-      fundingPercentage: 40
-    },
-    {
-      title: 'Public launch',
-      description: 'Full public release with all features',
-      fundingPercentage: 40
-    }
-  ]
-});`,
-          },
+          { type: "heading", title: "Token utility" },
+          "FounderNFTs provide various utilities within the Frami ecosystem:",
 
           {
             type: "list",
             items: [
-              "Full TypeScript support with comprehensive type definitions",
-              "Extensive documentation with code examples for all features",
-              "Event subscription system for real-time updates",
-              "Comprehensive error handling with detailed error messages",
-              "Gas estimation utilities for transaction planning",
-              "Caching layer for optimized performance",
-              "Wallet connection abstractions supporting multiple providers",
+              "Governance voting rights for platform decisions",
+              "Fee sharing from platform transaction revenues",
+              "Early access to premium projects before public rounds",
+              "Priority verification status for milestone validation",
+              "Exclusive access to platform features and extensions",
+              "Enhanced rewards when staking tokens",
             ],
           },
 
-          { type: "heading", title: "API endpoints" },
-          "For developers who prefer direct API integration, Frami offers a RESTful API:",
+          { type: "heading", title: "Acquisition methods" },
+          "There are several ways to acquire a FounderNFT:",
 
           {
-            type: "table",
-            headers: ["Endpoint", "Method", "Description"],
-            rows: [
-              [
-                "/api/projects",
-                "GET",
-                "List all projects with filtering options",
-              ],
-              ["/api/projects/:id", "GET", "Get details of a specific project"],
-              [
-                "/api/projects/:id/milestones",
-                "GET",
-                "Get milestones for a project",
-              ],
-              ["/api/projects/:id/backers", "GET", "Get backers of a project"],
-              [
-                "/api/users/:address/projects",
-                "GET",
-                "Get projects created by a user",
-              ],
-              [
-                "/api/users/:address/investments",
-                "GET",
-                "Get investments made by a user",
-              ],
-              ["/api/stats", "GET", "Get platform statistics and metrics"],
+            type: "list",
+            items: [
+              "Primary sale during the initial platform launch (limited to 1000 NFTs)",
+              "Secondary market purchases from existing holders",
+              "Special allocations through community contests and contributor rewards",
+              "Earn partial ownership rights through platform participation (future feature)",
             ],
           },
 
+          { type: "heading", title: "Transfer restrictions" },
+          "FounderNFTs have certain transfer restrictions to maintain ecosystem health:",
+
           {
-            type: "code",
-            code: `// Example API request using fetch
-async function getProject(projectId) {
-  const response = await fetch(
-    \`https://api.frami.io/api/projects/\${projectId}\`,
-    {
-      headers: {
-        'Authorization': \`Bearer \${apiKey}\`,
-        'Content-Type': 'application/json'
-      }
-    }
-  );
-  
-  if (!response.ok) {
-    throw new Error(\`API error: \${response.status}\`);
-  }
-  
-  return await response.json();
-}`,
+            type: "list",
+            items: [
+              "14-day cooldown period between transfers to prevent market manipulation",
+              "Governance rights activation only after 30 days of ownership",
+              "Maximum of 5 FounderNFTs per wallet address",
+              "Smart contract restrictions to prevent flash loans and other exploits",
+            ],
           },
 
           {
             type: "note",
-            title: "API Access",
-            text: "To use the Frami API, you need to register for an API key through the developer portal. API usage is subject to rate limits based on your subscription tier.",
+            title: "Value Protection",
+            text: "The fixed supply of 1000 FounderNFTs ensures scarcity, while the continuous addition of new platform utilities increases their value proposition over time.",
           },
         ],
       },
       {
-        id: "community-guidelines",
-        title: "Community Guidelines",
+        id: "fee-distribution",
+        title: "Fee Distribution",
         content: [
-          { type: "heading", title: "Code of conduct" },
-          "The Frami community adheres to a code of conduct that promotes a positive, inclusive environment for all participants:",
+          { type: "heading", title: "Platform fee structure" },
+          "Frami implements a transparent fee structure to sustain platform operations and reward ecosystem participants:",
 
           {
             type: "list",
             items: [
-              "Respect: Treat all community members with respect, regardless of background, identity, or experience level.",
-              "Inclusivity: Foster an inclusive environment where diverse perspectives are welcomed and valued.",
-              "Constructive Communication: Provide feedback in a constructive, helpful manner.",
-              "Responsibility: Take responsibility for your words and actions within the community.",
-              "Safety: Help create a safe space free from harassment, discrimination, and harmful behavior.",
-              "Privacy: Respect the privacy and confidentiality of other community members.",
-              "Collaboration: Work together to solve problems and advance the platform's goals.",
+              "5% base fee on all successfully funded projects",
+              "5% transaction fee on secondary NFT sales (if applicable)",
+              "0.5% fee on token swaps within the platform (future feature)",
+              "Premium feature access fees (optional, varies by feature)",
+            ],
+          },
+
+          { type: "heading", title: "Treasury allocation" },
+          "Collected fees are distributed to various ecosystem components:",
+
+          {
+            type: "table",
+            headers: ["Allocation", "Percentage", "Purpose"],
+            rows: [
+              [
+                "FounderNFT Holders",
+                "50%",
+                "Rewards for early platform supporters",
+              ],
+              [
+                "Protocol Treasury",
+                "30%",
+                "Platform development and maintenance",
+              ],
+              [
+                "Validator Incentives",
+                "10%",
+                "Rewards for milestone validators",
+              ],
+              ["Community Fund", "10%", "Community initiatives and grants"],
+            ],
+          },
+
+          { type: "heading", title: "Rewards distribution" },
+          "The 50% allocated to FounderNFT holders is distributed based on the following mechanisms:",
+
+          {
+            type: "list",
+            items: [
+              "Base distribution: Equal share among all FounderNFT holders",
+              "Staking multiplier: Increased rewards based on staking duration",
+              "Validator bonus: Extra rewards for those participating in milestone validation (Upcoming Feature)",
+            ],
+          },
+
+          {
+            type: "note",
+            title: "Distribution Schedule",
+            text: "Fee distributions occur automatically every 14 days through smart contracts. Holders can claim their rewards at any time or compound them by reinvesting into the platform.",
+          },
+        ],
+      },
+      {
+        id: "staking-system",
+        title: "Staking System (Coming Soon)",
+        content: [
+          { type: "heading", title: "Staking requirements" },
+          "The Frami staking system enables FounderNFT holders to lock their assets for enhanced benefits:",
+
+          {
+            type: "list",
+            items: [
+              "Minimum staking period: 60 days",
+              "NFT remains in holder's wallet but with transfer restrictions",
+              "Smart contract locking mechanism with on-chain verification",
+              "Option to auto-renew staking periods",
+            ],
+          },
+
+          { type: "heading", title: "Reward calculation" },
+          "Staking rewards are calculated based on multiple factors:",
+
+          {
+            type: "table",
+            headers: ["Factor", "Multiplier Range", "Notes"],
+            rows: [
+              [
+                "Staking Duration",
+                "1.0x - 2.5x",
+                "Higher multiplier for longer commitment",
+              ],
+              [
+                "Number of NFTs Staked",
+                "1.0x - 1.5x",
+                "Bonus for staking multiple FounderNFTs",
+              ],
+              [
+                "Validator Status",
+                "1.0x - 1.2x",
+                "Bonus for helping validate milestones",
+              ],
+            ],
+          },
+
+          { type: "heading", title: "Unstaking process" },
+          "The process to unstake FounderNFTs follows these steps:",
+
+          {
+            type: "numbered-list",
+            items: [
+              "Initiate unstaking through the platform interface",
+              "7-day cooldown period begins (rewards continue during this period)",
+              "After cooldown, NFT is fully released and transferable",
+              "Accumulated rewards are automatically distributed to the holder's wallet",
+              "30-day restriction period before the same NFT can be staked again",
             ],
           },
 
           {
             type: "warning",
-            title: "Enforcement",
-            text: "Violations of the code of conduct may result in warnings, temporary suspension, or permanent removal from the platform, depending on the severity and context of the violation.",
-          },
-
-          { type: "heading", title: "Contribution guidelines" },
-          "We welcome contributions to the Frami ecosystem. Here's how you can contribute effectively:",
-
-          {
-            type: "list",
-            items: [
-              "Start Small: Begin with smaller issues or improvements to familiarize yourself with the codebase.",
-              "Follow Standards: Adhere to the coding standards and guidelines documented in the repository.",
-              "Test Thoroughly: Ensure all contributions include appropriate tests.",
-              "Document Changes: Provide clear documentation for any new features or changes.",
-              "Submit PRs: Create pull requests with concise descriptions of the changes and their purpose.",
-              "Review Process: Be open to feedback during the code review process.",
-              "Licensing: All contributions must be licensed under the project's open source license.",
-            ],
-          },
-
-          { type: "heading", title: "Support channels" },
-          "Get help and connect with the Frami community through these official channels:",
-
-          {
-            type: "table",
-            headers: ["Channel", "Purpose", "Link"],
-            rows: [
-              [
-                "Discord",
-                "Real-time community discussions and support",
-                "discord.gg/frami",
-              ],
-              [
-                "Forum",
-                "Detailed discussions, proposals, and community governance",
-                "forum.frami.io",
-              ],
-              [
-                "GitHub",
-                "Code contributions, issue tracking, and technical discussions",
-                "github.com/frami-platform",
-              ],
-              [
-                "Developer Chat",
-                "Technical support for developers building on Frami",
-                "dev.frami.io/chat",
-              ],
-              [
-                "Twitter",
-                "Platform announcements and updates",
-                "twitter.com/FramiPlatform",
-              ],
-              [
-                "Help Center",
-                "Knowledge base with guides and troubleshooting",
-                "help.frami.io",
-              ],
-            ],
+            title: "Important Notice",
+            text: "Early unstaking (before the committed period ends) incurs a penalty of 20% of accumulated rewards, which are redistributed to the remaining stakers.",
           },
         ],
       },
       {
-        id: "faqs",
-        title: "FAQs",
+        id: "governance-token",
+        title: "Governance Token (Coming Soon)",
         content: [
-          { type: "heading", title: "Platform mechanics" },
-
-          { type: "subheading", title: "What is milestone-based funding?" },
-          "Milestone-based funding is a method where project funds are released in stages as specific development milestones are achieved and verified. This creates accountability for creators and reduces risk for backers, as funds are only released when tangible progress is demonstrated.",
-
-          { type: "subheading", title: "How does verification work?" },
-          "When a creator submits evidence of completing a milestone, backers review the evidence and vote to approve or reject it. If approved by a sufficient majority, the funds allocated to that milestone are released to the creator. This creates a transparent, community-driven verification process.",
-
-          { type: "subheading", title: "Can I use fiat currency?" },
-          "Currently, the platform primarily supports cryptocurrency transactions (ETH and select ERC-20 tokens). However, we plan to add fiat on-ramps in the future to make the platform more accessible to non-crypto users.",
-
-          { type: "subheading", title: "What happens if a project fails?" },
-          "If a project fails to complete its milestones or is abandoned, any unreleased funds (those allocated to incomplete milestones) can be reclaimed by backers through the platform's refund mechanism.",
-
-          { type: "heading", title: "Fees and payments" },
-
-          { type: "subheading", title: "What fees does Frami charge?" },
-          "Frami charges a 5% platform fee on funds successfully raised (applied only when milestone funds are released). Additional fees may apply for certain extensions or special features. FounderNFT holders receive fee discounts of up to 40%.",
-
-          { type: "subheading", title: "How are gas fees handled?" },
-          "Users are responsible for paying the gas fees for their own transactions on the blockchain. The platform is optimized to minimize gas costs where possible, and we provide gas estimation tools to help users understand potential costs before confirming transactions.",
-
-          { type: "subheading", title: "When do creators receive funds?" },
-          "Creators receive funds incrementally as milestones are completed and verified. Once a milestone is approved through the verification process, the corresponding portion of the project funding is immediately transferred to the creator's wallet.",
-
-          { type: "heading", title: "Security concerns" },
-
-          { type: "subheading", title: "How secure is the platform?" },
-          "The Frami platform undergoes regular security audits by leading blockchain security firms. Our smart contracts implement best practices for secure contract development, including formal verification where applicable. We also maintain a bug bounty program to incentivize responsible disclosure of potential vulnerabilities.",
+          { type: "heading", title: "Future roadmap" },
+          "While FounderNFTs currently serve as the primary governance mechanism, Frami plans to introduce a dedicated governance token in the future with the following characteristics:",
 
           {
-            type: "subheading",
-            title: "What happens if I lose access to my wallet?",
+            type: "list",
+            items: [
+              "ERC-20 compatible token with governance and utility functions",
+              "Fixed maximum supply with deflationary mechanisms",
+              "Gradual distribution to ensure fair allocation across the ecosystem",
+              "Integration with existing FounderNFT benefits and rights",
+            ],
           },
-          "If you lose access to your wallet, we cannot recover your account or funds directly due to the decentralized nature of blockchain. We strongly recommend using wallet recovery options like seed phrases and hardware wallets. For creators, we offer optional multi-sig project control that can help mitigate single points of failure.",
 
-          { type: "subheading", title: "Are smart contracts audited?" },
-          "Yes, all core smart contracts are audited by independent security firms before deployment. Audit reports are published on our website and GitHub repository. Extensions undergo a thorough review process before being approved for the platform.",
+          { type: "heading", title: "Transition process" },
+          "The transition to a dual governance system will be carefully managed:",
 
-          { type: "heading", title: "Troubleshooting" },
+          {
+            type: "numbered-list",
+            items: [
+              "Initial token distribution to FounderNFT holders (airdrop based on holding duration)",
+              "Liquidity bootstrapping phase with incentivized pools",
+              "Governance power sharing between NFT holders and token holders",
+              "Gradual shift of certain rights to token governance while preserving FounderNFT value",
+            ],
+          },
 
-          { type: "subheading", title: "Transaction failed or stuck pending" },
-          "If your transaction is stuck or failed, it may be due to insufficient gas, network congestion, or wallet issues. Try increasing the gas price (for stuck transactions), ensure your wallet has sufficient funds, or check the network status. If problems persist, visit our Help Center or contact support.",
+          { type: "heading", title: "Voting mechanics" },
+          "The future governance token will enable nuanced voting mechanics:",
 
-          { type: "subheading", title: "Cannot connect wallet" },
-          "Wallet connection issues may be caused by browser extensions, privacy settings, or wallet compatibility. Try refreshing the page, ensuring your wallet is unlocked, using a different browser, or checking for wallet updates. We support MetaMask, WalletConnect, and several other popular wallet providers.",
+          {
+            type: "list",
+            items: [
+              "Token-weighted voting with optional time-locking for increased power",
+              "Delegation capabilities for passive holders",
+              "Specialized voting for different platform aspects (technical, financial, community)",
+              "Quadratic voting for certain community-focused decisions",
+              "Combined NFT+Token voting power for critical platform decisions",
+            ],
+          },
 
-          { type: "subheading", title: "Milestone verification issues" },
-          "If you're experiencing problems with milestone verification, check that you've provided comprehensive evidence, the verification period hasn't expired, and you've met all the criteria specified in the milestone description. For project backers, ensure your wallet is properly connected when attempting to vote on milestones.",
+          {
+            type: "note",
+            title: "Development Timeline",
+            text: "The governance token is planned for introduction in Q4 2025, following extensive community discussion and economic modeling to ensure sustainability and alignment of incentives.",
+          },
         ],
       },
     ],
