@@ -232,8 +232,18 @@ export default function FounderNFTDashboard() {
                 {mockNFTData.map((nft) => (
                   <Card key={nft.id} className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
                     <CardContent className="p-3">
-                      <div className="aspect-square bg-gradient-to-br from-[#8A63D2]/20 to-[#583c8e]/20 rounded-lg mb-3 flex items-center justify-center">
-                        <Crown className="h-8 w-8 text-[#8A63D2]" />
+                      <div className="aspect-square bg-gradient-to-br from-[#8A63D2]/20 to-[#583c8e]/20 rounded-lg mb-3 overflow-hidden">
+                        <video
+                          src={founderNftVideo}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-full h-full object-cover rounded-lg"
+                          onLoadedData={(e) => {
+                            e.currentTarget.playbackRate = 0.5;
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <div className="flex justify-between items-center">
