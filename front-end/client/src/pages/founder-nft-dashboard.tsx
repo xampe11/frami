@@ -413,20 +413,20 @@ export default function FounderNFTDashboard() {
                     )}
                   </CardContent>
                 </Card>
-
-                {/* Selection Controls */}
-                {selectedNFTs.length > 0 && (
-                  <div className="flex justify-center">
-                    <Button 
-                      onClick={handleDeselectAll}
-                      variant="ghost"
-                      size="sm"
-                    >
-                      Clear All Selections
-                    </Button>
-                  </div>
-                )}
               </div>
+
+              {/* Selection Controls */}
+              {selectedNFTs.length > 0 && (
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleDeselectAll}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    Clear All Selections
+                  </Button>
+                </div>
+              )}
             </div>
           </TabsContent>
 
