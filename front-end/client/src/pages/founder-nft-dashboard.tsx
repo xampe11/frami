@@ -130,15 +130,15 @@ export default function FounderNFTDashboard() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleNFTSelection = (nftId: number) => {
-    setSelectedNFTs(prev => 
-      prev.includes(nftId) 
-        ? prev.filter(id => id !== nftId)
-        : [...prev, nftId]
+    setSelectedNFTs((prev) =>
+      prev.includes(nftId)
+        ? prev.filter((id) => id !== nftId)
+        : [...prev, nftId],
     );
   };
 
   const handleSelectAll = () => {
-    setSelectedNFTs(mockNFTData.map(nft => nft.id));
+    setSelectedNFTs(mockNFTData.map((nft) => nft.id));
   };
 
   const handleDeselectAll = () => {
@@ -149,11 +149,11 @@ export default function FounderNFTDashboard() {
     setIsProcessing(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Staking NFTs:', selectedNFTs);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Staking NFTs:", selectedNFTs);
       setSelectedNFTs([]);
     } catch (error) {
-      console.error('Staking failed:', error);
+      console.error("Staking failed:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -163,25 +163,25 @@ export default function FounderNFTDashboard() {
     setIsProcessing(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Unstaking NFTs:', selectedNFTs);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Unstaking NFTs:", selectedNFTs);
       setSelectedNFTs([]);
     } catch (error) {
-      console.error('Unstaking failed:', error);
+      console.error("Unstaking failed:", error);
     } finally {
       setIsProcessing(false);
     }
   };
 
   const getSelectedStaked = () => {
-    return selectedNFTs.filter(id => 
-      mockNFTData.find(nft => nft.id === id)?.status === "staked"
+    return selectedNFTs.filter(
+      (id) => mockNFTData.find((nft) => nft.id === id)?.status === "staked",
     );
   };
 
   const getSelectedUnstaked = () => {
-    return selectedNFTs.filter(id => 
-      mockNFTData.find(nft => nft.id === id)?.status === "unstaked"
+    return selectedNFTs.filter(
+      (id) => mockNFTData.find((nft) => nft.id === id)?.status === "unstaked",
     );
   };
 
@@ -283,9 +283,7 @@ export default function FounderNFTDashboard() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Platform Staked
                   </p>
-                  <p className="text-2xl font-bold">
-                    8,547
-                  </p>
+                  <p className="text-2xl font-bold">8,547</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     of 10,000 total NFTs
                   </p>
@@ -303,131 +301,153 @@ export default function FounderNFTDashboard() {
           className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
         >
           <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-700 h-12">
-            <TabsTrigger value="staking" className="text-base font-medium">Staking</TabsTrigger>
-            <TabsTrigger value="earnings" className="text-base font-medium">Earnings & Claims</TabsTrigger>
-            <TabsTrigger value="exclusive" className="text-base font-medium">Exclusive</TabsTrigger>
+            <TabsTrigger value="staking" className="text-base font-medium">
+              Staking
+            </TabsTrigger>
+            <TabsTrigger value="earnings" className="text-base font-medium">
+              Earnings & Claims
+            </TabsTrigger>
+            <TabsTrigger value="exclusive" className="text-base font-medium">
+              Exclusive
+            </TabsTrigger>
           </TabsList>
-
-
 
           {/* Staking Management Tab */}
           <TabsContent value="staking" className="space-y-6 p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Unstaked NFTs Section */}
-                <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Clock className="h-5 w-5 mr-2" />
-                        Available to Stake
-                      </div>
-                      <Badge variant="secondary">
-                        {mockNFTData.filter(nft => nft.status === "unstaked").length} NFTs
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {mockNFTData
-                      .filter(nft => nft.status === "unstaked")
-                      .map((nft) => (
-                        <div key={nft.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <input 
-                              type="checkbox"
-                              checked={selectedNFTs.includes(nft.id)}
-                              onChange={() => handleNFTSelection(nft.id)}
-                              className="w-4 h-4 text-[#8A63D2] border-gray-300 rounded focus:ring-[#8A63D2] focus:ring-2"
-                            />
-                            <div>
-                              <p className="font-medium">FounderNFT {nft.tokenId}</p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Ready to earn rewards
-                              </p>
-                            </div>
+              {/* Unstaked NFTs Section */}
+              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Clock className="h-5 w-5 mr-2" />
+                      Available to Stake
+                    </div>
+                    <Badge variant="secondary">
+                      {
+                        mockNFTData.filter((nft) => nft.status === "unstaked")
+                          .length
+                      }{" "}
+                      NFTs
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {mockNFTData
+                    .filter((nft) => nft.status === "unstaked")
+                    .map((nft) => (
+                      <div
+                        key={nft.id}
+                        className="flex items-center justify-between p-3 border rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedNFTs.includes(nft.id)}
+                            onChange={() => handleNFTSelection(nft.id)}
+                            className="w-4 h-4 text-[#8A63D2] border-gray-300 rounded focus:ring-[#8A63D2] focus:ring-2"
+                          />
+                          <div>
+                            <p className="font-medium">
+                              FounderNFT {nft.tokenId}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              Ready to earn rewards
+                            </p>
                           </div>
-                          <Badge variant="secondary">Available</Badge>
                         </div>
-                      ))}
-                    
-                    {getSelectedUnstaked().length > 0 && (
-                      <div className="pt-3 border-t">
-                        <Button 
-                          onClick={handleBulkStake}
-                          disabled={isProcessing}
-                          className="bg-[#8A63D2] hover:bg-[#7651c0] w-full"
-                        >
-                          {isProcessing ? "Processing..." : `Stake ${getSelectedUnstaked().length} NFT${getSelectedUnstaked().length > 1 ? 's' : ''}`}
-                        </Button>
+                        <Badge variant="secondary">Available</Badge>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
+                    ))}
 
-                {/* Staked NFTs Section */}
-                <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Shield className="h-5 w-5 mr-2" />
-                        Currently Staked
-                      </div>
-                      <Badge className="bg-green-500">
-                        {mockNFTData.filter(nft => nft.status === "staked").length} NFTs Earning
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {mockNFTData
-                      .filter(nft => nft.status === "staked")
-                      .map((nft) => (
-                        <div key={nft.id} className="flex items-center justify-between p-3 border rounded-lg bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-                          <div className="flex items-center space-x-3">
-                            <input 
-                              type="checkbox"
-                              checked={selectedNFTs.includes(nft.id)}
-                              onChange={() => handleNFTSelection(nft.id)}
-                              className="w-4 h-4 text-[#8A63D2] border-gray-300 rounded focus:ring-[#8A63D2] focus:ring-2"
-                            />
-                            <div>
-                              <p className="font-medium">FounderNFT {nft.tokenId}</p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Staked for {nft.stakingDuration} • Earned {nft.earnedRewards}
-                              </p>
-                            </div>
+                  {getSelectedUnstaked().length > 0 && (
+                    <div className="pt-3 border-t">
+                      <Button
+                        onClick={handleBulkStake}
+                        disabled={isProcessing}
+                        className="bg-[#8A63D2] hover:bg-[#7651c0] w-full"
+                      >
+                        {isProcessing
+                          ? "Processing..."
+                          : `Stake ${getSelectedUnstaked().length} NFT${getSelectedUnstaked().length > 1 ? "s" : ""}`}
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Staked NFTs Section */}
+              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Shield className="h-5 w-5 mr-2" />
+                      Currently Staked
+                    </div>
+                    <Badge className="bg-green-500">
+                      {
+                        mockNFTData.filter((nft) => nft.status === "staked")
+                          .length
+                      }{" "}
+                      NFTs Earning
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {mockNFTData
+                    .filter((nft) => nft.status === "staked")
+                    .map((nft) => (
+                      <div
+                        key={nft.id}
+                        className="flex items-center justify-between p-3 border rounded-lg bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedNFTs.includes(nft.id)}
+                            onChange={() => handleNFTSelection(nft.id)}
+                            className="w-4 h-4 text-[#8A63D2] border-gray-300 rounded focus:ring-[#8A63D2] focus:ring-2"
+                          />
+                          <div>
+                            <p className="font-medium">
+                              FounderNFT {nft.tokenId}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              Staked for {nft.stakingDuration} • Earned{" "}
+                              {nft.earnedRewards}
+                            </p>
                           </div>
-                          <Badge className="bg-green-500">Earning</Badge>
                         </div>
-                      ))}
-                    
-                    {getSelectedStaked().length > 0 && (
-                      <div className="pt-3 border-t">
-                        <Button 
-                          onClick={handleBulkUnstake}
-                          disabled={isProcessing}
-                          variant="outline"
-                          className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-600 dark:text-orange-400"
-                        >
-                          {isProcessing ? "Processing..." : `Unstake ${getSelectedStaked().length} NFT${getSelectedStaked().length > 1 ? 's' : ''}`}
-                        </Button>
+                        <Badge className="bg-green-500">Earning</Badge>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
+                    ))}
 
-              {/* Selection Controls */}
-              {selectedNFTs.length > 0 && (
-                <div className="flex justify-center">
-                  <Button 
-                    onClick={handleDeselectAll}
-                    variant="ghost"
-                    size="sm"
-                  >
-                    Clear All Selections
-                  </Button>
-                </div>
-              )}
+                  {getSelectedStaked().length > 0 && (
+                    <div className="pt-3 border-t">
+                      <Button
+                        onClick={handleBulkUnstake}
+                        disabled={isProcessing}
+                        variant="outline"
+                        className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-600 dark:text-orange-400"
+                      >
+                        {isProcessing
+                          ? "Processing..."
+                          : `Unstake ${getSelectedStaked().length} NFT${getSelectedStaked().length > 1 ? "s" : ""}`}
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
+
+            {/* Selection Controls */}
+            {selectedNFTs.length > 0 && (
+              <div className="flex justify-center">
+                <Button onClick={handleDeselectAll} variant="ghost" size="sm">
+                  Clear All Selections
+                </Button>
+              </div>
+            )}
           </TabsContent>
 
           {/* Earnings & Claims Tab */}
