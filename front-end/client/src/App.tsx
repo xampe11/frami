@@ -103,6 +103,7 @@ function Router() {
           <Route path="/projects/:slug" component={Project} />
           <Route path="/create-project" component={CreateProject} />
           <Route path="/founder-nft" component={FounderNFT} />
+          <Route path="/founder-nft/dashboard" component={FounderNFTDashboard} />
           <Route path="/docs" component={Docs} />
           {/* Redirects for old routes */}
           <Route path="/projects">
