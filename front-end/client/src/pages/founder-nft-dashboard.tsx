@@ -313,64 +313,6 @@ export default function FounderNFTDashboard() {
           {/* Staking Management Tab */}
           <TabsContent value="staking" className="space-y-6 p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Shield className="h-5 w-5 mr-2" />
-                    Staking Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm">Staked NFTs</span>
-                      <span className="font-semibold">
-                        {mockStakingData.totalStaked}/
-                        {mockStakingData.totalOwned}
-                      </span>
-                    </div>
-                    <Progress
-                      value={
-                        (mockStakingData.totalStaked /
-                          mockStakingData.totalOwned) *
-                        100
-                      }
-                      className="h-2"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 pt-4">
-                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <p className="text-2xl font-bold text-green-500">
-                        {mockStakingData.currentAPY}%
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Current APY
-                      </p>
-                    </div>
-                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <p className="text-2xl font-bold">
-                        {mockStakingData.totalRewards}
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Total Rewards
-                      </p>
-                    </div>
-                  </div>
-
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      Minimum staking period:{" "}
-                      {mockStakingData.minimumStakingPeriod} days
-                      <br />
-                      Unstake cooldown: {mockStakingData.unstakeCooldown} days
-                    </AlertDescription>
-                  </Alert>
-                </CardContent>
-              </Card>
-
-              <div className="space-y-6">
                 {/* Unstaked NFTs Section */}
                 <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
                   <CardHeader>
