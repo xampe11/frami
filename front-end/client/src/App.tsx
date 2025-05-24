@@ -19,6 +19,7 @@ import Projects from "@/pages/projects";
 import Project from "@/pages/project";
 import CreateProject from "@/pages/create-project";
 import FounderNFT from "@/pages/founder-nft";
+import FounderNFTDashboard from "@/pages/founder-nft-dashboard";
 import Docs from "@/pages/docs";
 import NotFound from "@/pages/not-found";
 import Navbar from "@/components/layout/navbar";
