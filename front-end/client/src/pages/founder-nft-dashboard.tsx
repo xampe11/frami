@@ -137,7 +137,7 @@ export default function FounderNFTDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#111827] pt-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#111827] pt-20">
       <div className="container mx-auto px-4 max-w-[110rem] py-8">
         {/* Header */}
         <div className="mb-8">
@@ -159,7 +159,7 @@ export default function FounderNFTDashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -171,7 +171,7 @@ export default function FounderNFTDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -183,7 +183,7 @@ export default function FounderNFTDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -195,7 +195,7 @@ export default function FounderNFTDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -209,65 +209,57 @@ export default function FounderNFTDashboard() {
         </div>
 
         {/* Main Tabs */}
-        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-700">
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="staking">Staking</TabsTrigger>
-            <TabsTrigger value="earnings">Earnings</TabsTrigger>
-            <TabsTrigger value="claims">Claims</TabsTrigger>
+            <TabsTrigger value="earnings">Earnings & Claims</TabsTrigger>
             <TabsTrigger value="exclusive">Exclusive</TabsTrigger>
           </TabsList>
 
           {/* NFT Portfolio Tab */}
-          <TabsContent value="portfolio" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Crown className="h-5 w-5 mr-2" />
-                  Your FounderNFT Collection
-                </CardTitle>
-                <CardDescription>
-                  Visual display of your owned FounderNFTs with current status
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {mockNFTData.map((nft) => (
-                    <Card key={nft.id} className="border-2 border-gray-200 dark:border-gray-700">
-                      <CardContent className="p-4">
-                        <div className="aspect-square bg-gradient-to-br from-[#8A63D2]/20 to-[#583c8e]/20 rounded-lg mb-4 flex items-center justify-center">
-                          <Crown className="h-16 w-16 text-[#8A63D2]" />
+          <TabsContent value="portfolio" className="space-y-6 p-6">
+            <div>
+              <h3 className="text-xl font-semibold mb-2 flex items-center">
+                <Crown className="h-5 w-5 mr-2" />
+                Your FounderNFT Collection
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                Visual display of your owned FounderNFTs with current status
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                {mockNFTData.map((nft) => (
+                  <Card key={nft.id} className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+                    <CardContent className="p-3">
+                      <div className="aspect-square bg-gradient-to-br from-[#8A63D2]/20 to-[#583c8e]/20 rounded-lg mb-3 flex items-center justify-center">
+                        <Crown className="h-8 w-8 text-[#8A63D2]" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-medium text-sm">NFT {nft.tokenId}</h4>
+                          <Badge 
+                            variant={nft.status === "staked" ? "default" : "secondary"}
+                            className={nft.status === "staked" ? "bg-green-500 text-xs" : "text-xs"}
+                          >
+                            {nft.status === "staked" ? "Staked" : "Unstaked"}
+                          </Badge>
                         </div>
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <h3 className="font-semibold">FounderNFT {nft.tokenId}</h3>
-                            <Badge 
-                              variant={nft.status === "staked" ? "default" : "secondary"}
-                              className={nft.status === "staked" ? "bg-green-500" : ""}
-                            >
-                              {nft.status === "staked" ? "Staked" : "Unstaked"}
-                            </Badge>
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            <p>Staking Duration: {nft.stakingDuration}</p>
-                            <p>Earned Rewards: {nft.earnedRewards}</p>
-                            {nft.nextUnstakeDate && (
-                              <p>Next Unstake: {nft.nextUnstakeDate}</p>
-                            )}
-                          </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                          <p>Duration: {nft.stakingDuration}</p>
+                          <p>Rewards: {nft.earnedRewards}</p>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           </TabsContent>
 
           {/* Staking Management Tab */}
-          <TabsContent value="staking" className="space-y-6">
+          <TabsContent value="staking" className="space-y-6 p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Shield className="h-5 w-5 mr-2" />
@@ -308,7 +300,7 @@ export default function FounderNFTDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Timer className="h-5 w-5 mr-2" />
@@ -338,10 +330,10 @@ export default function FounderNFTDashboard() {
             </div>
           </TabsContent>
 
-          {/* Earnings Overview Tab */}
-          <TabsContent value="earnings" className="space-y-6">
+          {/* Earnings & Claims Tab */}
+          <TabsContent value="earnings" className="space-y-6 p-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2">
+              <Card className="lg:col-span-2 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <TrendingUp className="h-5 w-5 mr-2" />
@@ -364,7 +356,7 @@ export default function FounderNFTDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <DollarSign className="h-5 w-5 mr-2" />
@@ -391,11 +383,9 @@ export default function FounderNFTDashboard() {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
 
-          {/* Claims Center Tab */}
-          <TabsContent value="claims" className="space-y-6">
-            <Card>
+            {/* Claims Section */}
+            <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Gift className="h-5 w-5 mr-2" />
@@ -458,9 +448,9 @@ export default function FounderNFTDashboard() {
           </TabsContent>
 
           {/* Exclusive Access Tab */}
-          <TabsContent value="exclusive" className="space-y-6">
+          <TabsContent value="exclusive" className="space-y-6 p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Star className="h-5 w-5 mr-2" />
@@ -494,7 +484,7 @@ export default function FounderNFTDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Bell className="h-5 w-5 mr-2" />
