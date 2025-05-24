@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import RainbowWalletButton from "../wallet/rainbow-wallet-button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Navbar() {
@@ -54,11 +54,29 @@ export default function Navbar() {
                 Start a Project
               </span>
             </Link>
-            <Link href="/founder-nft">
-              <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">
-                Founder NFT
-              </span>
-            </Link>
+            {/* Founder NFT Dropdown */}
+            <div className="relative group">
+              <div className="flex items-center cursor-pointer text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">
+                <span>Founder NFT</span>
+                <ChevronDown className="h-4 w-4 ml-1 transition-transform group-hover:rotate-180" />
+              </div>
+              
+              {/* Dropdown Menu */}
+              <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="py-2">
+                  <Link href="/founder-nft">
+                    <div className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-primary dark:hover:text-primary transition-colors">
+                      Sale
+                    </div>
+                  </Link>
+                  <Link href="/founder-nft/dashboard">
+                    <div className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-primary dark:hover:text-primary transition-colors">
+                      Dashboard
+                    </div>
+                  </Link>
+                </div>
+              </div>
+            </div>
             <Link href="/docs">
               <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">
                 Docs
@@ -110,11 +128,24 @@ export default function Navbar() {
                 Start a Project
               </span>
             </Link>
-            <Link href="/founder-nft">
-              <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors block py-2">
+            {/* Founder NFT Mobile Dropdown */}
+            <div className="space-y-1">
+              <div className="text-slate-700 dark:text-slate-300 font-medium py-2">
                 Founder NFT
-              </span>
-            </Link>
+              </div>
+              <div className="pl-4 space-y-2">
+                <Link href="/founder-nft">
+                  <span className="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors block py-1 text-sm">
+                    Sale
+                  </span>
+                </Link>
+                <Link href="/founder-nft/dashboard">
+                  <span className="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors block py-1 text-sm">
+                    Dashboard
+                  </span>
+                </Link>
+              </div>
+            </div>
             <Link href="/docs">
               <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors block py-2">
                 Docs
