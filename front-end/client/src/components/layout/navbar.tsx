@@ -1,32 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 import RainbowWalletButton from "../wallet/rainbow-wallet-button";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useQuery } from "@tanstack/react-query";
-import { Project } from "@shared/schema";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  // Fetch projects for search
-  const { data: projects, isLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
-    enabled: isSearchOpen, // Only fetch when search is open
-  });
-
-  // Filter projects based on search query
-  const filteredProjects = projects?.filter(project =>
-    project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    project.description.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -85,81 +66,8 @@ export default function Navbar() {
             </Link>
           </nav>
 
-          {/* Right Side - Search, Theme Toggle & Wallet Connection */}
+          {/* Right Side - Theme Toggle & Wallet Connection */}
           <div className="hidden md:flex items-center space-x-3">
-            <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  <Search className="h-5 w-5" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden">
-                <DialogHeader>
-                  <DialogTitle>Search Projects</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <Input
-                    placeholder="Search for projects..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full"
-                    autoFocus
-                  />
-                  
-                  <div className="max-h-[400px] overflow-y-auto space-y-2">
-                    {isLoading ? (
-                      // Loading skeleton
-                      Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="p-3 border rounded-lg">
-                          <Skeleton className="h-4 w-3/4 mb-2" />
-                          <Skeleton className="h-3 w-full" />
-                          <Skeleton className="h-3 w-2/3" />
-                        </div>
-                      ))
-                    ) : filteredProjects.length > 0 ? (
-                      // Search results
-                      filteredProjects.map((project) => (
-                        <Link key={project.id} href={`/project/${project.slug}`}>
-                          <div 
-                            className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                            onClick={() => {
-                              setIsSearchOpen(false);
-                              setSearchQuery("");
-                            }}
-                          >
-                            <h3 className="font-semibold text-sm mb-1">{project.title}</h3>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
-                              {project.description}
-                            </p>
-                            <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
-                              <span>Goal: {project.fundingGoal} ETH</span>
-                              <span>Raised: {project.currentFunding} ETH</span>
-                            </div>
-                          </div>
-                        </Link>
-                      ))
-                    ) : searchQuery.trim() ? (
-                      // No results found
-                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                        <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p>No projects found for "{searchQuery}"</p>
-                        <p className="text-xs mt-1">Try searching with different keywords</p>
-                      </div>
-                    ) : (
-                      // Empty state
-                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                        <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p>Start typing to search for projects</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
             <ThemeToggle />
             <RainbowWalletButton />
           </div>
