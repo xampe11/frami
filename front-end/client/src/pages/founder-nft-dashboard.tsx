@@ -281,13 +281,16 @@ export default function FounderNFTDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Staking Rate
+                    Platform Staked
                   </p>
                   <p className="text-2xl font-bold">
-                    {mockStakingData.totalStaked}/{mockStakingData.totalOwned}
+                    8,547
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    of 10,000 total NFTs
                   </p>
                 </div>
-                <Shield className="h-8 w-8 text-purple-500" />
+                <Users className="h-8 w-8 text-purple-500" />
               </div>
             </CardContent>
           </Card>
