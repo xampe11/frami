@@ -302,10 +302,10 @@ export default function FounderNFTDashboard() {
           onValueChange={setSelectedTab}
           className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
         >
-          <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-700">
-            <TabsTrigger value="staking">Staking</TabsTrigger>
-            <TabsTrigger value="earnings">Earnings & Claims</TabsTrigger>
-            <TabsTrigger value="exclusive">Exclusive</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-700 h-12">
+            <TabsTrigger value="staking" className="text-base font-medium">Staking</TabsTrigger>
+            <TabsTrigger value="earnings" className="text-base font-medium">Earnings & Claims</TabsTrigger>
+            <TabsTrigger value="exclusive" className="text-base font-medium">Exclusive</TabsTrigger>
           </TabsList>
 
 
