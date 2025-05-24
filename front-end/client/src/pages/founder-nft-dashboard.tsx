@@ -281,13 +281,13 @@ export default function FounderNFTDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Current APY
+                    Staking Rate
                   </p>
                   <p className="text-2xl font-bold">
-                    {mockStakingData.currentAPY}%
+                    {mockStakingData.totalStaked}/{mockStakingData.totalOwned}
                   </p>
                 </div>
-                <Zap className="h-8 w-8 text-yellow-500" />
+                <Shield className="h-8 w-8 text-purple-500" />
               </div>
             </CardContent>
           </Card>
