@@ -25,6 +25,7 @@ import {
   Bell,
   Crown
 } from "lucide-react";
+import founderNftVideo from "@assets/FounderNFT.mp4";
 
 // Mock data for development - replace with real API calls
 const mockNFTData = [
