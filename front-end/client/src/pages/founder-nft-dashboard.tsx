@@ -125,7 +125,7 @@ const mockExclusiveDeals = [
 
 export default function FounderNFTDashboard() {
   const { isConnected, address } = useWallet();
-  const [selectedTab, setSelectedTab] = useState("portfolio");
+  const [selectedTab, setSelectedTab] = useState("staking");
   const [selectedNFTs, setSelectedNFTs] = useState<number[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -302,72 +302,13 @@ export default function FounderNFTDashboard() {
           onValueChange={setSelectedTab}
           className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
         >
-          <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-700">
-            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-700">
             <TabsTrigger value="staking">Staking</TabsTrigger>
             <TabsTrigger value="earnings">Earnings & Claims</TabsTrigger>
             <TabsTrigger value="exclusive">Exclusive</TabsTrigger>
           </TabsList>
 
-          {/* NFT Portfolio Tab */}
-          <TabsContent value="portfolio" className="space-y-6 p-6">
-            <div>
-              <h3 className="text-xl font-semibold mb-2 flex items-center">
-                <Crown className="h-5 w-5 mr-2" />
-                Your FounderNFT Collection
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Visual display of your owned FounderNFTs with current status
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                {mockNFTData.map((nft) => (
-                  <Card
-                    key={nft.id}
-                    className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                  >
-                    <CardContent className="p-3">
-                      <div className="aspect-square bg-gradient-to-br from-[#8A63D2]/20 to-[#583c8e]/20 rounded-lg mb-3 overflow-hidden p-1">
-                        <video
-                          src={founderNftVideo}
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                          className="w-full h-full object-contain rounded-md"
-                          onLoadedData={(e) => {
-                            e.currentTarget.playbackRate = 0.5;
-                          }}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <h4 className="font-medium text-sm">
-                            NFT {nft.tokenId}
-                          </h4>
-                          <Badge
-                            variant={
-                              nft.status === "staked" ? "default" : "secondary"
-                            }
-                            className={
-                              nft.status === "staked"
-                                ? "bg-green-500 text-xs"
-                                : "text-xs"
-                            }
-                          >
-                            {nft.status === "staked" ? "Staked" : "Unstaked"}
-                          </Badge>
-                        </div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                          <p>Duration: {nft.stakingDuration}</p>
-                          <p>Rewards: {nft.earnedRewards}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
+
 
           {/* Staking Management Tab */}
           <TabsContent value="staking" className="space-y-6 p-6">
