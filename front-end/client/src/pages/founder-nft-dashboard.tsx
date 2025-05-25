@@ -316,7 +316,7 @@ export default function FounderNFTDashboard() {
           <TabsContent value="staking" className="space-y-6 p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Unstaked NFTs Section */}
-              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+              <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -377,7 +377,7 @@ export default function FounderNFTDashboard() {
               </Card>
 
               {/* Staked NFTs Section */}
-              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+              <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -453,7 +453,7 @@ export default function FounderNFTDashboard() {
           {/* Earnings & Claims Tab */}
           <TabsContent value="earnings" className="space-y-6 p-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+              <Card className="lg:col-span-2 bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <TrendingUp className="h-5 w-5 mr-2" />
@@ -486,7 +486,7 @@ export default function FounderNFTDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+              <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <DollarSign className="h-5 w-5 mr-2" />
