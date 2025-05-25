@@ -385,23 +385,24 @@ const CoreBenefits = () => {
       description:
         "Receive a share of platform fees proportional to your NFT holdings.",
       icon: <PieChart className="h-10 w-10 text-primary" />,
-      animation:
-        "diagram showing fee distribution flow with percentages and arrows",
     },
     {
       title: "Early Access",
       description:
         "Get priority access to new projects and initiatives before they're available to the general public.",
       icon: <Clock className="h-10 w-10 text-primary" />,
-      animation: "timeline visualization showing early access window",
     },
     {
       title: "Governance Rights",
       description:
         "Receive a percentage of the DAO token minting pool once the platform transitions to a decentralized governance structure.",
       icon: <VoteIcon className="h-10 w-10 text-primary" />,
-      animation:
-        "voting mechanism with tokens being allocated to different proposals",
+    },
+    {
+      title: "Premium Features",
+      description:
+        "Access exclusive platform features, advanced analytics, and priority customer support reserved for Founder NFT holders.",
+      icon: <Users className="h-10 w-10 text-primary" />,
     },
   ];
 
@@ -417,7 +418,7 @@ const CoreBenefits = () => {
           the platform grows.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {benefits.map((benefit, index) => (
             <div
               key={index}
@@ -425,14 +426,9 @@ const CoreBenefits = () => {
             >
               <div className="mb-4">{benefit.icon}</div>
               <h3 className="text-xl font-bold mb-2">{benefit.title}</h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
+              <p className="text-gray-600 dark:text-gray-300">
                 {benefit.description}
               </p>
-
-              {/* Animated graphic placeholder */}
-              <div className="mt-auto h-32 rounded-md bg-gray-100 dark:bg-[#1a1e31] flex items-center justify-center text-xs text-gray-600 dark:text-gray-400 italic p-2 text-center">
-                {benefit.animation}
-              </div>
             </div>
           ))}
         </div>
