@@ -521,7 +521,7 @@ export default function FounderNFTDashboard() {
             </div>
 
             {/* Claims Section */}
-            <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+            <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Gift className="h-5 w-5 mr-2" />
@@ -598,7 +598,7 @@ export default function FounderNFTDashboard() {
           {/* Exclusive Access Tab */}
           <TabsContent value="exclusive" className="space-y-6 p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+              <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Star className="h-5 w-5 mr-2" />
@@ -642,7 +642,7 @@ export default function FounderNFTDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
+              <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Bell className="h-5 w-5 mr-2" />
