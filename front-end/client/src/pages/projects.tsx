@@ -126,7 +126,7 @@ export default function Projects() {
   if (isLoadingProjects || isLoadingCategories) {
     return (
       <section className="py-12 pt-28">
-        <div className="container mx-auto px-4 sm:px-6 max-w-[110rem]">
+        <div className="container mx-auto px-6 sm:px-8 lg:px-12 max-w-[110rem]">
           <div className="mb-8">
             <Skeleton className="h-10 w-64 mb-4" />
             <Skeleton className="h-4 w-full max-w-2xl" />
@@ -171,7 +171,7 @@ export default function Projects() {
 
   return (
     <section ref={sectionRef} className="py-12 pt-24 bg-gray-50 dark:bg-slate-900">
-      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem]">
+      <div className="container mx-auto px-6 sm:px-8 lg:px-12 max-w-[110rem]">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">Explore Projects</h1>
           <p className="text-gray-600 dark:text-gray-400 max-w-2xl">

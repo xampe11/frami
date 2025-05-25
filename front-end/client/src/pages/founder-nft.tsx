@@ -134,7 +134,7 @@ const HeroAndMintSection = () => {
 
   return (
     <section className="w-full py-16 md:py-24 lg:py-28 bg-white dark:bg-[#111827] text-black dark:text-white">
-      <div className="container mx-auto px-10 max-w-[110rem]">
+      <div className="container mx-auto px-12 sm:px-16 lg:px-20 max-w-[110rem]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left Side: NFT Showcase and Info */}
           <div>
@@ -411,7 +411,7 @@ const CoreBenefits = () => {
       ref={sectionRef}
       className="py-20 bg-gradient-to-b from-white to-gray-100 dark:from-[#111827] dark:to-[#1a1e31] text-black dark:text-white"
     >
-      <div className="container mx-auto px-10 max-w-[110rem]">
+      <div className="container mx-auto px-12 sm:px-16 lg:px-20 max-w-[110rem]">
         <h2 className="text-3xl font-bold text-center mb-4">Core Benefits</h2>
         <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
           Each Founder NFT unlocks exclusive benefits that increase in value as
@@ -825,7 +825,7 @@ const PlatformDevelopmentRoadmap = () => {
 const FAQ = () => {
   return (
     <section className="py-20 bg-gradient-to-t from-gray-100 to-white dark:from-[#111827] dark:to-[#1a1e31] text-black dark:text-white">
-      <div className="container mx-auto px-10 max-w-[110rem]">
+      <div className="container mx-auto px-12 sm:px-16 lg:px-20 max-w-[110rem]">
         <h2 className="text-3xl font-bold text-center mb-4">
           Frequently Asked Questions
         </h2>
