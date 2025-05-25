@@ -79,7 +79,7 @@ const ProjectPage = () => {
   
   if (error || !project) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem] py-16">
+      <div className="container mx-auto px-4 sm:px-6 max-w-[110rem] pt-20 pb-16 md:pt-24">
         <div className="max-w-5xl mx-auto text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-destructive" />
           <h2 className="mt-4 text-2xl font-bold dark:text-white">Project not found</h2>
@@ -158,7 +158,7 @@ const ProjectPage = () => {
   };
   
   return (
-    <div className="container mx-auto px-4 sm:px-6 max-w-[110rem] py-8 md:py-16">
+    <div className="container mx-auto px-4 sm:px-6 max-w-[110rem] pt-20 pb-8 md:pt-24 md:pb-16">
       <div className="max-w-5xl mx-auto">
         <Button
           variant="ghost"
