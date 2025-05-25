@@ -1088,7 +1088,7 @@ export const docSections: DocSection[] = [
               "Early access to premium projects before public rounds",
               "Priority verification status for milestone validation",
               "Exclusive access to platform features and extensions",
-              "Enhanced rewards when staking tokens",
+              "Enhanced rewards when staking tokens (coming soon)",
             ],
           },
 
@@ -1098,23 +1098,9 @@ export const docSections: DocSection[] = [
           {
             type: "list",
             items: [
-              "Primary sale during the initial platform launch (limited to 1000 NFTs)",
+              "Primary sale during the initial platform launch",
               "Secondary market purchases from existing holders",
               "Special allocations through community contests and contributor rewards",
-              "Earn partial ownership rights through platform participation (future feature)",
-            ],
-          },
-
-          { type: "heading", title: "Transfer restrictions" },
-          "FounderNFTs have certain transfer restrictions to maintain ecosystem health:",
-
-          {
-            type: "list",
-            items: [
-              "14-day cooldown period between transfers to prevent market manipulation",
-              "Governance rights activation only after 30 days of ownership",
-              "Maximum of 5 FounderNFTs per wallet address",
-              "Smart contract restrictions to prevent flash loans and other exploits",
             ],
           },
 
@@ -1136,7 +1122,7 @@ export const docSections: DocSection[] = [
             type: "list",
             items: [
               "5% base fee on all successfully funded projects",
-              "5% transaction fee on secondary NFT sales (if applicable)",
+              "5-10% transaction fee on secondary NFT sales (if applicable)",
               "0.5% fee on token swaps within the platform (future feature)",
               "Premium feature access fees (optional, varies by feature)",
             ],
@@ -1168,28 +1154,16 @@ export const docSections: DocSection[] = [
             ],
           },
 
-          { type: "heading", title: "Rewards distribution" },
-          "The 50% allocated to FounderNFT holders is distributed based on the following mechanisms:",
-
-          {
-            type: "list",
-            items: [
-              "Base distribution: Equal share among all FounderNFT holders",
-              "Staking multiplier: Increased rewards based on staking duration",
-              "Validator bonus: Extra rewards for those participating in milestone validation (Upcoming Feature)",
-            ],
-          },
-
           {
             type: "note",
             title: "Distribution Schedule",
-            text: "Fee distributions occur automatically every 14 days through smart contracts. Holders can claim their rewards at any time or compound them by reinvesting into the platform.",
+            text: "Fee distributions occur automatically every 10 days through smart contracts. Holders can claim their rewards at any time.",
           },
         ],
       },
       {
         id: "staking-system",
-        title: "Staking System (Coming Soon)",
+        title: "Staking System",
         content: [
           { type: "heading", title: "Staking requirements" },
           "The Frami staking system enables FounderNFT holders to lock their assets for enhanced benefits:",
@@ -1197,35 +1171,10 @@ export const docSections: DocSection[] = [
           {
             type: "list",
             items: [
-              "Minimum staking period: 60 days",
+              "Fist-time staking lock period: 60 days",
               "NFT remains in holder's wallet but with transfer restrictions",
               "Smart contract locking mechanism with on-chain verification",
               "Option to auto-renew staking periods",
-            ],
-          },
-
-          { type: "heading", title: "Reward calculation" },
-          "Staking rewards are calculated based on multiple factors:",
-
-          {
-            type: "table",
-            headers: ["Factor", "Multiplier Range", "Notes"],
-            rows: [
-              [
-                "Staking Duration",
-                "1.0x - 2.5x",
-                "Higher multiplier for longer commitment",
-              ],
-              [
-                "Number of NFTs Staked",
-                "1.0x - 1.5x",
-                "Bonus for staking multiple FounderNFTs",
-              ],
-              [
-                "Validator Status",
-                "1.0x - 1.2x",
-                "Bonus for helping validate milestones",
-              ],
             ],
           },
 
@@ -1235,18 +1184,16 @@ export const docSections: DocSection[] = [
           {
             type: "numbered-list",
             items: [
-              "Initiate unstaking through the platform interface",
-              "7-day cooldown period begins (rewards continue during this period)",
-              "After cooldown, NFT is fully released and transferable",
-              "Accumulated rewards are automatically distributed to the holder's wallet",
-              "30-day restriction period before the same NFT can be staked again",
+              "Select and unstake the NFTs through the platform dashboard interface",
+              "NFTs are fully released and transferable",
+              "Accumulated unclaimed rewards are automatically distributed to the holder's wallet when unstaked",
             ],
           },
 
           {
             type: "warning",
             title: "Important Notice",
-            text: "Early unstaking (before the committed period ends) incurs a penalty of 20% of accumulated rewards, which are redistributed to the remaining stakers.",
+            text: "All Founder NFTs will be locked for 60 days the first time they are staked (this resets if the NFT is transferred to another wallet), they will not be able to unstake prior to this time. Once the 60 days are complete the NFTs will be able to be staked/unstaked at will without restrictions",
           },
         ],
       },

@@ -401,7 +401,7 @@ const CoreBenefits = () => {
     {
       title: "Premium Features",
       description:
-        "Access exclusive platform features, advanced analytics, and priority customer support reserved for Founder NFT holders.",
+        "Access exclusive platform features and advanced analytics for Founder NFT holders.",
       icon: <Users className="h-10 w-10 text-primary" />,
     },
   ];
@@ -457,17 +457,22 @@ const PlatformDevelopmentRoadmap = () => {
             <div className="relative bg-[#1a1e2b] p-4 border-b border-gray-700">
               <div className="absolute top-4 left-4 w-4 h-4 rounded-full bg-[#8A63D2]"></div>
               <h3 className="text-xl font-bold ml-8 text-white">Q2 2025</h3>
-              <h4 className="text-base text-purple-300 font-medium ml-8">Foundation Launch</h4>
+              <h4 className="text-base text-purple-300 font-medium ml-8">
+                Foundation Launch
+              </h4>
             </div>
-            
+
             {/* Content */}
             <div className="p-4 text-sm">
               <ul className="space-y-3 text-gray-700 dark:text-gray-300">
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Website Launch: Intuitive platform for project creation, discovery, and milestone tracking</span>
+                  <span>
+                    Website Launch: Intuitive platform for project creation,
+                    discovery, and milestone tracking
+                  </span>
                 </li>
-                
+
                 <li>
                   <div className="flex items-center">
                     <span className="mr-2">•</span>
@@ -485,29 +490,44 @@ const PlatformDevelopmentRoadmap = () => {
                     </li>
                     <li className="flex">
                       <span className="mr-2">-</span>
-                      <span>Limited collection representing early platform supporters</span>
+                      <span>
+                        Limited collection representing early platform
+                        supporters
+                      </span>
                     </li>
                   </ul>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Core Functionality: Smart contracts for milestone-based funding, transparent progress tracking</span>
+                  <span>
+                    Core Functionality: Smart contracts for milestone-based
+                    funding, transparent progress tracking
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>First 10 Projects: Curated selection of high-quality inaugural projects</span>
+                  <span>
+                    First 10 Projects: Curated selection of high-quality
+                    inaugural projects
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Security Audit: Comprehensive third-party audit ensuring platform safety</span>
+                  <span>
+                    Security Audit: Comprehensive third-party audit ensuring
+                    platform safety
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Community Building: Ambassador program and educational initiatives</span>
+                  <span>
+                    Community Building: Ambassador program and educational
+                    initiatives
+                  </span>
                 </li>
               </ul>
             </div>
@@ -519,35 +539,51 @@ const PlatformDevelopmentRoadmap = () => {
             <div className="relative bg-[#1a1e2b] p-4 border-b border-gray-700">
               <div className="absolute top-4 left-4 w-4 h-4 rounded-full bg-[#8A63D2]"></div>
               <h3 className="text-xl font-bold ml-8 text-white">Q3 2025</h3>
-              <h4 className="text-base text-purple-300 font-medium ml-8">Feature Expansion</h4>
+              <h4 className="text-base text-purple-300 font-medium ml-8">
+                Feature Expansion
+              </h4>
             </div>
-            
+
             {/* Content */}
             <div className="p-4 text-sm">
               <ul className="space-y-3 text-gray-700 dark:text-gray-300">
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Token (ERC20) Creator: No-code tool for project-specific tokens</span>
+                  <span>
+                    Token (ERC20) Creator: No-code tool for project-specific
+                    tokens
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>NFT (ERC721) Creator: Simple interface for project reward NFTs</span>
+                  <span>
+                    NFT (ERC721) Creator: Simple interface for project reward
+                    NFTs
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Multi-Currency Support: Add USDC, USDT, and other currencies</span>
+                  <span>
+                    Multi-Currency Support: Add USDC, USDT, and other currencies
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Analytics Dashboard: Real-time project metrics and funding visualization</span>
+                  <span>
+                    Analytics Dashboard: Real-time project metrics and funding
+                    visualization
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Additional Wallet Integrations: Expanded support for popular Web3 wallets</span>
+                  <span>
+                    Additional Wallet Integrations: Expanded support for popular
+                    Web3 wallets
+                  </span>
                 </li>
               </ul>
             </div>
@@ -559,9 +595,11 @@ const PlatformDevelopmentRoadmap = () => {
             <div className="relative bg-[#1a1e2b] p-4 border-b border-gray-700">
               <div className="absolute top-4 left-4 w-4 h-4 rounded-full bg-[#8A63D2]"></div>
               <h3 className="text-xl font-bold ml-8 text-white">Q4 2025</h3>
-              <h4 className="text-base text-purple-300 font-medium ml-8">Advanced Ecosystem</h4>
+              <h4 className="text-base text-purple-300 font-medium ml-8">
+                Advanced Ecosystem
+              </h4>
             </div>
-            
+
             {/* Content */}
             <div className="p-4 text-sm">
               <ul className="space-y-3 text-gray-700 dark:text-gray-300">
@@ -574,7 +612,9 @@ const PlatformDevelopmentRoadmap = () => {
                   <ul className="ml-5 mt-1 space-y-1">
                     <li className="flex">
                       <span className="mr-2">-</span>
-                      <span>Priority validator status for FounderNFT holders</span>
+                      <span>
+                        Priority validator status for FounderNFT holders
+                      </span>
                     </li>
                     <li className="flex">
                       <span className="mr-2">-</span>
@@ -582,7 +622,7 @@ const PlatformDevelopmentRoadmap = () => {
                     </li>
                   </ul>
                 </li>
-                
+
                 <li>
                   <div className="flex items-center">
                     <span className="mr-2">•</span>
@@ -600,27 +640,37 @@ const PlatformDevelopmentRoadmap = () => {
                     </li>
                   </ul>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Cross-Chain Bridge: Interoperability between major blockchains</span>
+                  <span>
+                    Cross-Chain Bridge: Interoperability between major
+                    blockchains
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Reputation System: Dynamic scoring for project creators</span>
+                  <span>
+                    Reputation System: Dynamic scoring for project creators
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Automated Milestone Verification: AI-assisted validation</span>
+                  <span>
+                    Automated Milestone Verification: AI-assisted validation
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>AI Risk Assessment: Project viability analysis for investor protection</span>
+                  <span>
+                    AI Risk Assessment: Project viability analysis for investor
+                    protection
+                  </span>
                 </li>
-                
+
                 <li>
                   <div className="flex items-center">
                     <span className="mr-2">•</span>
@@ -634,7 +684,7 @@ const PlatformDevelopmentRoadmap = () => {
                     </li>
                   </ul>
                 </li>
-                
+
                 <li>
                   <div className="flex items-center">
                     <span className="mr-2">•</span>
@@ -644,7 +694,9 @@ const PlatformDevelopmentRoadmap = () => {
                   <ul className="ml-5 mt-1 space-y-1">
                     <li className="flex">
                       <span className="mr-2">-</span>
-                      <span>Priority access to high-demand projects for NFT holders</span>
+                      <span>
+                        Priority access to high-demand projects for NFT holders
+                      </span>
                     </li>
                   </ul>
                 </li>
@@ -658,9 +710,11 @@ const PlatformDevelopmentRoadmap = () => {
             <div className="relative bg-[#1a1e2b] p-4 border-b border-gray-700">
               <div className="absolute top-4 left-4 w-4 h-4 rounded-full bg-[#8A63D2]"></div>
               <h3 className="text-xl font-bold ml-8 text-white">Q1 2026</h3>
-              <h4 className="text-base text-purple-300 font-medium ml-8">Ecosystem Maturity</h4>
+              <h4 className="text-base text-purple-300 font-medium ml-8">
+                Ecosystem Maturity
+              </h4>
             </div>
-            
+
             {/* Content */}
             <div className="p-4 text-sm">
               <ul className="space-y-3 text-gray-700 dark:text-gray-300">
@@ -677,11 +731,13 @@ const PlatformDevelopmentRoadmap = () => {
                     </li>
                     <li className="flex">
                       <span className="mr-2">-</span>
-                      <span>Complete decentralization of platform governance</span>
+                      <span>
+                        Complete decentralization of platform governance
+                      </span>
                     </li>
                   </ul>
                 </li>
-                
+
                 <li>
                   <div className="flex items-center">
                     <span className="mr-2">•</span>
@@ -691,15 +747,19 @@ const PlatformDevelopmentRoadmap = () => {
                   <ul className="ml-5 mt-1 space-y-1">
                     <li className="flex">
                       <span className="mr-2">-</span>
-                      <span>Revenue sharing from extensions to FounderNFT holders</span>
+                      <span>
+                        Revenue sharing from extensions to FounderNFT holders
+                      </span>
                     </li>
                     <li className="flex">
                       <span className="mr-2">-</span>
-                      <span>Early access to new extensions for NFT holders</span>
+                      <span>
+                        Early access to new extensions for NFT holders
+                      </span>
                     </li>
                   </ul>
                 </li>
-                
+
                 <li>
                   <div className="flex items-center">
                     <span className="mr-2">•</span>
@@ -724,28 +784,37 @@ const PlatformDevelopmentRoadmap = () => {
                     </li>
                   </ul>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Decentralized Identity: Self-sovereign identity solutions</span>
+                  <span>
+                    Decentralized Identity: Self-sovereign identity solutions
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Fiat On-ramps: Direct fiat currency contribution options</span>
+                  <span>
+                    Fiat On-ramps: Direct fiat currency contribution options
+                  </span>
                 </li>
-                
+
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  <span>Developer API & SDK: Tools for platform integration and extension</span>
+                  <span>
+                    Developer API & SDK: Tools for platform integration and
+                    extension
+                  </span>
                 </li>
               </ul>
             </div>
           </div>
         </div>
-        
+
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-8">
-          <span className="text-yellow-500 mr-1">★</span> Indicates special benefits for FounderNFT holders. This roadmap is subject to change based on market conditions and community feedback.
+          <span className="text-yellow-500 mr-1">★</span> Indicates special
+          benefits for FounderNFT holders. This roadmap is subject to change
+          based on market conditions and community feedback.
         </p>
       </div>
     </section>
@@ -780,20 +849,18 @@ const FAQ = () => {
                   <li>
                     Connect your Ethereum wallet (MetaMask, WalletConnect, etc.)
                   </li>
-                  <li>
-                    Select the desired quantity (1-10 NFTs per transaction)
-                  </li>
+                  <li>Select the desired quantity.</li>
                   <li>
                     Click the "Mint" button and confirm the transaction in your
-                    wallet
+                    wallet.
                   </li>
                   <li>
-                    Wait for the transaction to be confirmed on the blockchain
+                    Wait for the transaction to be confirmed on the blockchain.
                   </li>
                 </ol>
                 <p className="text-gray-700 dark:text-gray-300">
                   Once minted, your NFTs will appear in your connected wallet
-                  and can be viewed on popular NFT marketplaces.
+                  and can be viewed at your dashboard.
                 </p>
               </AccordionContent>
             </AccordionItem>
@@ -805,15 +872,10 @@ const FAQ = () => {
               <AccordionContent>
                 <p className="text-gray-700 dark:text-gray-300">
                   Fee distribution is calculated proportionally based on the
-                  number of Founder NFTs you hold. 30% of all platform fees are
-                  allocated to the Founder NFT holders pool. Distributions occur
-                  on a monthly basis and can be claimed through the platform
-                  dashboard.
-                </p>
-                <p className="mt-2 text-gray-700 dark:text-gray-300">
-                  For example, if you own 10 out of 1000 Founder NFTs (1%),
-                  you'll receive 1% of the 30% fee allocation, which equals 0.3%
-                  of the total platform fees.
+                  number of Founder NFTs staked on the platform. Starting from
+                  50% of all platform fees are allocated to the staked Founder
+                  NFT pool. Distributions occur every 10 days and can be claimed
+                  through the platform dashboard.
                 </p>
               </AccordionContent>
             </AccordionItem>
@@ -828,17 +890,10 @@ const FAQ = () => {
                   including:
                 </p>
                 <ul className="list-disc pl-5 space-y-1 mt-2 text-gray-700 dark:text-gray-300">
-                  <li>Voting on platform upgrade proposals</li>
                   <li>Participating in feature prioritization</li>
-                  <li>Providing input on fee structures</li>
-                  <li>
-                    Voting on funding allocations for ecosystem development
-                  </li>
+                  <li>Providing input on platform proposals</li>
+                  <li>Will be the main DAO token minting distribution.</li>
                 </ul>
-                <p className="mt-2 text-gray-700 dark:text-gray-300">
-                  Each Founder NFT represents one vote in the governance system.
-                  Voting takes place through a secure on-chain mechanism.
-                </p>
               </AccordionContent>
             </AccordionItem>
 
@@ -854,8 +909,8 @@ const FAQ = () => {
                   the new owner.
                 </p>
                 <p className="mt-2 text-gray-700 dark:text-gray-300">
-                  There is a 5% royalty fee on secondary sales that goes back to
-                  the platform treasury, helping to maintain the value of all
+                  There is a 10% royalty fee on secondary sales that goes back
+                  to the platform fee pool, helping to maintain the value of all
                   Founder NFTs by funding ongoing development.
                 </p>
               </AccordionContent>
@@ -867,20 +922,13 @@ const FAQ = () => {
               </AccordionTrigger>
               <AccordionContent>
                 <p className="text-gray-700 dark:text-gray-300">
-                  Founder NFT benefits are automatically activated when you hold
-                  the NFT in a connected wallet. There's no need for manual
-                  activation.
+                  Founder NFT benefits are activated when you stake them at your
+                  FRAMI Founder NFT Dashboard.
                 </p>
                 <p className="mt-2 text-gray-700 dark:text-gray-300">
-                  For fee distribution and governance participation, you'll need
-                  to connect your wallet to the platform dashboard. Early access
-                  benefits are applied automatically when new projects launch on
-                  the platform.
-                </p>
-                <p className="mt-2 text-gray-700 dark:text-gray-300">
-                  In some cases, you may need to stake your NFT to access
-                  specific benefits, which will be clearly communicated when
-                  those features become available.
+                  At the Dahsboard you are going to be able to manage all your
+                  Founder NFT features such as staking, claiming your earnings
+                  and participate in exclusive events.
                 </p>
               </AccordionContent>
             </AccordionItem>

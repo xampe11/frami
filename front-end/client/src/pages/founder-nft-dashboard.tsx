@@ -228,7 +228,7 @@ export default function FounderNFTDashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -244,7 +244,7 @@ export default function FounderNFTDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -260,7 +260,7 @@ export default function FounderNFTDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -276,7 +276,7 @@ export default function FounderNFTDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -298,7 +298,7 @@ export default function FounderNFTDashboard() {
         <Tabs
           value={selectedTab}
           onValueChange={setSelectedTab}
-          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+          className="bg-white dark:bg-[#1a1e31] rounded-lg border border-gray-200 dark:border-gray-700"
         >
           <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-700 h-12">
             <TabsTrigger value="staking" className="text-base font-medium">
