@@ -615,20 +615,17 @@ export default function FounderNFTDashboard() {
                         </div>
                         <div className="flex items-center space-x-3">
                           <span className="font-semibold">{claim.amount}</span>
-                          {claim.status === "available" && (
-                            <Button
-                              size="sm"
-                              className="bg-[#8A63D2] hover:bg-[#7651c0]"
-                            >
-                              Claim
-                            </Button>
-                          )}
                           {claim.status === "claimed" && (
                             <Badge variant="secondary">Claimed</Badge>
                           )}
                           {claim.status === "pending" && (
                             <Badge variant="outline" className="text-yellow-600 border-yellow-600">
                               Pending
+                            </Badge>
+                          )}
+                          {claim.status === "available" && (
+                            <Badge variant="outline" className="text-green-600 border-green-600">
+                              Available
                             </Badge>
                           )}
                         </div>
