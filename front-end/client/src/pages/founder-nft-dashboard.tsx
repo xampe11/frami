@@ -174,12 +174,16 @@ export default function FounderNFTDashboard() {
   };
 
   const handleDeselectAllUnstaked = () => {
-    const unstakedIds = mockNFTData.filter((nft) => nft.status === "unstaked").map((nft) => nft.id);
+    const unstakedIds = mockNFTData
+      .filter((nft) => nft.status === "unstaked")
+      .map((nft) => nft.id);
     setSelectedNFTs((prev) => prev.filter((id) => !unstakedIds.includes(id)));
   };
 
   const handleDeselectAllStaked = () => {
-    const stakedIds = mockNFTData.filter((nft) => nft.status === "staked").map((nft) => nft.id);
+    const stakedIds = mockNFTData
+      .filter((nft) => nft.status === "staked")
+      .map((nft) => nft.id);
     setSelectedNFTs((prev) => prev.filter((id) => !stakedIds.includes(id)));
   };
 
@@ -559,16 +563,18 @@ export default function FounderNFTDashboard() {
                     </div>
                     <div className="border-t pt-3">
                       <div className="flex justify-between items-center mb-4">
-                        <span className="font-medium text-lg">Total Available to Claim</span>
+                        <span className="font-medium text-lg">
+                          Total Available to Claim
+                        </span>
                         <span className="font-bold text-xl text-[#8A63D2]">
                           {mockEarningsData.totalEarnings}
                         </span>
                       </div>
-                      <Button 
+                      <Button
                         className="w-full bg-[#8A63D2] hover:bg-[#7651c0] text-white"
                         onClick={() => {
                           // Handle claim functionality
-                          alert('Claiming all earnings...');
+                          alert("Claiming all earnings...");
                         }}
                       >
                         <Gift className="h-4 w-4 mr-2" />
@@ -580,7 +586,7 @@ export default function FounderNFTDashboard() {
 
                 {/* Claims History */}
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Recent Claims</h3>
+                  <h3 className="font-semibold text-lg">Claim History</h3>
                   <div className="space-y-3">
                     {mockClaims.map((claim) => (
                       <div
@@ -589,8 +595,8 @@ export default function FounderNFTDashboard() {
                           claim.status === "available"
                             ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20"
                             : claim.status === "claimed"
-                            ? "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-                            : "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20"
+                              ? "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
+                              : "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20"
                         }`}
                       >
                         <div className="flex items-center space-x-3">
@@ -619,12 +625,18 @@ export default function FounderNFTDashboard() {
                             <Badge variant="secondary">Claimed</Badge>
                           )}
                           {claim.status === "pending" && (
-                            <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                            <Badge
+                              variant="outline"
+                              className="text-yellow-600 border-yellow-600"
+                            >
                               Pending
                             </Badge>
                           )}
                           {claim.status === "available" && (
-                            <Badge variant="outline" className="text-green-600 border-green-600">
+                            <Badge
+                              variant="outline"
+                              className="text-green-600 border-green-600"
+                            >
                               Available
                             </Badge>
                           )}
