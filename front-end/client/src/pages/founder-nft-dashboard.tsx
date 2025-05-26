@@ -576,7 +576,7 @@ export default function FounderNFTDashboard() {
                 </CardContent>
               </Card>
 
-            {/* Claims Section */}
+              {/* Claims Section */}
             <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -649,6 +649,7 @@ export default function FounderNFTDashboard() {
                 </div>
               </CardContent>
             </Card>
+            </div>
           </TabsContent>
 
           {/* Exclusive Access Tab */}
