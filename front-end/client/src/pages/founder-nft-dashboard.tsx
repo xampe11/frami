@@ -141,8 +141,8 @@ export default function FounderNFTDashboard() {
     const unstakedNFTs = mockNFTData.filter((nft) => nft.status === "unstaked");
     const unstakedIds = unstakedNFTs.map((nft) => nft.id);
     setSelectedNFTs((prev) => {
-      const newSet = new Set([...prev, ...unstakedIds]);
-      return Array.from(newSet);
+      const combined = [...prev, ...unstakedIds];
+      return combined.filter((id, index) => combined.indexOf(id) === index);
     });
   };
 
@@ -150,8 +150,8 @@ export default function FounderNFTDashboard() {
     const stakedNFTs = mockNFTData.filter((nft) => nft.status === "staked");
     const stakedIds = stakedNFTs.map((nft) => nft.id);
     setSelectedNFTs((prev) => {
-      const newSet = new Set([...prev, ...stakedIds]);
-      return Array.from(newSet);
+      const combined = [...prev, ...stakedIds];
+      return combined.filter((id, index) => combined.indexOf(id) === index);
     });
   };
 
