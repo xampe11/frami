@@ -156,6 +156,11 @@ export default function Navbar() {
                 Docs
               </span>
             </Link>
+            <Link href="/contact">
+              <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors block py-2">
+                Contact
+              </span>
+            </Link>
             <div className="pt-2 flex items-center space-x-2">
               <ThemeToggle />
               <RainbowWalletButton />
