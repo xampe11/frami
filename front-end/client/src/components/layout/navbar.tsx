@@ -82,6 +82,11 @@ export default function Navbar() {
                 Docs
               </span>
             </Link>
+            <Link href="/contact">
+              <span className="text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">
+                Contact
+              </span>
+            </Link>
           </nav>
 
           {/* Right Side - Theme Toggle & Wallet Connection */}
