@@ -591,13 +591,7 @@ export default function FounderNFTDashboard() {
                     {mockClaims.map((claim) => (
                       <div
                         key={claim.id}
-                        className={`flex items-center justify-between p-4 border rounded-lg ${
-                          claim.status === "available"
-                            ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20"
-                            : claim.status === "claimed"
-                              ? "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-                              : "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20"
-                        }`}
+                        className="flex items-center justify-between p-4 border rounded-lg border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
                       >
                         <div className="flex items-center space-x-3">
                           {claim.status === "available" ? (
