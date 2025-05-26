@@ -140,13 +140,19 @@ export default function FounderNFTDashboard() {
   const handleSelectAllUnstaked = () => {
     const unstakedNFTs = mockNFTData.filter((nft) => nft.status === "unstaked");
     const unstakedIds = unstakedNFTs.map((nft) => nft.id);
-    setSelectedNFTs((prev) => [...new Set([...prev, ...unstakedIds])]);
+    setSelectedNFTs((prev) => {
+      const newSet = new Set([...prev, ...unstakedIds]);
+      return Array.from(newSet);
+    });
   };
 
   const handleSelectAllStaked = () => {
     const stakedNFTs = mockNFTData.filter((nft) => nft.status === "staked");
     const stakedIds = stakedNFTs.map((nft) => nft.id);
-    setSelectedNFTs((prev) => [...new Set([...prev, ...stakedIds])]);
+    setSelectedNFTs((prev) => {
+      const newSet = new Set([...prev, ...stakedIds]);
+      return Array.from(newSet);
+    });
   };
 
   const handleDeselectAllUnstaked = () => {
@@ -157,6 +163,10 @@ export default function FounderNFTDashboard() {
   const handleDeselectAllStaked = () => {
     const stakedIds = mockNFTData.filter((nft) => nft.status === "staked").map((nft) => nft.id);
     setSelectedNFTs((prev) => prev.filter((id) => !stakedIds.includes(id)));
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedNFTs([]);
   };
 
   const handleBulkStake = async () => {
