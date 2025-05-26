@@ -137,12 +137,26 @@ export default function FounderNFTDashboard() {
     );
   };
 
-  const handleSelectAll = () => {
-    setSelectedNFTs(mockNFTData.map((nft) => nft.id));
+  const handleSelectAllUnstaked = () => {
+    const unstakedNFTs = mockNFTData.filter((nft) => nft.status === "unstaked");
+    const unstakedIds = unstakedNFTs.map((nft) => nft.id);
+    setSelectedNFTs((prev) => [...new Set([...prev, ...unstakedIds])]);
   };
 
-  const handleDeselectAll = () => {
-    setSelectedNFTs([]);
+  const handleSelectAllStaked = () => {
+    const stakedNFTs = mockNFTData.filter((nft) => nft.status === "staked");
+    const stakedIds = stakedNFTs.map((nft) => nft.id);
+    setSelectedNFTs((prev) => [...new Set([...prev, ...stakedIds])]);
+  };
+
+  const handleDeselectAllUnstaked = () => {
+    const unstakedIds = mockNFTData.filter((nft) => nft.status === "unstaked").map((nft) => nft.id);
+    setSelectedNFTs((prev) => prev.filter((id) => !unstakedIds.includes(id)));
+  };
+
+  const handleDeselectAllStaked = () => {
+    const stakedIds = mockNFTData.filter((nft) => nft.status === "staked").map((nft) => nft.id);
+    setSelectedNFTs((prev) => prev.filter((id) => !stakedIds.includes(id)));
   };
 
   const handleBulkStake = async () => {
@@ -331,6 +345,24 @@ export default function FounderNFTDashboard() {
                       NFTs
                     </Badge>
                   </CardTitle>
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSelectAllUnstaked}
+                      className="text-xs"
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDeselectAllUnstaked}
+                      className="text-xs"
+                    >
+                      Deselect All
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockNFTData
@@ -392,6 +424,24 @@ export default function FounderNFTDashboard() {
                       NFTs Earning
                     </Badge>
                   </CardTitle>
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSelectAllStaked}
+                      className="text-xs"
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDeselectAllStaked}
+                      className="text-xs"
+                    >
+                      Deselect All
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockNFTData
