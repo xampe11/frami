@@ -46,7 +46,25 @@ const mockNFTData = [
   },
   {
     id: 2,
+    tokenId: "#0078",
+    image: "/api/placeholder/200/200",
+    status: "staked",
+    stakingDuration: "89 days",
+    earnedRewards: "1.67 ETH",
+    nextUnstakeDate: "2025-09-02",
+  },
+  {
+    id: 3,
     tokenId: "#0156",
+    image: "/api/placeholder/200/200",
+    status: "unstaked",
+    stakingDuration: "0 days",
+    earnedRewards: "0 ETH",
+    nextUnstakeDate: null,
+  },
+  {
+    id: 4,
+    tokenId: "#0234",
     image: "/api/placeholder/200/200",
     status: "unstaked",
     stakingDuration: "0 days",
@@ -57,9 +75,9 @@ const mockNFTData = [
 
 const mockStakingData = {
   totalStaked: 2,
-  totalOwned: 2,
+  totalOwned: 4,
   currentAPY: 12.5,
-  totalRewards: "2.45 ETH",
+  totalRewards: "4.12 ETH",
   minimumStakingPeriod: 7,
   unstakeCooldown: 14,
 };
