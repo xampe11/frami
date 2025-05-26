@@ -594,13 +594,7 @@ export default function FounderNFTDashboard() {
                         className="flex items-center justify-between p-4 border rounded-lg border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
                       >
                         <div className="flex items-center space-x-3">
-                          {claim.status === "available" ? (
-                            <CheckCircle className="h-5 w-5 text-green-500" />
-                          ) : claim.status === "claimed" ? (
-                            <CheckCircle className="h-5 w-5 text-gray-400" />
-                          ) : (
-                            <Clock className="h-5 w-5 text-yellow-500" />
-                          )}
+                          <CheckCircle className="h-5 w-5 text-green-500" />
                           <div>
                             <p className="font-medium">{claim.type}</p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
