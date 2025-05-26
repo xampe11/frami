@@ -562,24 +562,26 @@ export default function FounderNFTDashboard() {
                       </span>
                     </div>
                     <div className="border-t pt-3">
-                      <div className="flex justify-between items-center mb-4">
+                      <div className="flex justify-between items-center">
                         <span className="font-medium text-lg">
                           Total Available to Claim
                         </span>
-                        <span className="font-bold text-xl text-[#8A63D2]">
-                          {mockEarningsData.totalEarnings}
-                        </span>
+                        <div className="flex items-center space-x-4">
+                          <span className="font-bold text-xl text-[#8A63D2]">
+                            {mockEarningsData.totalEarnings}
+                          </span>
+                          <Button
+                            className="bg-[#8A63D2] hover:bg-[#7651c0] text-white"
+                            onClick={() => {
+                              // Handle claim functionality
+                              alert("Claiming earnings...");
+                            }}
+                          >
+                            <Gift className="h-4 w-4 mr-2" />
+                            Claim Earnings
+                          </Button>
+                        </div>
                       </div>
-                      <Button
-                        className=" bg-[#8A63D2] hover:bg-[#7651c0] text-white"
-                        onClick={() => {
-                          // Handle claim functionality
-                          alert("Claiming all earnings...");
-                        }}
-                      >
-                        <Gift className="h-4 w-4 mr-2" />
-                        Claim All Earnings
-                      </Button>
                     </div>
                   </div>
                 </div>
