@@ -36,7 +36,7 @@ export default function Contact() {
     try {
       // Simulate form submission
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      
+
       toast({
         title: "Message sent successfully!",
         description: "We'll get back to you as soon as possible.",
@@ -81,17 +81,18 @@ export default function Contact() {
               Contact
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Got a question or need help creating your project? Fill out the form below
-              and we'll get back to you as soon as possible. You can also reach out to us on{" "}
+              For inquiries or project support, please submit the form below and
+              we'll respond at our earliest opportunity. Alternative contact is
+              available through{" "}
               <a
                 href="https://discord.gg/frami"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 underline"
               >
-                Discord
+                Telegram
               </a>{" "}
-              for a faster response.
+              .
             </p>
           </div>
 
@@ -123,7 +124,9 @@ export default function Contact() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Select
                       value={formData.contactMethod}
-                      onValueChange={(value) => handleInputChange("contactMethod", value)}
+                      onValueChange={(value) =>
+                        handleInputChange("contactMethod", value)
+                      }
                     >
                       <SelectTrigger className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600 h-12">
                         <SelectValue />
@@ -135,24 +138,34 @@ export default function Contact() {
                             Email
                           </div>
                         </SelectItem>
-                        <SelectItem value="Discord">
+                        <SelectItem value="Telegram">
                           <div className="flex items-center">
                             <MessageCircle className="h-4 w-4 mr-2" />
-                            Discord
+                            Telegram
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="X(Twitter)">
+                          <div className="flex items-center">
+                            <MessageCircle className="h-4 w-4 mr-2" />
+                            X(Twitter)
                           </div>
                         </SelectItem>
                       </SelectContent>
                     </Select>
                     <div className="md:col-span-2">
                       <Input
-                        type={formData.contactMethod === "Email" ? "email" : "text"}
+                        type={
+                          formData.contactMethod === "Email" ? "email" : "text"
+                        }
                         placeholder={
                           formData.contactMethod === "Email"
                             ? "your.email@example.com"
                             : "your_discord_username"
                         }
                         value={formData.contact}
-                        onChange={(e) => handleInputChange("contact", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("contact", e.target.value)
+                        }
                         required
                         className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 text-base h-12"
                       />
@@ -167,7 +180,9 @@ export default function Contact() {
                   </Label>
                   <Select
                     value={formData.subject}
-                    onValueChange={(value) => handleInputChange("subject", value)}
+                    onValueChange={(value) =>
+                      handleInputChange("subject", value)
+                    }
                   >
                     <SelectTrigger className="bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600 h-12">
                       <SelectValue placeholder="Select a subject" />
@@ -192,7 +207,9 @@ export default function Contact() {
                       id="message"
                       placeholder="Enter a message..."
                       value={formData.message}
-                      onChange={(e) => handleInputChange("message", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("message", e.target.value)
+                      }
                       required
                       maxLength={500}
                       rows={6}
@@ -207,7 +224,12 @@ export default function Contact() {
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  disabled={isSubmitting || !formData.name || !formData.contact || !formData.message}
+                  disabled={
+                    isSubmitting ||
+                    !formData.name ||
+                    !formData.contact ||
+                    !formData.message
+                  }
                   className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-base font-medium h-12"
                 >
                   {isSubmitting ? (

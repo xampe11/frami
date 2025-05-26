@@ -530,40 +530,7 @@ export default function FounderNFTDashboard() {
 
           {/* Earnings & Claims Tab */}
           <TabsContent value="earnings" className="space-y-6 p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2 bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <TrendingUp className="h-5 w-5 mr-2" />
-                    Earnings Chart
-                  </CardTitle>
-                  <CardDescription>
-                    Historical earnings over the past 6 months
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {mockEarningsData.monthlyEarnings.map((month, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between"
-                      >
-                        <span className="text-sm">{month.month}</span>
-                        <div className="flex items-center space-x-2 flex-1 ml-4">
-                          <Progress
-                            value={(month.amount / 1.5) * 100}
-                            className="flex-1"
-                          />
-                          <span className="text-sm font-medium w-16 text-right">
-                            {month.amount} ETH
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -593,10 +560,21 @@ export default function FounderNFTDashboard() {
                         </span>
                       </div>
                     </div>
+                    <div className="pt-3">
+                      <Button 
+                        className="w-full bg-[#8A63D2] hover:bg-[#7651c0] text-white"
+                        onClick={() => {
+                          // Handle claim functionality
+                          alert('Claiming earnings...');
+                        }}
+                      >
+                        <Gift className="h-4 w-4 mr-2" />
+                        Claim Earnings
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            </div>
 
             {/* Claims Section */}
             <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
