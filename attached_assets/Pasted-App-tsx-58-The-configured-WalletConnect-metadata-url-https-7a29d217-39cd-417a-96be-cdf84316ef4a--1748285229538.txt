@@ -1,0 +1,42 @@
+App.tsx:58 The configured WalletConnect 'metadata.url':https://7a29d217-39cd-417a-96be-cdf84316ef4a-00-14iknayvdpegq.riker.replit.dev/founder-nft/dashboard differs from the actual page url:https://7a29d217-39cd-417a-96be-cdf84316ef4a-00-14iknayvdpegq.riker.replit.dev. This is probably unintended and can lead to issues.
+oi @ index.es-IZTHTFBB.js?v=3bcc9a7f:5983
+_Ee @ index.es-IZTHTFBB.js?v=3bcc9a7f:13383
+init @ index.es-IZTHTFBB.js?v=3bcc9a7f:13388
+createClient @ index.es-IZTHTFBB.js?v=3bcc9a7f:14609
+initialize @ index.es-IZTHTFBB.js?v=3bcc9a7f:14605
+init @ index.es-IZTHTFBB.js?v=3bcc9a7f:14522
+initialize @ index.es-IZTHTFBB.js?v=3bcc9a7f:14963
+init @ index.es-IZTHTFBB.js?v=3bcc9a7f:14822
+initProvider @ chunk-ZAN2XAZ3.js?v=3bcc9a7f:972
+await in initProvider
+getProvider @ chunk-ZAN2XAZ3.js?v=3bcc9a7f:989
+setup @ chunk-ZAN2XAZ3.js?v=3bcc9a7f:852
+setup @ chunk-SDIVP66B.js?v=3bcc9a7f:1699
+(anonymous) @ chunk-SDIVP66B.js?v=3bcc9a7f:1666
+createStoreImpl @ chunk-SDIVP66B.js?v=3bcc9a7f:1595
+createStore2 @ chunk-SDIVP66B.js?v=3bcc9a7f:1598
+createConfig @ chunk-SDIVP66B.js?v=3bcc9a7f:1662
+getDefaultConfig @ @rainbow-me_rainbowkit.js?v=3bcc9a7f:43565
+(anonymous) @ App.tsx:58
+App.tsx:58 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 2 times.
+getGlobalCore @ index.es-IZTHTFBB.js?v=3bcc9a7f:12130
+_Te @ index.es-IZTHTFBB.js?v=3bcc9a7f:12086
+_Ee @ index.es-IZTHTFBB.js?v=3bcc9a7f:13385
+init @ index.es-IZTHTFBB.js?v=3bcc9a7f:13388
+createClient @ index.es-IZTHTFBB.js?v=3bcc9a7f:14609
+initialize @ index.es-IZTHTFBB.js?v=3bcc9a7f:14605
+init @ index.es-IZTHTFBB.js?v=3bcc9a7f:14522
+initialize @ index.es-IZTHTFBB.js?v=3bcc9a7f:14963
+init @ index.es-IZTHTFBB.js?v=3bcc9a7f:14822
+initProvider @ chunk-ZAN2XAZ3.js?v=3bcc9a7f:972
+await in initProvider
+getProvider @ chunk-ZAN2XAZ3.js?v=3bcc9a7f:989
+setup @ chunk-ZAN2XAZ3.js?v=3bcc9a7f:852
+setup @ chunk-SDIVP66B.js?v=3bcc9a7f:1699
+(anonymous) @ chunk-SDIVP66B.js?v=3bcc9a7f:1666
+createStoreImpl @ chunk-SDIVP66B.js?v=3bcc9a7f:1595
+createStore2 @ chunk-SDIVP66B.js?v=3bcc9a7f:1598
+createConfig @ chunk-SDIVP66B.js?v=3bcc9a7f:1662
+getDefaultConfig @ @rainbow-me_rainbowkit.js?v=3bcc9a7f:43565
+(anonymous) @ App.tsx:58
+index.es-IZTHTFBB.js?v=3bcc9a7f:16143 Unable to get preferred account types

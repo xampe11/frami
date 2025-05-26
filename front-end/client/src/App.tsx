@@ -63,6 +63,7 @@ const config = getDefaultConfig({
     [mainnet.id]: http(),
     [polygon.id]: http(),
   },
+  ssr: false, // Disable SSR to prevent duplicate initialization
 });
 
 function Router() {
