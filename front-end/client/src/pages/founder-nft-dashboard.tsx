@@ -600,11 +600,6 @@ export default function FounderNFTDashboard() {
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                               {claim.date}
                             </p>
-                            {claim.estimatedGas && (
-                              <p className="text-xs text-gray-500">
-                                Est. Gas: {claim.estimatedGas}
-                              </p>
-                            )}
                           </div>
                         </div>
                         <div className="flex items-center space-x-3">
