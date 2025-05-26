@@ -55,25 +55,25 @@ export default function Navbar() {
               </span>
             </Link>
             {/* Founder NFT Dropdown */}
-            <div className="relative group">
-              <div className="flex items-center cursor-pointer text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">
-                <span>Founder</span>
+            <div className="relative">
+              <div className="flex items-center cursor-pointer text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors font-medium group">
+                <span className="px-1 py-1">Founder</span>
                 <ChevronDown className="h-4 w-4 ml-1 transition-transform group-hover:rotate-180" />
-              </div>
-              
-              {/* Dropdown Menu */}
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[9999]">
-                <div className="py-2">
-                  <Link href="/founder-nft">
-                    <div className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-primary dark:hover:text-primary transition-colors">
-                      NFT Sale
-                    </div>
-                  </Link>
-                  <Link href="/founder-nft/dashboard">
-                    <div className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-primary dark:hover:text-primary transition-colors">
-                      Dashboard
-                    </div>
-                  </Link>
+                
+                {/* Dropdown Menu - positioned to appear only on text hover */}
+                <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-[9999] pointer-events-none group-hover:pointer-events-auto">
+                  <div className="py-2">
+                    <Link href="/founder-nft">
+                      <div className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-primary dark:hover:text-primary transition-colors">
+                        NFT Sale
+                      </div>
+                    </Link>
+                    <Link href="/founder-nft/dashboard">
+                      <div className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-primary dark:hover:text-primary transition-colors">
+                        Dashboard
+                      </div>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
