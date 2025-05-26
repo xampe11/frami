@@ -383,7 +383,7 @@ const CoreBenefits = () => {
     {
       title: "Fee Distribution",
       description:
-        "Receive a share of platform fees proportional to your NFT holdings.",
+        "50% of ALL platform fees will be distributed to the staked founder NFTs pool.",
       icon: <PieChart className="h-10 w-10 text-primary" />,
     },
     {

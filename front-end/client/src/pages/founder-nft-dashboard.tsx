@@ -530,15 +530,20 @@ export default function FounderNFTDashboard() {
 
           {/* Earnings & Claims Tab */}
           <TabsContent value="earnings" className="space-y-6 p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <DollarSign className="h-5 w-5 mr-2" />
-                    Earnings Breakdown
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+            <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <DollarSign className="h-5 w-5 mr-2" />
+                  Earnings & Claims
+                </CardTitle>
+                <CardDescription>
+                  View your accumulated earnings and claim available rewards
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Earnings Summary */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg">Current Earnings</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Platform Fees</span>
@@ -553,103 +558,86 @@ export default function FounderNFTDashboard() {
                       </span>
                     </div>
                     <div className="border-t pt-3">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Total Earnings</span>
-                        <span className="font-bold text-lg">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="font-medium text-lg">Total Available to Claim</span>
+                        <span className="font-bold text-xl text-[#8A63D2]">
                           {mockEarningsData.totalEarnings}
                         </span>
                       </div>
-                    </div>
-                    <div className="pt-3">
                       <Button 
                         className="w-full bg-[#8A63D2] hover:bg-[#7651c0] text-white"
                         onClick={() => {
                           // Handle claim functionality
-                          alert('Claiming earnings...');
+                          alert('Claiming all earnings...');
                         }}
                       >
                         <Gift className="h-4 w-4 mr-2" />
-                        Claim Earnings
+                        Claim All Earnings
                       </Button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
 
-              {/* Claims Section */}
-            <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Gift className="h-5 w-5 mr-2" />
-                  Available Claims
-                </CardTitle>
-                <CardDescription>
-                  One-click claim functionality for available rewards
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                {/* Claims History */}
                 <div className="space-y-4">
-                  {mockClaims.map((claim) => (
-                    <div
-                      key={claim.id}
-                      className={`flex items-center justify-between p-4 border rounded-lg ${
-                        claim.status === "available"
-                          ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20"
-                          : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        {claim.status === "available" ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <Clock className="h-5 w-5 text-gray-400" />
-                        )}
-                        <div>
-                          <p className="font-medium">{claim.type}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {claim.date}
-                          </p>
-                          {claim.estimatedGas && (
-                            <p className="text-xs text-gray-500">
-                              Est. Gas: {claim.estimatedGas}
+                  <h3 className="font-semibold text-lg">Recent Claims</h3>
+                  <div className="space-y-3">
+                    {mockClaims.map((claim) => (
+                      <div
+                        key={claim.id}
+                        className={`flex items-center justify-between p-4 border rounded-lg ${
+                          claim.status === "available"
+                            ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20"
+                            : claim.status === "claimed"
+                            ? "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
+                            : "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20"
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          {claim.status === "available" ? (
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          ) : claim.status === "claimed" ? (
+                            <CheckCircle className="h-5 w-5 text-gray-400" />
+                          ) : (
+                            <Clock className="h-5 w-5 text-yellow-500" />
+                          )}
+                          <div>
+                            <p className="font-medium">{claim.type}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {claim.date}
                             </p>
+                            {claim.estimatedGas && (
+                              <p className="text-xs text-gray-500">
+                                Est. Gas: {claim.estimatedGas}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <span className="font-semibold">{claim.amount}</span>
+                          {claim.status === "available" && (
+                            <Button
+                              size="sm"
+                              className="bg-[#8A63D2] hover:bg-[#7651c0]"
+                            >
+                              Claim
+                            </Button>
+                          )}
+                          {claim.status === "claimed" && (
+                            <Badge variant="secondary">Claimed</Badge>
+                          )}
+                          {claim.status === "pending" && (
+                            <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                              Pending
+                            </Badge>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <span className="font-semibold">{claim.amount}</span>
-                        {claim.status === "available" && (
-                          <Button
-                            size="sm"
-                            className="bg-[#8A63D2] hover:bg-[#7651c0]"
-                          >
-                            Claim
-                          </Button>
-                        )}
-                        {claim.status === "claimed" && (
-                          <Badge variant="secondary">Claimed</Badge>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                    Bulk Claiming Available
-                  </h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-200 mb-3">
-                    Save on gas fees by claiming multiple rewards in a single
-                    transaction
-                  </p>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    Claim All Available (
-                    {mockClaims.filter((c) => c.status === "available").length})
-                  </Button>
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
-            </div>
           </TabsContent>
 
           {/* Exclusive Access Tab */}
