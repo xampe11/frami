@@ -571,7 +571,7 @@ export default function FounderNFTDashboard() {
                         </span>
                       </div>
                       <Button
-                        className="w-full bg-[#8A63D2] hover:bg-[#7651c0] text-white"
+                        className=" bg-[#8A63D2] hover:bg-[#7651c0] text-white"
                         onClick={() => {
                           // Handle claim functionality
                           alert("Claiming all earnings...");
@@ -604,7 +604,6 @@ export default function FounderNFTDashboard() {
                         </div>
                         <div className="flex items-center space-x-3">
                           <span className="font-semibold">{claim.amount}</span>
-
                         </div>
                       </div>
                     ))}
