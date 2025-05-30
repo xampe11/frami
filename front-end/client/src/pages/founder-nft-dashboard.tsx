@@ -596,7 +596,7 @@ export default function FounderNFTDashboard() {
                     </div>
                     <div className="flex justify-center">
                       <Button
-                        className="w-1/2 bg-[#8A63D2] hover:bg-[#7651c0] text-white"
+                        className="w-2/5 bg-[#8A63D2] hover:bg-[#7651c0] text-white"
                         onClick={() => {
                           alert("Claiming earnings...");
                         }}
