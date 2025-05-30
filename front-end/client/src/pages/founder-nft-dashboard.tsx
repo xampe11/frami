@@ -586,7 +586,7 @@ export default function FounderNFTDashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="text-center space-y-4">
-                    <div>
+                    <div className="bg-gradient-to-br from-[#8A63D2]/10 to-[#583c8e]/10 border border-[#8A63D2]/20 rounded-lg p-4">
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                         Available to Claim
                       </p>
@@ -594,15 +594,17 @@ export default function FounderNFTDashboard() {
                         {mockEarningsData.totalEarnings}
                       </p>
                     </div>
-                    <Button
-                      className="w-full bg-[#8A63D2] hover:bg-[#7651c0] text-white"
-                      onClick={() => {
-                        alert("Claiming earnings...");
-                      }}
-                    >
-                      <Gift className="h-4 w-4 mr-2" />
-                      Claim All Earnings
-                    </Button>
+                    <div className="flex justify-center">
+                      <Button
+                        className="w-1/2 bg-[#8A63D2] hover:bg-[#7651c0] text-white"
+                        onClick={() => {
+                          alert("Claiming earnings...");
+                        }}
+                      >
+                        <Gift className="h-4 w-4 mr-2" />
+                        Claim All Earnings
+                      </Button>
+                    </div>
                     <p className="text-xs text-gray-500">
                       Claiming will transfer earnings to your wallet
                     </p>
