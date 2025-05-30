@@ -534,20 +534,20 @@ export default function FounderNFTDashboard() {
 
           {/* Earnings & Claims Tab */}
           <TabsContent value="earnings" className="space-y-6 p-6">
-            <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <DollarSign className="h-5 w-5 mr-2" />
-                  Earnings & Claims
-                </CardTitle>
-                <CardDescription>
-                  View your accumulated earnings and claim available rewards
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Earnings Summary */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Current Earnings</h3>
+            {/* Top Row - Earnings Details and Claiming */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Earnings Details Card */}
+              <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <DollarSign className="h-5 w-5 mr-2" />
+                    Earnings Details
+                  </CardTitle>
+                  <CardDescription>
+                    View your accumulated earnings breakdown
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-sm">Platform Fees</span>
@@ -563,53 +563,86 @@ export default function FounderNFTDashboard() {
                     </div>
                     <div className="border-t pt-3">
                       <div className="flex justify-between items-center">
-                        <span className="font-medium text-lg">
-                          Total Available to Claim
+                        <span className="font-medium text-lg">Total Earned</span>
+                        <span className="font-bold text-xl text-[#8A63D2]">
+                          {mockEarningsData.totalEarnings}
                         </span>
-                        <div className="flex items-center space-x-4">
-                          <span className="font-bold text-xl text-[#8A63D2]">
-                            {mockEarningsData.totalEarnings}
-                          </span>
-                          <Button
-                            className="bg-[#8A63D2] hover:bg-[#7651c0] text-white"
-                            onClick={() => {
-                              // Handle claim functionality
-                              alert("Claiming earnings...");
-                            }}
-                          >
-                            <Gift className="h-4 w-4 mr-2" />
-                            Claim Earnings
-                          </Button>
-                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                {/* Claims History */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Claim History</h3>
-                  <div className="space-y-3">
-                    {mockClaims.map((claim) => (
-                      <div
-                        key={claim.id}
-                        className="flex items-center justify-between p-4 border rounded-lg border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                          <div>
-                            <p className="font-medium">{claim.type}</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {claim.date}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <span className="font-semibold">{claim.amount}</span>
+              {/* Claiming Card */}
+              <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Gift className="h-5 w-5 mr-2" />
+                    Claim Earnings
+                  </CardTitle>
+                  <CardDescription>
+                    Claim your available earnings rewards
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        Available to Claim
+                      </p>
+                      <p className="text-3xl font-bold text-[#8A63D2]">
+                        {mockEarningsData.totalEarnings}
+                      </p>
+                    </div>
+                    <Button
+                      className="w-full bg-[#8A63D2] hover:bg-[#7651c0] text-white"
+                      onClick={() => {
+                        alert("Claiming earnings...");
+                      }}
+                    >
+                      <Gift className="h-4 w-4 mr-2" />
+                      Claim All Earnings
+                    </Button>
+                    <p className="text-xs text-gray-500">
+                      Claiming will transfer earnings to your wallet
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Bottom Row - Claims History */}
+            <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  Claim History
+                </CardTitle>
+                <CardDescription>
+                  Your recent earnings claims and transactions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {mockClaims.map((claim) => (
+                    <div
+                      key={claim.id}
+                      className="flex items-center justify-between p-4 border rounded-lg border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <div>
+                          <p className="font-medium">{claim.type}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {claim.date}
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="font-semibold">{claim.amount}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
