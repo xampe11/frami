@@ -15,6 +15,16 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
   Clock,
   Coins,
   TrendingUp,
@@ -147,6 +157,12 @@ export default function FounderNFTDashboard() {
   const [selectedNFTs, setSelectedNFTs] = useState<number[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Modal state for staking/unstaking
+  const [stakeModalOpen, setStakeModalOpen] = useState(false);
+  const [unstakeModalOpen, setUnstakeModalOpen] = useState(false);
+  const [stakeAmount, setStakeAmount] = useState("");
+  const [unstakeAmount, setUnstakeAmount] = useState("");
+
   const handleNFTSelection = (nftId: number) => {
     setSelectedNFTs((prev) =>
       prev.includes(nftId)
@@ -229,6 +245,58 @@ export default function FounderNFTDashboard() {
     return selectedNFTs.filter(
       (id) => mockNFTData.find((nft) => nft.id === id)?.status === "unstaked",
     );
+  };
+
+  // Handle stake modal actions
+  const handleStakeModalOpen = () => {
+    const availableCount = mockNFTData.filter((nft) => nft.status === "unstaked").length;
+    setStakeAmount(availableCount.toString());
+    setStakeModalOpen(true);
+  };
+
+  const handleStakeConfirm = async () => {
+    const amount = parseInt(stakeAmount);
+    const maxAvailable = mockNFTData.filter((nft) => nft.status === "unstaked").length;
+    
+    if (amount > 0 && amount <= maxAvailable) {
+      setIsProcessing(true);
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        alert(`Successfully staked ${amount} NFTs`);
+        setStakeModalOpen(false);
+        setStakeAmount("");
+      } catch (error) {
+        console.error("Staking failed:", error);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+  };
+
+  // Handle unstake modal actions
+  const handleUnstakeModalOpen = () => {
+    const stakedCount = mockNFTData.filter((nft) => nft.status === "staked").length;
+    setUnstakeAmount(stakedCount.toString());
+    setUnstakeModalOpen(true);
+  };
+
+  const handleUnstakeConfirm = async () => {
+    const amount = parseInt(unstakeAmount);
+    const maxStaked = mockNFTData.filter((nft) => nft.status === "staked").length;
+    
+    if (amount > 0 && amount <= maxStaked) {
+      setIsProcessing(true);
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        alert(`Successfully unstaked ${amount} NFTs`);
+        setUnstakeModalOpen(false);
+        setUnstakeAmount("");
+      } catch (error) {
+        console.error("Unstaking failed:", error);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
   };
 
   if (!isConnected) {
@@ -384,12 +452,12 @@ export default function FounderNFTDashboard() {
                     </div>
                   </div>
                   <Button
-                    onClick={() => alert("Stake all available NFTs")}
+                    onClick={handleStakeModalOpen}
                     disabled={mockNFTData.filter((nft) => nft.status === "unstaked").length === 0}
                     className="bg-[#8A63D2] hover:bg-[#7651c0] w-full"
                   >
                     <Shield className="h-4 w-4 mr-2" />
-                    Stake All Available
+                    Stake NFTs
                   </Button>
                 </CardContent>
               </Card>
@@ -427,13 +495,13 @@ export default function FounderNFTDashboard() {
                       </span>
                     </div>
                     <Button
-                      onClick={() => alert("Unstake all NFTs")}
+                      onClick={handleUnstakeModalOpen}
                       disabled={mockNFTData.filter((nft) => nft.status === "staked").length === 0}
                       variant="outline"
                       className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-600 dark:text-orange-400"
                     >
                       <Clock className="h-4 w-4 mr-2" />
-                      Unstake All
+                      Unstake NFTs
                     </Button>
                   </div>
                 </CardContent>
@@ -655,6 +723,103 @@ export default function FounderNFTDashboard() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Stake Modal */}
+        <Dialog open={stakeModalOpen} onOpenChange={setStakeModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <Shield className="h-5 w-5 mr-2 text-[#8A63D2]" />
+                Stake FounderNFTs
+              </DialogTitle>
+              <DialogDescription>
+                Choose how many NFTs you want to stake to start earning rewards.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="stake-amount">Number of NFTs to Stake</Label>
+                <Input
+                  id="stake-amount"
+                  type="number"
+                  min="1"
+                  max={mockNFTData.filter((nft) => nft.status === "unstaked").length}
+                  value={stakeAmount}
+                  onChange={(e) => setStakeAmount(e.target.value)}
+                  placeholder="Enter amount"
+                />
+                <p className="text-sm text-gray-500">
+                  Available: {mockNFTData.filter((nft) => nft.status === "unstaked").length} NFTs
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setStakeModalOpen(false)}
+                disabled={isProcessing}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleStakeConfirm}
+                disabled={isProcessing || !stakeAmount || parseInt(stakeAmount) < 1}
+                className="bg-[#8A63D2] hover:bg-[#7651c0]"
+              >
+                {isProcessing ? "Staking..." : `Stake ${stakeAmount || 0} NFT${parseInt(stakeAmount) !== 1 ? 's' : ''}`}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Unstake Modal */}
+        <Dialog open={unstakeModalOpen} onOpenChange={setUnstakeModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <Clock className="h-5 w-5 mr-2 text-orange-600" />
+                Unstake FounderNFTs
+              </DialogTitle>
+              <DialogDescription>
+                Choose how many NFTs you want to unstake. Note that you'll stop earning rewards.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="unstake-amount">Number of NFTs to Unstake</Label>
+                <Input
+                  id="unstake-amount"
+                  type="number"
+                  min="1"
+                  max={mockNFTData.filter((nft) => nft.status === "staked").length}
+                  value={unstakeAmount}
+                  onChange={(e) => setUnstakeAmount(e.target.value)}
+                  placeholder="Enter amount"
+                />
+                <p className="text-sm text-gray-500">
+                  Currently Staked: {mockNFTData.filter((nft) => nft.status === "staked").length} NFTs
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setUnstakeModalOpen(false)}
+                disabled={isProcessing}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUnstakeConfirm}
+                disabled={isProcessing || !unstakeAmount || parseInt(unstakeAmount) < 1}
+                variant="outline"
+                className="border-orange-300 text-orange-600 hover:bg-orange-50"
+              >
+                {isProcessing ? "Unstaking..." : `Unstake ${unstakeAmount || 0} NFT${parseInt(unstakeAmount) !== 1 ? 's' : ''}`}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
