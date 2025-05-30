@@ -441,8 +441,8 @@ export default function FounderNFTDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="text-center">
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+                  <div className="flex justify-center">
+                    <div className="w-1/2 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
                       <p className="text-3xl font-bold text-[#8A63D2] mb-2">
                         {mockNFTData.filter((nft) => nft.status === "unstaked").length}
                       </p>
@@ -451,14 +451,16 @@ export default function FounderNFTDashboard() {
                       </p>
                     </div>
                   </div>
-                  <Button
-                    onClick={handleStakeModalOpen}
-                    disabled={mockNFTData.filter((nft) => nft.status === "unstaked").length === 0}
-                    className="bg-[#8A63D2] hover:bg-[#7651c0] w-full"
-                  >
-                    <Shield className="h-4 w-4 mr-2" />
-                    Stake NFTs
-                  </Button>
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={handleStakeModalOpen}
+                      disabled={mockNFTData.filter((nft) => nft.status === "unstaked").length === 0}
+                      className="bg-[#8A63D2] hover:bg-[#7651c0] w-1/2"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Stake NFTs
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -474,8 +476,8 @@ export default function FounderNFTDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="text-center">
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
+                  <div className="flex justify-center">
+                    <div className="w-1/2 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 text-center">
                       <p className="text-3xl font-bold text-green-600 mb-2">
                         {mockNFTData.filter((nft) => nft.status === "staked").length}
                       </p>
@@ -494,15 +496,17 @@ export default function FounderNFTDashboard() {
                           .toFixed(3)} ETH
                       </span>
                     </div>
-                    <Button
-                      onClick={handleUnstakeModalOpen}
-                      disabled={mockNFTData.filter((nft) => nft.status === "staked").length === 0}
-                      variant="outline"
-                      className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-600 dark:text-orange-400"
-                    >
-                      <Clock className="h-4 w-4 mr-2" />
-                      Unstake NFTs
-                    </Button>
+                    <div className="flex justify-center">
+                      <Button
+                        onClick={handleUnstakeModalOpen}
+                        disabled={mockNFTData.filter((nft) => nft.status === "staked").length === 0}
+                        variant="outline"
+                        className="w-1/2 border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-600 dark:text-orange-400"
+                      >
+                        <Clock className="h-4 w-4 mr-2" />
+                        Unstake NFTs
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
