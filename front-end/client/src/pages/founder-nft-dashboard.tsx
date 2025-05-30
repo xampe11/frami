@@ -586,13 +586,15 @@ export default function FounderNFTDashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="text-center space-y-4">
-                    <div className="bg-gradient-to-br from-[#8A63D2]/10 to-[#583c8e]/10 border border-[#8A63D2]/20 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        Available to Claim
-                      </p>
-                      <p className="text-3xl font-bold text-[#8A63D2]">
-                        {mockEarningsData.totalEarnings}
-                      </p>
+                    <div className="flex justify-center">
+                      <div className="w-2/5 bg-gradient-to-br from-[#8A63D2]/10 to-[#583c8e]/10 border border-[#8A63D2]/20 rounded-lg p-4">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                          Available to Claim
+                        </p>
+                        <p className="text-3xl font-bold text-[#8A63D2]">
+                          {mockEarningsData.totalEarnings}
+                        </p>
+                      </div>
                     </div>
                     <div className="flex justify-center">
                       <Button
