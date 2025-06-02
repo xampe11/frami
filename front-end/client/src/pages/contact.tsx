@@ -85,7 +85,7 @@ export default function Contact() {
               we'll respond at our earliest opportunity. Alternative contact is
               available through{" "}
               <a
-                href="https://discord.gg/frami"
+                href="#"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 underline"
@@ -160,7 +160,9 @@ export default function Contact() {
                         placeholder={
                           formData.contactMethod === "Email"
                             ? "your.email@example.com"
-                            : "your_discord_username"
+                            : formData.contactMethod === "Telegram"
+                              ? "your_telegram_username"
+                              : "your_twitter_username"
                         }
                         value={formData.contact}
                         onChange={(e) =>
