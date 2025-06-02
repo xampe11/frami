@@ -427,6 +427,75 @@ export const docSections: DocSection[] = [
           },
         ],
       },
+      {
+        id: "our-mission",
+        title: "Our Mission",
+        description: "Understanding Frami's vision and values",
+        content: [
+          { type: "heading", title: "Empowering Innovation Through Decentralized Funding" },
+          "At Frami, we believe that the best ideas shouldn't be limited by traditional funding barriers. Our mission is to democratize access to capital for innovative projects while creating a transparent, secure, and community-driven ecosystem that benefits both creators and backers.",
+
+          { type: "heading", title: "Core Values" },
+          {
+            type: "list",
+            items: [
+              "Transparency: Every transaction, milestone, and decision is recorded on the blockchain for complete visibility.",
+              "Accountability: Milestone-based funding ensures creators deliver on their promises while protecting backer investments.",
+              "Innovation: We foster cutting-edge projects that push the boundaries of technology and creativity.",
+              "Community: Our platform is built by and for the community, with governance that reflects collective interests.",
+              "Accessibility: We strive to make blockchain technology accessible to creators and backers regardless of their technical background.",
+              "Sustainability: Our economic model ensures long-term viability for both the platform and the projects it supports.",
+            ],
+          },
+
+          { type: "heading", title: "Vision for the Future" },
+          "We envision a world where innovative ideas can flourish without the constraints of traditional funding gatekeepers. Frami aims to become the leading decentralized crowdfunding platform where:",
+
+          {
+            type: "list",
+            items: [
+              "Creators can focus on building rather than fundraising complexities",
+              "Backers have confidence in their investments through transparent milestone tracking",
+              "Communities can collectively support projects that align with their values",
+              "Innovation is rewarded and sustainable through fair economic incentives",
+              "Global collaboration becomes the norm for bringing ideas to life",
+            ],
+          },
+
+          { type: "heading", title: "Building Trust Through Technology" },
+          "Traditional crowdfunding platforms often lack transparency and accountability mechanisms. Frami addresses these challenges by leveraging blockchain technology to create:",
+
+          {
+            type: "list",
+            items: [
+              "Immutable Records: All project updates, funding milestones, and transactions are permanently recorded",
+              "Smart Contract Automation: Reduces human error and ensures consistent execution of agreed-upon terms",
+              "Community Governance: Stakeholders have a voice in platform decisions and project milestone verification",
+              "Economic Incentives: Aligned interests between creators, backers, and the platform itself",
+            ],
+          },
+
+          { type: "heading", title: "Commitment to Our Community" },
+          "Frami is more than a platform – it's a movement toward a more equitable and innovative future. We are committed to:",
+
+          {
+            type: "list",
+            items: [
+              "Continuous improvement based on community feedback and technological advances",
+              "Supporting creators at all stages of their journey with resources and guidance",
+              "Maintaining the highest standards of security and platform reliability",
+              "Fostering an inclusive environment where diverse ideas and perspectives thrive",
+              "Contributing to the broader blockchain ecosystem through open-source development and research",
+            ],
+          },
+
+          {
+            type: "note",
+            title: "Join Our Mission",
+            text: "Whether you're a creator with a groundbreaking idea, a backer looking to support innovation, or a developer wanting to contribute to the platform, you're part of the Frami mission. Together, we're building the future of decentralized funding.",
+          },
+        ],
+      },
     ],
   },
   {

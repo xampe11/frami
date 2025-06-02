@@ -45,7 +45,7 @@ export default function Footer() {
                   href="/create-project"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Start a Project
+                  How to Start a Project
                 </Link>
               </li>
               <li>
@@ -69,15 +69,7 @@ export default function Footer() {
                   href="#"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Blockchain Education
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
-                >
-                  Creator Resources
+                  FAQs
                 </a>
               </li>
             </ul>
@@ -101,15 +93,7 @@ export default function Footer() {
                   href="#"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Wallet Setup Guide
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
-                >
-                  Trust & Safety
+                  How to Invest in a Project
                 </a>
               </li>
               <li>
@@ -142,6 +126,14 @@ export default function Footer() {
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Our Mission
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
+                >
+                  Community Guidelines
                 </a>
               </li>
               <li>
