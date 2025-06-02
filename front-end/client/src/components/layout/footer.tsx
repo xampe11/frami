@@ -42,35 +42,35 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/create-project"
+                  href="/docs#welcome-guide"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  How to Start a Project
+                  Start a Project → Quick Start Guide
                 </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/docs#for-project-creators"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Creator Guidelines
-                </a>
+                  Creator Guidelines → For Project Creators
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/docs#milestone-funding"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Fees & Payments
-                </a>
+                  Fees & Payments → Milestone-based Funding
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/docs#faqs"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  FAQs
-                </a>
+                  FAQs → FAQs
+                </Link>
               </li>
             </ul>
           </div>
@@ -82,35 +82,27 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/explore"
+                  href="/docs#welcome-guide"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Discover Projects
+                  How to Invest in a Project → Quick Start Guide
                 </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/docs#milestone-funding"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  How to Invest in a Project
-                </a>
+                  Backer Protection → Milestone-based Funding
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/docs#faqs"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Backer Protection
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
-                >
-                  FAQs
-                </a>
+                  FAQs → FAQs
+                </Link>
               </li>
             </ul>
           </div>
@@ -121,28 +113,28 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2">
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/docs#our-mission"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Our Mission
-                </a>
+                  Our Mission → Our Mission
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/docs#community-guidelines"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Community Guidelines
-                </a>
+                  Community Guidelines → Community Guidelines
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/contact"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Contact Us
-                </a>
+                  Contact Us → Contact page
+                </Link>
               </li>
             </ul>
           </div>
