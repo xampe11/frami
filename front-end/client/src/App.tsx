@@ -20,6 +20,7 @@ import Project from "@/pages/project";
 import CreateProject from "@/pages/create-project";
 import FounderNFT from "@/pages/founder-nft";
 import FounderNFTDashboard from "@/pages/founder-nft-dashboard";
+import MyProfile from "@/pages/my-profile";
 import Docs from "@/pages/docs";
 import Contact from "@/pages/contact";
 import NotFound from "@/pages/not-found";
@@ -106,6 +107,7 @@ function Router() {
           <Route path="/create-project" component={CreateProject} />
           <Route path="/founder-nft" component={FounderNFT} />
           <Route path="/founder-nft/dashboard" component={FounderNFTDashboard} />
+          <Route path="/my-profile" component={MyProfile} />
           <Route path="/docs" component={Docs} />
           <Route path="/contact" component={Contact} />
           {/* Redirects for old routes */}
