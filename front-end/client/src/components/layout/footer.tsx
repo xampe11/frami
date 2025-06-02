@@ -19,7 +19,9 @@ export default function Footer() {
             </p>
             <div className="flex space-x-4">
               <a
-                href="#"
+                href="https://x.com/FramiSpace"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary transition"
                 aria-label="Twitter"
               >
@@ -27,6 +29,8 @@ export default function Footer() {
               </a>
               <a
                 href="#"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-gray-400 hover:text-primary transition"
                 aria-label="Telegram"
               >
