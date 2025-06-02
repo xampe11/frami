@@ -45,7 +45,7 @@ export default function Footer() {
                   href="/docs#welcome-guide"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Start a Project → Quick Start Guide
+                  How to Start a Project
                 </Link>
               </li>
               <li>
@@ -53,7 +53,7 @@ export default function Footer() {
                   href="/docs#for-project-creators"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Creator Guidelines → For Project Creators
+                  Creator Guidelines
                 </Link>
               </li>
               <li>
@@ -61,7 +61,7 @@ export default function Footer() {
                   href="/docs#milestone-funding"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Fees & Payments → Milestone-based Funding
+                  Fees & Payments
                 </Link>
               </li>
               <li>
@@ -69,7 +69,7 @@ export default function Footer() {
                   href="/docs#faqs"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  FAQs → FAQs
+                  FAQs
                 </Link>
               </li>
             </ul>
@@ -85,7 +85,7 @@ export default function Footer() {
                   href="/docs#welcome-guide"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  How to Invest in a Project → Quick Start Guide
+                  How to Invest in a Project
                 </Link>
               </li>
               <li>
@@ -93,7 +93,7 @@ export default function Footer() {
                   href="/docs#milestone-funding"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Backer Protection → Milestone-based Funding
+                  Backer Protection
                 </Link>
               </li>
               <li>
@@ -101,7 +101,7 @@ export default function Footer() {
                   href="/docs#faqs"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  FAQs → FAQs
+                  FAQs
                 </Link>
               </li>
             </ul>
@@ -117,7 +117,7 @@ export default function Footer() {
                   href="/docs#our-mission"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Our Mission → Our Mission
+                  Our Mission
                 </Link>
               </li>
               <li>
@@ -125,7 +125,7 @@ export default function Footer() {
                   href="/docs#community-guidelines"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Community Guidelines → Community Guidelines
+                  Community Guidelines
                 </Link>
               </li>
               <li>
@@ -133,7 +133,7 @@ export default function Footer() {
                   href="/contact"
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
-                  Contact Us → Contact page
+                  Contact Us
                 </Link>
               </li>
             </ul>
