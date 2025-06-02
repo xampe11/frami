@@ -507,6 +507,61 @@ export const docSections: DocSection[] = [
         ],
       },
       {
+        id: "milestone-funding",
+        title: "Milestone-based Funding",
+        content: [
+          { type: "heading", title: "Creating effective milestones" },
+          "Milestone-based funding is a cornerstone of the Frami platform, providing structure and accountability to project development:",
+
+          "Effective milestones should be:",
+
+          {
+            type: "list",
+            items: [
+              "Specific: Clearly defined with measurable deliverables.",
+              "Achievable: Realistic given the project's resources and timeline.",
+              "Relevant: Directly related to the project's overall goals.",
+              "Time-bound: Include clear deadlines for completion.",
+              "Verifiable: Include methods to validate completion.",
+            ],
+          },
+
+          { type: "heading", title: "Milestone verification process" },
+          "When a milestone is marked as complete, the following verification process is triggered:",
+
+          {
+            type: "numbered-list",
+            items: [
+              "Creator submits evidence of milestone completion.",
+              "Verification method is activated based on project settings (community vote, designated validators, or automated checks).",
+              "Verification period begins (typically 3-7 days).",
+              "If approved, funds allocated to the milestone are released to the project.",
+              "If rejected, the creator can address concerns and resubmit, or dispute the rejection.",
+            ],
+          },
+
+          { type: "heading", title: "Fund distribution mechanics" },
+          "The Frami platform employs a secure and transparent fund distribution system:",
+
+          {
+            type: "list",
+            items: [
+              "Escrow: Funds are held in a smart contract escrow until milestones are verified.",
+              "Proportional Release: Each milestone releases a predetermined percentage of the total funds.",
+              "Backer Protection: If a project fails to complete milestones within the specified timeframe, unused funds can be returned to backers.",
+              "Creator Incentives: Successfully completing milestones on time can unlock bonuses or additional benefits.",
+              "Transparent Tracking: All fund movements are recorded on the blockchain and visible to backers.",
+            ],
+          },
+
+          {
+            type: "warning",
+            title: "Important Consideration",
+            text: "When defining milestones, ensure that early milestones provide demonstrable value to backers. This builds trust and establishes credibility for later, more complex development phases.",
+          },
+        ],
+      },
+      {
         id: "for-investors",
         title: "For Investors",
         content: [
@@ -723,61 +778,6 @@ export const docSections: DocSection[] = [
             type: "note",
             title: "Developer Resources",
             text: 'For detailed guidance on extension development, refer to the "For Extension Builders" section under Guides.',
-          },
-        ],
-      },
-      {
-        id: "milestone-funding",
-        title: "Milestone-based Funding",
-        content: [
-          { type: "heading", title: "Creating effective milestones" },
-          "Milestone-based funding is a cornerstone of the Frami platform, providing structure and accountability to project development:",
-
-          "Effective milestones should be:",
-
-          {
-            type: "list",
-            items: [
-              "Specific: Clearly defined with measurable deliverables.",
-              "Achievable: Realistic given the project's resources and timeline.",
-              "Relevant: Directly related to the project's overall goals.",
-              "Time-bound: Include clear deadlines for completion.",
-              "Verifiable: Include methods to validate completion.",
-            ],
-          },
-
-          { type: "heading", title: "Milestone verification process" },
-          "When a milestone is marked as complete, the following verification process is triggered:",
-
-          {
-            type: "numbered-list",
-            items: [
-              "Creator submits evidence of milestone completion.",
-              "Verification method is activated based on project settings (community vote, designated validators, or automated checks).",
-              "Verification period begins (typically 3-7 days).",
-              "If approved, funds allocated to the milestone are released to the project.",
-              "If rejected, the creator can address concerns and resubmit, or dispute the rejection.",
-            ],
-          },
-
-          { type: "heading", title: "Fund distribution mechanics" },
-          "The Frami platform employs a secure and transparent fund distribution system:",
-
-          {
-            type: "list",
-            items: [
-              "Escrow: Funds are held in a smart contract escrow until milestones are verified.",
-              "Proportional Release: Each milestone releases a predetermined percentage of the total funds.",
-              "Backer Protection: If a project fails to complete milestones within the specified timeframe, unused funds can be returned to backers.",
-              "Creator Incentives: Successfully completing milestones on time can unlock bonuses or additional benefits.",
-              "Transparent Tracking: All fund movements are recorded on the blockchain and visible to backers.",
-            ],
-          },
-
-          {
-            type: "warning",
-            title: "Important Consideration",
-            text: "When defining milestones, ensure that early milestones provide demonstrable value to backers. This builds trust and establishes credibility for later, more complex development phases.",
           },
         ],
       },

@@ -28,20 +28,6 @@ export default function Footer() {
               <a
                 href="#"
                 className="text-gray-400 hover:text-primary transition"
-                aria-label="MessageCircleCode"
-              >
-                <MessageCircleCode size={20} />
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-primary transition"
-                aria-label="Github"
-              >
-                <Github size={20} />
-              </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-primary transition"
                 aria-label="Telegram"
               >
                 <Send size={20} />
@@ -156,30 +142,6 @@ export default function Footer() {
                   className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
                 >
                   Our Mission
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
-                >
-                  Stats
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
-                >
-                  Press
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-600 hover:text-white dark:text-gray-400 dark:hover:text-white transition"
-                >
-                  Careers
                 </a>
               </li>
               <li>
