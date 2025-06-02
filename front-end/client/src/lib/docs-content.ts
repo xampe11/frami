@@ -548,6 +548,7 @@ export const docSections: DocSection[] = [
             items: [
               "Escrow: Funds are held in a smart contract escrow until milestones are verified.",
               "Proportional Release: Each milestone releases a predetermined percentage of the total funds.",
+              "Platform Fee: A 5% fee is automatically deducted from released funds when milestones are approved and funds are distributed to the project creator.",
               "Backer Protection: If a project fails to complete milestones within the specified timeframe, unused funds can be returned to backers.",
               "Creator Incentives: Successfully completing milestones on time can unlock bonuses or additional benefits.",
               "Transparent Tracking: All fund movements are recorded on the blockchain and visible to backers.",
