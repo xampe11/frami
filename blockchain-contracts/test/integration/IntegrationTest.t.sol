@@ -73,6 +73,9 @@ contract IntegrationTest is Test {
         vm.deal(founder2, 5 ether);
         vm.deal(founder3, 5 ether);
 
+        // Set consistent starting time
+        vm.warp(1);
+
         // Deploy implementations
         PlatformRegistry registryImplementation = new PlatformRegistry();
         registryImpl = address(registryImplementation);

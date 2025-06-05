@@ -70,6 +70,22 @@ contract FounderNFTTest is Test {
         vm.deal(user3, 10 ether);
         vm.deal(platform, 10 ether);
 
+        // === CHOOSE YOUR APPROACH ===
+
+        // APPROACH 1: Fresh deployment (works with any network)
+        deployFreshContractsForTesting();
+
+        // APPROACH 2: Warp to future (for mainnet fork testing)
+        // warpToFutureForForkTesting();
+    }
+
+    /**
+     * @dev Deploy fresh contracts for testing (recommended for unit tests)
+     */
+    function deployFreshContractsForTesting() internal {
+        // Set consistent starting time
+        vm.warp(1);
+
         // Deploy mock registry
         mockRegistry = new MockPlatformRegistry();
 
@@ -96,6 +112,27 @@ contract FounderNFTTest is Test {
 
         // Activate sale
         founderNFT.setSaleStatus(true);
+
+        console.log("Fresh deployment - Deployment week:", founderNFT.getCurrentWeek());
+    }
+
+    /**
+     * @dev Warp to future for fork testing (use this if testing with mainnet fork)
+     */
+    function warpToFutureForForkTesting() internal {
+        // Assume founderNFT is already deployed (from fork)
+        // Get current week from the forked mainnet timestamp
+        uint256 currentMainnetWeek = founderNFT.getCurrentWeek();
+
+        // Warp to a future week (well beyond deployment week)
+        uint256 futureWeek = currentMainnetWeek + 10; // 10 weeks in future
+        uint256 futureTimestamp = futureWeek * WEEK + 100;
+
+        vm.warp(futureTimestamp);
+
+        console.log("Fork testing - Original week:", currentMainnetWeek);
+        console.log("Fork testing - Current week:", founderNFT.getCurrentWeek());
+        console.log("Fork testing - Can finalize:", founderNFT.getCurrentWeek() > currentMainnetWeek);
     }
 
     function testWeeklySystemInitialization() public view {
