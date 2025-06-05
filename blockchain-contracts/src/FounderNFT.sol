@@ -11,7 +11,7 @@ import {FounderNFTStorage} from "./FounderNFTStorage.sol";
 
 /**
  * @title FounderNFT
- * @dev NFT for platform founders with special privileges and staking
+ * @dev NFT for platform founders with special privileges and weekly reward epochs
  */
 contract FounderNFT is
     Initializable,
@@ -27,17 +27,22 @@ contract FounderNFT is
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant PLATFORM_ROLE = keccak256("PLATFORM_ROLE");
 
+    // Weekly epoch constants
+    uint256 public constant WEEK = 7 days;
+    uint256 public constant SALES_REDISTRIBUTION_PERCENTAGE = 1000; // 10%
+    uint256 public constant BASIS_POINTS = 10000; // 100%
+
     // Events
     event FounderNFTMinted(address indexed to, uint256 indexed tokenId);
-    event FeeDistributionReceived(uint256 amount);
-    event FeeDistributionUpdated(uint256 totalUndistributedFees);
-    event FeesDistributed(address indexed to, uint256 amount);
+    event WeeklyEpochFinalized(uint256 indexed week, uint256 totalRewards, uint256 stakedCount);
+    event WeeklyRewardClaimed(address indexed user, uint256 indexed tokenId, uint256 indexed week, uint256 amount);
+    event SalesRedistributed(uint256 amount);
     event SaleProceedsReceived(uint256 amount);
+    event FeeDistributionReceived(uint256 amount);
     event EarlyAccessProjectAdded(address indexed projectAddress);
     event EarlyAccessProjectRemoved(address indexed projectAddress);
     event TokenStaked(address indexed owner, uint256 indexed tokenId);
     event TokenUnstaked(address indexed owner, uint256 indexed tokenId);
-    event StakingRewardsClaimed(address indexed owner, uint256 indexed tokenId, uint256 amount);
     event ETHReceived(address indexed from, uint256 amount);
 
     /**
@@ -76,6 +81,10 @@ contract FounderNFT is
         _nextTokenId = 0;
         _totalStakedTokens = 0;
 
+        // Initialize weekly system
+        _deploymentWeek = getCurrentWeek();
+        _currentWeeklyRewards = 0;
+
         // Set up access control
         _grantRole(DEFAULT_ADMIN_ROLE, initialOwner);
         _grantRole(ADMIN_ROLE, initialOwner);
@@ -84,24 +93,47 @@ contract FounderNFT is
     }
 
     /**
+     * @dev Get current week number since epoch
+     */
+    function getCurrentWeek() public view returns (uint256) {
+        return block.timestamp / WEEK;
+    }
+
+    /**
+     * @dev Get week number for a specific timestamp
+     */
+    function getWeekOf(uint256 timestamp) public pure returns (uint256) {
+        return timestamp / WEEK;
+    }
+
+    /**
      * @dev Function to receive ETH
      */
     receive() external payable {
-        //emit an event for tracking
         emit ETHReceived(msg.sender, msg.value);
     }
 
     /**
-     * @dev Mint a Founder NFT
+     * @dev Mint a Founder NFT with weekly sales redistribution
      */
     function mint() external payable {
         require(_saleActive, "Sale is not active");
         require(totalSupply() < _maxSupply, "Max supply reached");
         require(msg.value >= _price, "Insufficient payment");
 
-        // Add to sales proceeds
-        _totalSalesProceeds += msg.value;
-        emit SaleProceedsReceived(msg.value);
+        // Calculate redistribution amount (10% of sales)
+        uint256 redistributionAmount = (msg.value * SALES_REDISTRIBUTION_PERCENTAGE) / BASIS_POINTS;
+        uint256 salesProceedsAmount = msg.value - redistributionAmount;
+
+        // Add to sales proceeds (90% of the payment)
+        _totalSalesProceeds += salesProceedsAmount;
+        emit SaleProceedsReceived(salesProceedsAmount);
+
+        // Add redistribution amount to current week's rewards
+        if (redistributionAmount > 0) {
+            _currentWeeklyRewards += redistributionAmount;
+            emit SalesRedistributed(redistributionAmount);
+        }
 
         uint256 tokenId = _nextTokenId;
         _nextTokenId++;
@@ -112,9 +144,9 @@ contract FounderNFT is
     }
 
     /**
-     * @dev Batch mint multiple NFTs (for admin use)
+     * @dev Batch mint multiple NFTs (for admin use) - NO PAYMENT REQUIRED
      */
-    function batchMint(address[] calldata recipients) external onlyRole(ADMIN_ROLE) {
+    function batchMint(address[] memory recipients) external onlyRole(ADMIN_ROLE) {
         require(_saleActive, "Sale is not active");
         require(totalSupply() + recipients.length <= _maxSupply, "Exceeds max supply");
 
@@ -129,44 +161,15 @@ contract FounderNFT is
     }
 
     /**
-     * @dev Check if an address owns a Founder NFT
-     */
-    function isFounder(address account) external view returns (bool) {
-        return balanceOf(account) > 0;
-    }
-
-    /**
-     * @dev Add to undistributed fees
+     * @dev Add platform fees to current week's reward pool
      */
     function addPlatformFees(uint256 amount) external onlyRole(PLATFORM_ROLE) {
-        _totalUndistributedFees += amount;
-        emit FeeDistributionUpdated(_totalUndistributedFees);
+        _currentWeeklyRewards += amount;
         emit FeeDistributionReceived(amount);
     }
 
     /**
-     * @dev Get platform fee distribution percentage
-     */
-    function getPlatformFeeDistributionPercentage() external view returns (uint256) {
-        return _platformFeeDistributionPercentage;
-    }
-
-    /**
-     * @dev Get total sales proceeds
-     */
-    function getTotalSalesProceeds() external view returns (uint256) {
-        return _totalSalesProceeds;
-    }
-
-    /**
-     * @dev Get total undistributed fees
-     */
-    function getTotalUndistributedFees() external view returns (uint256) {
-        return _totalUndistributedFees;
-    }
-
-    /**
-     * @dev Stake token to participate in fee distribution
+     * @dev Stake token to participate in weekly reward distribution
      */
     function stakeToken(uint256 tokenId) external nonReentrant {
         require(ownerOf(tokenId) == msg.sender, "Not the token owner");
@@ -181,11 +184,15 @@ contract FounderNFT is
 
         _totalStakedTokens++;
 
+        // Mark as staked for current week
+        uint256 currentWeek = getCurrentWeek();
+        _tokenStakedDuringWeek[currentWeek][tokenId] = true;
+
         emit TokenStaked(msg.sender, tokenId);
     }
 
     /**
-     * @dev Unstake token and claim any pending rewards
+     * @dev Unstake token
      */
     function unstakeToken(uint256 tokenId) external nonReentrant {
         require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
@@ -193,9 +200,6 @@ contract FounderNFT is
             block.timestamp >= _stakedTokens[tokenId].stakedSince + _minimumStakingPeriod,
             "Minimum staking period not reached"
         );
-
-        // Claim any pending rewards
-        _claimStakingRewards(tokenId);
 
         // Transfer token back to owner
         _transfer(address(this), msg.sender, tokenId);
@@ -209,83 +213,226 @@ contract FounderNFT is
     }
 
     /**
-     * @dev Claim rewards for a staked token
+     * @dev Finalize the current week and start a new one
      */
-    function claimStakingRewards(uint256 tokenId) external nonReentrant {
-        require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
+    function finalizeWeek() external {
+        uint256 currentWeek = getCurrentWeek();
+        require(currentWeek > _deploymentWeek, "Cannot finalize deployment week");
 
-        _claimStakingRewards(tokenId);
-    }
+        uint256 weekToFinalize = currentWeek - 1;
+        require(_weeklyRewardPool[weekToFinalize] == 0, "Week already finalized");
 
-    /**
-     * @dev Internal function to claim staking rewards
-     */
-    function _claimStakingRewards(uint256 tokenId) internal {
-        if (_totalStakedTokens == 0 || _totalUndistributedFees == 0) {
-            return;
-        }
+        // Snapshot the previous week's data
+        _weeklyRewardPool[weekToFinalize] = _currentWeeklyRewards;
+        _weeklyStakedCount[weekToFinalize] = _totalStakedTokens;
 
-        uint256 sharePerToken = _totalUndistributedFees / _totalStakedTokens;
-
-        if (sharePerToken == 0) {
-            return;
-        }
-
-        // Update undistributed fees
-        _totalUndistributedFees -= sharePerToken;
-
-        // Update claim timestamp
-        _stakedTokens[tokenId].lastRewardsClaimed = block.timestamp;
-
-        // Transfer share to token owner
-        address owner = _stakedTokens[tokenId].owner;
-        (bool success,) = owner.call{value: sharePerToken}("");
-        require(success, "Transfer failed");
-
-        emit StakingRewardsClaimed(owner, tokenId, sharePerToken);
-    }
-
-    /**
-     * @dev Claim fee distribution for all owned tokens
-     */
-    function claimAllStakingRewards() external nonReentrant {
-        uint256 totalClaimed = 0;
-
+        // Mark all currently staked tokens as staked during that week
         for (uint256 i = 0; i < totalSupply(); i++) {
             uint256 tokenId = tokenByIndex(i);
-            if (_stakedTokens[tokenId].owner == msg.sender) {
-                if (_totalStakedTokens == 0 || _totalUndistributedFees == 0) {
-                    break;
-                }
-
-                uint256 sharePerToken = _totalUndistributedFees / _totalStakedTokens;
-
-                if (sharePerToken == 0) {
-                    break;
-                }
-
-                // Update undistributed fees
-                _totalUndistributedFees -= sharePerToken;
-
-                // Update claim timestamp
-                _stakedTokens[tokenId].lastRewardsClaimed = block.timestamp;
-
-                totalClaimed += sharePerToken;
+            if (_stakedTokens[tokenId].owner != address(0)) {
+                _tokenStakedDuringWeek[weekToFinalize][tokenId] = true;
             }
         }
 
-        if (totalClaimed > 0) {
-            // Transfer total share to token owner
-            (bool success,) = msg.sender.call{value: totalClaimed}("");
-            require(success, "Transfer failed");
+        emit WeeklyEpochFinalized(weekToFinalize, _currentWeeklyRewards, _totalStakedTokens);
 
-            emit FeesDistributed(msg.sender, totalClaimed);
-        }
+        // Reset for new week
+        _currentWeeklyRewards = 0;
     }
 
     /**
-     * @dev Withdraw sales proceeds (only admin)
+     * @dev Claim reward for a specific week for a token
      */
+    function claimWeeklyReward(uint256 tokenId, uint256 week) external nonReentrant {
+        require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
+
+        // Validation checks
+        require(week < getCurrentWeek(), "Cannot claim current or future week");
+        require(_weeklyRewardPool[week] > 0, "Week not finalized or no rewards");
+        require(!_hasClaimedWeek[week][tokenId], "Already claimed for this week");
+        require(_tokenStakedDuringWeek[week][tokenId], "Token not staked during this week");
+
+        // Calculate reward for this week
+        uint256 weekReward = _weeklyRewardPool[week] / _weeklyStakedCount[week];
+
+        // Mark as claimed
+        _hasClaimedWeek[week][tokenId] = true;
+
+        // Transfer reward
+        (bool success,) = msg.sender.call{value: weekReward}("");
+        require(success, "Transfer failed");
+
+        emit WeeklyRewardClaimed(msg.sender, tokenId, week, weekReward);
+    }
+
+    /**
+     * @dev Claim rewards for all claimable weeks for a token
+     */
+    function claimAllWeeklyRewards(uint256 tokenId) external nonReentrant {
+        require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
+
+        uint256 currentWeek = getCurrentWeek();
+        uint256 totalRewards = 0;
+
+        for (uint256 week = _deploymentWeek; week < currentWeek; week++) {
+            if (_weeklyRewardPool[week] > 0 && _tokenStakedDuringWeek[week][tokenId] && !_hasClaimedWeek[week][tokenId])
+            {
+                uint256 weekReward = _weeklyRewardPool[week] / _weeklyStakedCount[week];
+                totalRewards += weekReward;
+
+                // Mark as claimed
+                _hasClaimedWeek[week][tokenId] = true;
+
+                emit WeeklyRewardClaimed(msg.sender, tokenId, week, weekReward);
+            }
+        }
+
+        require(totalRewards > 0, "No rewards to claim");
+
+        // Transfer total rewards
+        (bool success,) = msg.sender.call{value: totalRewards}("");
+        require(success, "Transfer failed");
+    }
+
+    /**
+     * @dev Get claimable weeks count and total amount for a token
+     */
+    function getClaimableRewardsInfo(uint256 tokenId) external view returns (uint256 weekCount, uint256 totalAmount) {
+        require(_stakedTokens[tokenId].owner != address(0), "Token not staked");
+
+        uint256 currentWeek = getCurrentWeek();
+        uint256 count = 0;
+        uint256 total = 0;
+
+        for (uint256 week = _deploymentWeek; week < currentWeek; week++) {
+            if (_weeklyRewardPool[week] > 0 && _tokenStakedDuringWeek[week][tokenId] && !_hasClaimedWeek[week][tokenId])
+            {
+                count++;
+                total += _weeklyRewardPool[week] / _weeklyStakedCount[week];
+            }
+        }
+
+        return (count, total);
+    }
+
+    /**
+     * @dev Get reward amount for a specific week and token
+     */
+    function getWeekReward(uint256 tokenId, uint256 week) external view returns (uint256) {
+        if (_weeklyRewardPool[week] == 0 || !_tokenStakedDuringWeek[week][tokenId] || _hasClaimedWeek[week][tokenId]) {
+            return 0;
+        }
+
+        return _weeklyRewardPool[week] / _weeklyStakedCount[week];
+    }
+
+    /**
+     * @dev Get current weekly rewards accumulating
+     */
+    function getCurrentWeeklyRewards() external view returns (uint256) {
+        return _currentWeeklyRewards;
+    }
+
+    /**
+     * @dev Get week info
+     */
+    function getWeekInfo(uint256 week) external view returns (uint256 rewards, uint256 stakedCount) {
+        return (_weeklyRewardPool[week], _weeklyStakedCount[week]);
+    }
+
+    /**
+     * @dev Check if token was staked during a specific week
+     */
+    function tokenStakedDuringWeek(uint256 week, uint256 tokenId) external view returns (bool) {
+        return _tokenStakedDuringWeek[week][tokenId];
+    }
+
+    /**
+     * @dev Check if token has claimed rewards for a specific week
+     */
+    function hasClaimedWeek(uint256 week, uint256 tokenId) external view returns (bool) {
+        return _hasClaimedWeek[week][tokenId];
+    }
+
+    // ===== ALL OTHER EXISTING FUNCTIONS (same as before) =====
+
+    function isFounder(address account) external view returns (bool) {
+        return balanceOf(account) > 0;
+    }
+
+    function getPlatformFeeDistributionPercentage() external view returns (uint256) {
+        return _platformFeeDistributionPercentage;
+    }
+
+    function getTotalSalesProceeds() external view returns (uint256) {
+        return _totalSalesProceeds;
+    }
+
+    function getSalesRedistributionPercentage() external pure returns (uint256) {
+        return SALES_REDISTRIBUTION_PERCENTAGE;
+    }
+
+    function isTokenStaked(uint256 tokenId) external view returns (bool) {
+        return _stakedTokens[tokenId].owner != address(0);
+    }
+
+    function getStakingInfo(uint256 tokenId)
+        external
+        view
+        returns (address owner, uint256 stakedSince, uint256 lastRewardsClaimed)
+    {
+        StakeInfo memory info = _stakedTokens[tokenId];
+        return (info.owner, info.stakedSince, info.lastRewardsClaimed);
+    }
+
+    function getTotalStakedTokens() external view returns (uint256) {
+        return _totalStakedTokens;
+    }
+
+    function getMinimumStakingPeriod() external view returns (uint256) {
+        return _minimumStakingPeriod;
+    }
+
+    function setMinimumStakingPeriod(uint256 newPeriod) external onlyRole(ADMIN_ROLE) {
+        _minimumStakingPeriod = newPeriod;
+    }
+
+    function hasEarlyAccess(address account, address projectAddress) external view returns (bool) {
+        return balanceOf(account) > 0 && _earlyAccessProjects[projectAddress];
+    }
+
+    function addEarlyAccessProject(address projectAddress) external onlyRole(ADMIN_ROLE) {
+        _earlyAccessProjects[projectAddress] = true;
+        emit EarlyAccessProjectAdded(projectAddress);
+    }
+
+    function removeEarlyAccessProject(address projectAddress) external onlyRole(ADMIN_ROLE) {
+        _earlyAccessProjects[projectAddress] = false;
+        emit EarlyAccessProjectRemoved(projectAddress);
+    }
+
+    function getDaoTokenAllocationPercentage() external view returns (uint256) {
+        return _daoTokenAllocationPercentage;
+    }
+
+    function setPlatformFeeDistributionPercentage(uint256 newPercentage) external onlyRole(ADMIN_ROLE) {
+        require(newPercentage <= 10000, "Invalid percentage");
+        _platformFeeDistributionPercentage = newPercentage;
+    }
+
+    function setDaoTokenAllocationPercentage(uint256 newPercentage) external onlyRole(ADMIN_ROLE) {
+        require(newPercentage <= 10000, "Invalid percentage");
+        _daoTokenAllocationPercentage = newPercentage;
+    }
+
+    function setSaleStatus(bool status) external onlyRole(ADMIN_ROLE) {
+        _saleActive = status;
+    }
+
+    function setPrice(uint256 newPrice) external onlyRole(ADMIN_ROLE) {
+        _price = newPrice;
+    }
+
     function withdrawSalesProceeds() external onlyRole(ADMIN_ROLE) {
         uint256 amount = _totalSalesProceeds;
         require(amount > 0, "No sales proceeds to withdraw");
@@ -296,126 +443,11 @@ contract FounderNFT is
         require(success, "Transfer failed");
     }
 
-    /**
-     * @dev Check if a token is currently staked
-     */
-    function isTokenStaked(uint256 tokenId) external view returns (bool) {
-        return _stakedTokens[tokenId].owner != address(0);
-    }
-
-    /**
-     * @dev Get staking information for a token
-     */
-    function getStakingInfo(uint256 tokenId)
-        external
-        view
-        returns (address owner, uint256 stakedSince, uint256 lastRewardsClaimed)
-    {
-        StakeInfo memory info = _stakedTokens[tokenId];
-        return (info.owner, info.stakedSince, info.lastRewardsClaimed);
-    }
-
-    /**
-     * @dev Get total number of staked tokens
-     */
-    function getTotalStakedTokens() external view returns (uint256) {
-        return _totalStakedTokens;
-    }
-
-    /**
-     * @dev Get minimum staking period
-     */
-    function getMinimumStakingPeriod() external view returns (uint256) {
-        return _minimumStakingPeriod;
-    }
-
-    /**
-     * @dev Set minimum staking period
-     */
-    function setMinimumStakingPeriod(uint256 newPeriod) external onlyRole(ADMIN_ROLE) {
-        _minimumStakingPeriod = newPeriod;
-    }
-
-    /**
-     * @dev Check if an address has early access to a project
-     */
-    function hasEarlyAccess(address account, address projectAddress) external view returns (bool) {
-        return balanceOf(account) > 0 && _earlyAccessProjects[projectAddress];
-    }
-
-    /**
-     * @dev Add a project for early access
-     */
-    function addEarlyAccessProject(address projectAddress) external onlyRole(ADMIN_ROLE) {
-        _earlyAccessProjects[projectAddress] = true;
-        emit EarlyAccessProjectAdded(projectAddress);
-    }
-
-    /**
-     * @dev Remove a project from early access
-     */
-    function removeEarlyAccessProject(address projectAddress) external onlyRole(ADMIN_ROLE) {
-        _earlyAccessProjects[projectAddress] = false;
-        emit EarlyAccessProjectRemoved(projectAddress);
-    }
-
-    /**
-     * @dev Get DAO token allocation percentage for founders
-     */
-    function getDaoTokenAllocationPercentage() external view returns (uint256) {
-        return _daoTokenAllocationPercentage;
-    }
-
-    /**
-     * @dev Get total undistributed fees
-     */
-    function getUndistributedFees() external view returns (uint256) {
-        return _totalUndistributedFees;
-    }
-
-    /**
-     * @dev Set platform fee distribution percentage
-     */
-    function setPlatformFeeDistributionPercentage(uint256 newPercentage) external onlyRole(ADMIN_ROLE) {
-        require(newPercentage <= 10000, "Invalid percentage");
-        _platformFeeDistributionPercentage = newPercentage;
-    }
-
-    /**
-     * @dev Set DAO token allocation percentage
-     */
-    function setDaoTokenAllocationPercentage(uint256 newPercentage) external onlyRole(ADMIN_ROLE) {
-        require(newPercentage <= 10000, "Invalid percentage");
-        _daoTokenAllocationPercentage = newPercentage;
-    }
-
-    /**
-     * @dev Set sale status
-     */
-    function setSaleStatus(bool status) external onlyRole(ADMIN_ROLE) {
-        _saleActive = status;
-    }
-
-    /**
-     * @dev Set NFT price
-     */
-    function setPrice(uint256 newPrice) external onlyRole(ADMIN_ROLE) {
-        _price = newPrice;
-    }
-
-    /**
-     * @dev Get NFT metadata URI
-     */
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        _requireOwned(tokenId); // Updated for v5.3.0
-
-        // You can customize this to return different metadata based on tokenId
+        _requireOwned(tokenId);
         return string(abi.encodePacked(super.tokenURI(tokenId), "/founder"));
     }
 
-    /**
-     * @dev Override transfer function for staked tokens in OpenZeppelin 5.x
-     */
     function _update(address to, uint256 tokenId, address auth)
         internal
         override(ERC721EnumerableUpgradeable)
@@ -423,9 +455,7 @@ contract FounderNFT is
     {
         address from = _ownerOf(tokenId);
 
-        // Prevent transfer of staked tokens except by this contract
         if (from != address(0) && to != address(0)) {
-            // Skip minting and burning
             require(
                 _stakedTokens[tokenId].owner == address(0) || from == address(this) || to == address(this),
                 "Cannot transfer staked token"
@@ -435,27 +465,16 @@ contract FounderNFT is
         return super._update(to, tokenId, auth);
     }
 
-    /**
-     * @dev Withdraw contract funds (excluding undistributed fees)
-     */
     function withdraw() external onlyRole(ADMIN_ROLE) {
-        uint256 balance = address(this).balance - _totalUndistributedFees;
+        uint256 balance = address(this).balance - _currentWeeklyRewards;
         require(balance > 0, "No funds to withdraw");
 
         (bool success,) = msg.sender.call{value: balance}("");
         require(success, "Transfer failed");
     }
 
-    /**
-     * @dev Authorization for upgrades
-     */
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {
-        // Additional upgrade logic if needed
-    }
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
-    /**
-     * @dev Required override for interface support
-     */
     function supportsInterface(bytes4 interfaceId)
         public
         view

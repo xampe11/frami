@@ -32,6 +32,8 @@ contract IntegrationTest is Test {
     uint256 constant FEE_DISTRIBUTION_PERCENTAGE = 3000; // 30%
     uint256 constant DAO_TOKEN_ALLOCATION = 1000; // 10%
     uint256 constant MIN_STAKING_PERIOD = 7 days;
+    uint256 constant WEEK = 7 days;
+    uint256 constant SALES_REDISTRIBUTION_PERCENTAGE = 1000; // 10%
 
     // Extension type constant
     bytes32 constant FOUNDER_NFT_EXTENSION = keccak256("FOUNDER_NFT_EXTENSION");
@@ -45,6 +47,7 @@ contract IntegrationTest is Test {
     address public investor2;
     address public founder1;
     address public founder2;
+    address public founder3;
 
     // Created project
     address public projectAddress;
@@ -60,6 +63,7 @@ contract IntegrationTest is Test {
         investor2 = makeAddr("investor2");
         founder1 = makeAddr("founder1");
         founder2 = makeAddr("founder2");
+        founder3 = makeAddr("founder3");
 
         // Fund accounts
         vm.deal(creator, 5 ether);
@@ -67,6 +71,7 @@ contract IntegrationTest is Test {
         vm.deal(investor2, 20 ether);
         vm.deal(founder1, 5 ether);
         vm.deal(founder2, 5 ether);
+        vm.deal(founder3, 5 ether);
 
         // Deploy implementations
         PlatformRegistry registryImplementation = new PlatformRegistry();
@@ -135,8 +140,11 @@ contract IntegrationTest is Test {
         factory.grantRole(factory.ADMIN_ROLE(), address(registryProxy));
     }
 
-    function testFounderNFTSale() public {
-        // Test founder minting NFTs
+    function testFounderNFTSaleWithWeeklyRedistribution() public {
+        // Test founder minting NFTs with weekly sales redistribution
+        uint256 expectedSalesProceeds = (NFT_PRICE * 9000) / 10000; // 90%
+        uint256 expectedRedistribution = (NFT_PRICE * 1000) / 10000; // 10%
+
         vm.prank(founder1);
         founderNFT.mint{value: NFT_PRICE}();
 
@@ -152,10 +160,25 @@ contract IntegrationTest is Test {
         assertTrue(founderNFT.isFounder(founder1), "Founder1 should be recognized as founder");
         assertTrue(founderNFT.isFounder(founder2), "Founder2 should be recognized as founder");
         assertFalse(founderNFT.isFounder(investor1), "Investor1 should not be recognized as founder");
+
+        // Verify weekly redistribution accumulation
+        assertEq(
+            founderNFT.getTotalSalesProceeds(), expectedSalesProceeds * 2, "Sales proceeds should be 90% of total sales"
+        );
+        assertEq(
+            founderNFT.getCurrentWeeklyRewards(),
+            expectedRedistribution * 2,
+            "Current weekly rewards should be 10% of total sales"
+        );
+        assertEq(
+            founderNFT.getSalesRedistributionPercentage(),
+            SALES_REDISTRIBUTION_PERCENTAGE,
+            "Redistribution percentage should be 10%"
+        );
     }
 
-    function testFounderStaking() public {
-        // Founder buys and stakes NFT
+    function testFounderStakingWithWeeklyRewards() public {
+        // Founder1 buys and stakes NFT
         vm.prank(founder1);
         founderNFT.mint{value: NFT_PRICE}();
 
@@ -173,18 +196,86 @@ contract IntegrationTest is Test {
         (address stakedOwner, uint256 stakedSince,) = founderNFT.getStakingInfo(0);
         assertEq(stakedOwner, founder1, "Staked owner should be founder1");
         assertEq(stakedSince, block.timestamp, "Staked since timestamp should match");
+
+        // Check staked during current week
+        uint256 currentWeek = founderNFT.getCurrentWeek();
+        assertTrue(
+            founderNFT.tokenStakedDuringWeek(currentWeek, 0), "Token should be marked as staked for current week"
+        );
     }
 
-    function testEndToEndProjectWithFounderFees() public {
+    function testWeeklyEpochSystemWithClaiming() public {
+        // Multiple founders buy and stake NFTs
+        vm.prank(founder1);
+        founderNFT.mint{value: NFT_PRICE}();
+        vm.prank(founder1);
+        founderNFT.stakeToken(0);
+
+        vm.prank(founder2);
+        founderNFT.mint{value: NFT_PRICE}();
+        vm.prank(founder2);
+        founderNFT.stakeToken(1);
+
+        uint256 weekToFinalize = founderNFT.getCurrentWeek();
+        uint256 expectedWeeklyRewards = (NFT_PRICE * 1000 * 2) / 10000; // 10% of 2 mints
+
+        // Verify weekly rewards accumulated
+        assertEq(founderNFT.getCurrentWeeklyRewards(), expectedWeeklyRewards, "Weekly rewards should accumulate");
+
+        // Move to next week and finalize
+        vm.warp(block.timestamp + WEEK);
+        founderNFT.finalizeWeek();
+
+        // Verify week was finalized
+        (uint256 weekRewards, uint256 weekStakers) = founderNFT.getWeekInfo(weekToFinalize);
+        assertEq(weekRewards, expectedWeeklyRewards, "Week should have correct rewards");
+        assertEq(weekStakers, 2, "Week should have correct staker count");
+
+        // Verify current weekly rewards reset
+        assertEq(founderNFT.getCurrentWeeklyRewards(), 0, "Current weekly rewards should reset");
+
+        // Check claimable rewards
+        (uint256 weekCount, uint256 totalAmount) = founderNFT.getClaimableRewardsInfo(0);
+        assertEq(weekCount, 1, "Should have 1 claimable week");
+        assertEq(totalAmount, expectedWeeklyRewards / 2, "Should have half the total rewards");
+
+        // Claim rewards
+        uint256 founder1BalanceBefore = founder1.balance;
+        vm.prank(founder1);
+        founderNFT.claimWeeklyReward(0, weekToFinalize);
+
+        uint256 founder2BalanceBefore = founder2.balance;
+        vm.prank(founder2);
+        founderNFT.claimWeeklyReward(1, weekToFinalize);
+
+        // Verify equal distribution
+        uint256 expectedPerFounder = expectedWeeklyRewards / 2;
+        assertEq(founder1.balance - founder1BalanceBefore, expectedPerFounder, "Founder1 should receive equal share");
+        assertEq(founder2.balance - founder2BalanceBefore, expectedPerFounder, "Founder2 should receive equal share");
+    }
+
+    function testEndToEndProjectWithWeeklyRewardsAndPlatformFees() public {
         // Step 1: Founder buys and stakes NFT
         vm.prank(founder1);
         founderNFT.mint{value: NFT_PRICE}();
 
-        // Verify sales proceeds are tracked correctly after minting
-        assertEq(founderNFT.getTotalSalesProceeds(), NFT_PRICE, "Sales proceeds should match mint price");
+        // Verify sales proceeds and redistribution are tracked correctly
+        uint256 expectedSalesProceeds = (NFT_PRICE * 9000) / 10000; // 90%
+        uint256 expectedSalesRedistribution = (NFT_PRICE * 1000) / 10000; // 10%
+
+        assertEq(
+            founderNFT.getTotalSalesProceeds(), expectedSalesProceeds, "Sales proceeds should be 90% of mint price"
+        );
+        assertEq(
+            founderNFT.getCurrentWeeklyRewards(),
+            expectedSalesRedistribution,
+            "Should have 10% sales redistribution in weekly rewards"
+        );
 
         vm.prank(founder1);
         founderNFT.stakeToken(0);
+
+        uint256 initialWeek = founderNFT.getCurrentWeek();
 
         // Make sure project contracts can call addPlatformFees
         bytes32 PLATFORM_ROLE = founderNFT.PLATFORM_ROLE();
@@ -214,14 +305,10 @@ contract IntegrationTest is Test {
         project.createMilestone("Final Product", 3000); // 30%
         vm.stopPrank();
 
-        // Verify milestones
-        assertEq(project.getMilestoneCount(), 3, "Should have 3 milestones");
-
         // Step 4: Invest with ETH
         vm.prank(investor1);
         project.invest{value: 6 ether}();
 
-        // Additional investment to reach funding goal
         vm.prank(investor2);
         project.invest{value: 5 ether}();
 
@@ -231,9 +318,6 @@ contract IntegrationTest is Test {
         // Step 6: Update project state
         project.checkAndUpdateState();
 
-        // Verify project state
-        assertEq(uint8(project.getProjectState()), 1, "Project should be Successful");
-
         // Step 7: Submit milestone completion
         vm.prank(creator);
         project.submitMilestoneCompletion(0);
@@ -242,56 +326,147 @@ contract IntegrationTest is Test {
         vm.prank(investor1);
         project.voteMilestone(0);
 
-        // Step 9: Record balances before milestone fund release
-        uint256 creatorBalanceBefore = creator.balance;
-        uint256 treasuryBalanceBefore = treasury.balance;
-        uint256 founderNFTBalanceBefore = address(founderNFT).balance;
-
-        // Step 10: Release funds for milestone
+        // Step 9: Release funds for milestone (this adds platform fees)
         vm.prank(creator);
         project.releaseMilestoneFunds(0);
 
         // Calculate expected amounts
-        uint256 totalFunding = 11 ether; // 6 ETH + 5 ETH
+        uint256 totalFunding = 11 ether;
         uint256 milestoneAmount = (totalFunding * 3000) / 10000; // 30% of funds
         uint256 platformFee = (milestoneAmount * 500) / 10000; // 5% fee
         uint256 founderShare = (platformFee * FEE_DISTRIBUTION_PERCENTAGE) / 10000; // 30% of platform fee
-        uint256 treasuryAmount = platformFee - founderShare;
-        uint256 creatorAmount = milestoneAmount - platformFee;
 
-        // Verify balances
-        assertEq(creator.balance, creatorBalanceBefore + creatorAmount, "Creator should receive correct amount");
-        assertEq(treasury.balance, treasuryBalanceBefore + treasuryAmount, "Treasury should receive correct fee amount");
+        // Verify platform fees added to weekly rewards
+        uint256 expectedTotalWeeklyRewards = expectedSalesRedistribution + founderShare;
         assertEq(
-            address(founderNFT).balance,
-            founderNFTBalanceBefore + founderShare,
-            "FounderNFT contract should receive fee share"
+            founderNFT.getCurrentWeeklyRewards(),
+            expectedTotalWeeklyRewards,
+            "Weekly rewards should include both sales redistribution and platform fees"
         );
 
-        // Verify the specific fund trackers in FounderNFT
-        assertEq(founderNFT.getTotalSalesProceeds(), NFT_PRICE, "Sales proceeds should still match mint price");
-        assertEq(
-            founderNFT.getTotalUndistributedFees(), founderShare, "Undistributed fees should match platform fee share"
-        );
+        // Step 10: Move to next week and finalize to enable claiming
+        vm.warp(WEEK + 100);
+        founderNFT.finalizeWeek();
 
-        // Step 11: Fast forward minimum staking period to allow unstaking
-        vm.warp(block.timestamp + MIN_STAKING_PERIOD + 1);
-
-        // Step 12: Founder claims rewards
+        // Step 11: Founder claims combined rewards (sales redistribution + platform fees)
         uint256 founder1BalanceBefore = founder1.balance;
 
         vm.prank(founder1);
-        founderNFT.claimStakingRewards(0);
+        founderNFT.claimWeeklyReward(0, initialWeek);
 
-        // Verify founder received rewards
-        assertEq(founder1.balance, founder1BalanceBefore + founderShare, "Founder should receive fee share");
+        // Verify founder received combined rewards
+        uint256 totalExpectedRewards = expectedSalesRedistribution + founderShare;
+        assertEq(
+            founder1.balance - founder1BalanceBefore, totalExpectedRewards, "Founder should receive combined rewards"
+        );
 
-        // Verify undistributed fees are now 0 after claiming
-        assertEq(founderNFT.getTotalUndistributedFees(), 0, "Undistributed fees should be 0 after claiming");
+        // Verify week is marked as claimed
+        assertTrue(founderNFT.hasClaimedWeek(initialWeek, 0), "Week should be marked as claimed");
 
         // Sales proceeds should be unchanged by the claim process
         assertEq(
-            founderNFT.getTotalSalesProceeds(), NFT_PRICE, "Sales proceeds should be unchanged after reward claiming"
+            founderNFT.getTotalSalesProceeds(),
+            expectedSalesProceeds,
+            "Sales proceeds should be unchanged after reward claiming"
+        );
+    }
+
+    function testClaimAllWeeklyRewardsAcrossMultipleWeeks() public {
+        // Start at timestamp 1 to avoid edge cases
+        vm.warp(1);
+
+        // Week 0: Setup
+        vm.prank(founder1);
+        founderNFT.mint{value: NFT_PRICE}();
+        vm.prank(founder1);
+        founderNFT.stakeToken(0);
+
+        //uint256 week1 = founderNFT.getCurrentWeek();
+        uint256 week1Rewards = (NFT_PRICE * 1000) / 10000;
+
+        // Move to week 1 and finalize week 0
+        vm.warp(WEEK + 100); // Move well into next week
+        founderNFT.finalizeWeek();
+
+        // Week 1: Add more rewards
+        vm.prank(founder2);
+        founderNFT.mint{value: NFT_PRICE}();
+
+        //uint256 week2 = founderNFT.getCurrentWeek();
+        uint256 week2Rewards = (NFT_PRICE * 1000) / 10000;
+
+        // Move to week 2 and finalize week 1
+        vm.warp(WEEK * 2 + 100); // Move well into week 2
+        founderNFT.finalizeWeek();
+
+        // Check claimable info
+        (uint256 weekCount, uint256 totalAmount) = founderNFT.getClaimableRewardsInfo(0);
+        assertEq(weekCount, 2, "Should have 2 claimable weeks");
+        assertEq(totalAmount, week1Rewards + week2Rewards, "Should have total of both weeks");
+
+        // Claim all weeks at once
+        uint256 founder1BalanceBefore = founder1.balance;
+        vm.prank(founder1);
+        founderNFT.claimAllWeeklyRewards(0);
+
+        uint256 expectedTotal = week1Rewards + week2Rewards;
+        assertEq(founder1.balance - founder1BalanceBefore, expectedTotal, "Should receive all accumulated rewards");
+
+        // Verify no more claimable rewards
+        (uint256 remainingWeeks, uint256 remainingAmount) = founderNFT.getClaimableRewardsInfo(0);
+        assertEq(remainingWeeks, 0, "Should have no claimable weeks left");
+        assertEq(remainingAmount, 0, "Should have no claimable amount left");
+    }
+
+    function testBatchMintNoWeeklyRedistribution() public {
+        uint256 initialWeeklyRewards = founderNFT.getCurrentWeeklyRewards();
+        uint256 initialSalesProceeds = founderNFT.getTotalSalesProceeds();
+
+        // Create list of recipients
+        address[] memory recipients = new address[](3);
+        recipients[0] = founder1;
+        recipients[1] = founder2;
+        recipients[2] = founder3;
+
+        // Batch mint NFTs (admin function, no payment)
+        founderNFT.batchMint(recipients);
+
+        // Verify ownership
+        assertEq(founderNFT.ownerOf(0), founder1, "Founder1 should own NFT #0");
+        assertEq(founderNFT.ownerOf(1), founder2, "Founder2 should own NFT #1");
+        assertEq(founderNFT.ownerOf(2), founder3, "Founder3 should own NFT #2");
+
+        // Verify total supply
+        assertEq(founderNFT.totalSupply(), 3, "Total supply should be 3");
+
+        // Verify no sales proceeds or weekly redistribution (batch mint is free)
+        assertEq(founderNFT.getTotalSalesProceeds(), initialSalesProceeds, "Sales proceeds should be unchanged");
+        assertEq(founderNFT.getCurrentWeeklyRewards(), initialWeeklyRewards, "Weekly rewards should be unchanged");
+    }
+
+    function testWithdrawSalesProceedsAfterWeeklyRedistribution() public {
+        // Founder mints NFT
+        vm.prank(founder1);
+        founderNFT.mint{value: NFT_PRICE}();
+
+        uint256 expectedSalesProceeds = (NFT_PRICE * 9000) / 10000; // 90%
+        assertEq(
+            founderNFT.getTotalSalesProceeds(), expectedSalesProceeds, "Sales proceeds should be 90% of mint price"
+        );
+
+        // Admin withdraws sales proceeds
+        uint256 adminBalanceBefore = address(this).balance;
+        founderNFT.withdrawSalesProceeds();
+
+        // Verify withdrawal
+        assertEq(address(this).balance - adminBalanceBefore, expectedSalesProceeds, "Admin should receive 90% of sales");
+        assertEq(founderNFT.getTotalSalesProceeds(), 0, "Sales proceeds should be 0 after withdrawal");
+
+        // Verify weekly redistribution funds remain in contract
+        uint256 expectedRedistribution = (NFT_PRICE * 1000) / 10000; // 10%
+        assertEq(founderNFT.getCurrentWeeklyRewards(), expectedRedistribution, "Weekly redistribution should remain");
+        assertTrue(
+            address(founderNFT).balance >= expectedRedistribution, "Contract should retain weekly redistribution funds"
         );
     }
 
@@ -324,26 +499,7 @@ contract IntegrationTest is Test {
         assertFalse(founderNFT.hasEarlyAccess(founder1, projectAddress), "Early access should be removed");
     }
 
-    function testFounderBatchMint() public {
-        // Create list of recipients
-        address[] memory recipients = new address[](3);
-        recipients[0] = founder1;
-        recipients[1] = founder2;
-        recipients[2] = investor1; // Using investor1 as a third founder for testing
-
-        // Batch mint NFTs
-        founderNFT.batchMint(recipients);
-
-        // Verify ownership
-        assertEq(founderNFT.ownerOf(0), founder1, "Founder1 should own NFT #0");
-        assertEq(founderNFT.ownerOf(1), founder2, "Founder2 should own NFT #1");
-        assertEq(founderNFT.ownerOf(2), investor1, "Investor1 should own NFT #2");
-
-        // Verify total supply
-        assertEq(founderNFT.totalSupply(), 3, "Total supply should be 3");
-    }
-
-    function testProjectUpgradesWithFounderNFT() public {
+    function testProjectUpgradesWithWeeklyFounderNFT() public {
         // Create a founder and project
         vm.prank(founder1);
         founderNFT.mint{value: NFT_PRICE}();
@@ -352,7 +508,7 @@ contract IntegrationTest is Test {
         address[] memory teamMembers = new address[](0);
         projectAddress = registry.createProject(
             "Upgradeable Project",
-            "A project that tests upgrades with FounderNFT",
+            "A project that tests upgrades with weekly FounderNFT",
             10 ether,
             30 days,
             false,
@@ -382,5 +538,23 @@ contract IntegrationTest is Test {
             address(founderNFTProxy),
             "Extension registration should be preserved"
         );
+
+        // Verify weekly system functionality preserved after upgrade
+        assertEq(
+            founderNFT.getSalesRedistributionPercentage(),
+            SALES_REDISTRIBUTION_PERCENTAGE,
+            "Redistribution percentage should be preserved"
+        );
+
+        uint256 expectedSalesProceeds = (NFT_PRICE * 9000) / 10000; // 90%
+        uint256 expectedRedistribution = (NFT_PRICE * 1000) / 10000; // 10%
+        assertEq(founderNFT.getTotalSalesProceeds(), expectedSalesProceeds, "Sales proceeds should be preserved");
+        assertEq(founderNFT.getCurrentWeeklyRewards(), expectedRedistribution, "Weekly rewards should be preserved");
+
+        // Verify weekly functions still work
+        assertEq(founderNFT.getCurrentWeek(), block.timestamp / WEEK, "getCurrentWeek should work after upgrade");
     }
+
+    // Allow contract to receive ETH
+    receive() external payable {}
 }

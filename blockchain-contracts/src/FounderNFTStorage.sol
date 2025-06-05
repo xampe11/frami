@@ -3,7 +3,7 @@ pragma solidity ^0.8.28;
 
 /**
  * @title FounderNFTStorage
- * @dev Storage contract for FounderNFT
+ * @dev Storage contract for FounderNFT with weekly reward system
  */
 contract FounderNFTStorage {
     // Token ID counter
@@ -20,7 +20,7 @@ contract FounderNFTStorage {
     // Sales proceeds tracking (separate from distribution pool)
     uint256 internal _totalSalesProceeds;
 
-    // Fee distribution tracking
+    // Legacy fee distribution tracking (kept for backward compatibility)
     uint256 internal _totalUndistributedFees;
 
     // Platform fee distribution percentage (e.g., 3000 = 30%)
@@ -48,6 +48,19 @@ contract FounderNFTStorage {
     // Minimum staking period (in seconds)
     uint256 internal _minimumStakingPeriod;
 
-    // Reserved storage gap for future upgrades
-    uint256[47] private __gap;
+    // NEW: Weekly reward system storage
+    // Week number when contract was deployed
+    uint256 internal _deploymentWeek;
+
+    // Current week's accumulating rewards
+    uint256 internal _currentWeeklyRewards;
+
+    // Weekly reward tracking
+    mapping(uint256 => uint256) internal _weeklyRewardPool; // week => total rewards for that week
+    mapping(uint256 => uint256) internal _weeklyStakedCount; // week => number of staked NFTs that week
+    mapping(uint256 => mapping(uint256 => bool)) internal _tokenStakedDuringWeek; // week => tokenId => was staked
+    mapping(uint256 => mapping(uint256 => bool)) internal _hasClaimedWeek; // week => tokenId => has claimed
+
+    // Reserved storage gap for future upgrades (reduced to account for new variables)
+    uint256[35] private __gap;
 }

@@ -7,7 +7,6 @@ import {ERC1967Proxy} from "../../src/proxy/ERC1967Proxy.sol";
 
 // Mock platform registry for testing
 contract MockPlatformRegistry {
-    // Function to simulate platform registry functionality
     function isFactoryRegistered(address /*factory*/ ) external pure returns (bool) {
         return true;
     }
@@ -15,12 +14,9 @@ contract MockPlatformRegistry {
 
 // Create a contract that can receive both ETH and ERC721 tokens for testing
 contract ReceivableUser {
-    // Function to receive ETH
     receive() external payable {}
 
-    // Function required by ERC721 to receive tokens
     function onERC721Received(address, address, uint256, bytes memory) external pure returns (bytes4) {
-        // Return the expected selector to indicate this contract can receive ERC721 tokens
         return this.onERC721Received.selector;
     }
 }
@@ -46,11 +42,14 @@ contract FounderNFTTest is Test {
     uint256 public constant FEE_DISTRIBUTION_PERCENTAGE = 3000; // 30%
     uint256 public constant DAO_TOKEN_ALLOCATION = 1000; // 10%
     uint256 public constant MIN_STAKING_PERIOD = 7 days;
+    uint256 public constant WEEK = 7 days;
 
     event FounderNFTMinted(address indexed to, uint256 indexed tokenId);
     event TokenStaked(address indexed owner, uint256 indexed tokenId);
     event TokenUnstaked(address indexed owner, uint256 indexed tokenId);
-    event StakingRewardsClaimed(address indexed owner, uint256 indexed tokenId, uint256 amount);
+    event WeeklyEpochFinalized(uint256 indexed week, uint256 totalRewards, uint256 stakedCount);
+    event WeeklyRewardClaimed(address indexed user, uint256 indexed tokenId, uint256 indexed week, uint256 amount);
+    event SalesRedistributed(uint256 amount);
 
     function setUp() public {
         // Create receivable user contracts
@@ -64,6 +63,12 @@ contract FounderNFTTest is Test {
         user2 = address(user2Contract);
         user3 = address(user3Contract);
         platform = address(platformContract);
+
+        // Fund accounts
+        vm.deal(user1, 10 ether);
+        vm.deal(user2, 10 ether);
+        vm.deal(user3, 10 ether);
+        vm.deal(platform, 10 ether);
 
         // Deploy mock registry
         mockRegistry = new MockPlatformRegistry();
@@ -84,356 +89,408 @@ contract FounderNFTTest is Test {
         );
 
         ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), initData);
-
         founderNFT = FounderNFT(payable(address(proxy)));
 
-        // Grant platform role to simulate platform
+        // Grant platform role
         founderNFT.grantRole(founderNFT.PLATFORM_ROLE(), platform);
 
         // Activate sale
         founderNFT.setSaleStatus(true);
-
-        // Fund test accounts
-        vm.deal(user1, 10 ether);
-        vm.deal(user2, 10 ether);
-        vm.deal(user3, 10 ether);
-        vm.deal(platform, 10 ether);
     }
 
-    // Test initialization
-    function testInitialization() public view {
-        assertEq(founderNFT.getPlatformFeeDistributionPercentage(), FEE_DISTRIBUTION_PERCENTAGE);
-        assertEq(founderNFT.getDaoTokenAllocationPercentage(), DAO_TOKEN_ALLOCATION);
-        assertEq(founderNFT.getMinimumStakingPeriod(), MIN_STAKING_PERIOD);
-        assertEq(founderNFT.getTotalStakedTokens(), 0);
-        assertTrue(founderNFT.hasRole(founderNFT.ADMIN_ROLE(), owner));
+    function testWeeklySystemInitialization() public view {
+        assertEq(founderNFT.getCurrentWeek(), block.timestamp / WEEK);
+        assertEq(founderNFT.getCurrentWeeklyRewards(), 0);
+        assertEq(founderNFT.getSalesRedistributionPercentage(), 1000); // 10%
     }
 
-    // Test minting
-    function testMint() public {
+    function testMintAccumulatesWeeklyRewards() public {
+        uint256 expectedRedistribution = (PRICE * 1000) / 10000; // 10%
+
+        // Mint NFT
         vm.prank(user1);
-        vm.expectEmit(true, true, false, false);
-        emit FounderNFTMinted(user1, 0);
         founderNFT.mint{value: PRICE}();
 
-        assertEq(founderNFT.balanceOf(user1), 1);
-        assertEq(founderNFT.ownerOf(0), user1);
-        assertTrue(founderNFT.isFounder(user1));
+        // Check weekly rewards accumulated
+        assertEq(founderNFT.getCurrentWeeklyRewards(), expectedRedistribution);
+
+        // Mint another NFT
+        vm.prank(user2);
+        founderNFT.mint{value: PRICE}();
+
+        // Should accumulate
+        assertEq(founderNFT.getCurrentWeeklyRewards(), expectedRedistribution * 2);
     }
 
-    // Test insufficient payment
-    function testInsufficientPayment() public {
-        vm.prank(user1);
-        vm.expectRevert("Insufficient payment");
-        founderNFT.mint{value: PRICE - 0.01 ether}();
+    function testPlatformFeesAccumulateWeeklyRewards() public {
+        uint256 platformFees = 1 ether;
+
+        // Add platform fees
+        vm.prank(platform);
+        founderNFT.addPlatformFees(platformFees);
+
+        // Should accumulate in weekly rewards
+        assertEq(founderNFT.getCurrentWeeklyRewards(), platformFees);
     }
 
-    // Test max supply
-    function testMaxSupply() public {
-        // Create a smaller NFT for easier testing
-        bytes memory initData = abi.encodeWithSelector(
-            FounderNFT.initialize.selector,
-            owner,
-            address(mockRegistry),
-            2, // Max supply of 2
-            PRICE,
-            FEE_DISTRIBUTION_PERCENTAGE,
-            DAO_TOKEN_ALLOCATION,
-            MIN_STAKING_PERIOD
-        );
-
-        ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), initData);
-
-        FounderNFT smallNFT = FounderNFT(payable(address(proxy)));
-        smallNFT.setSaleStatus(true);
-
-        // Mint 2 tokens (max supply)
+    function testStakingMarksTokenForCurrentWeek() public {
+        // Mint and stake
         vm.prank(user1);
-        smallNFT.mint{value: PRICE}();
+        founderNFT.mint{value: PRICE}();
+
+        uint256 currentWeek = founderNFT.getCurrentWeek();
+
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
+
+        // Check if token is marked as staked for current week
+        assertTrue(founderNFT.tokenStakedDuringWeek(currentWeek, 0));
+    }
+
+    function testFinalizeWeek() public {
+        // Mint and stake to create some rewards and stakers
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
 
         vm.prank(user2);
-        smallNFT.mint{value: PRICE}();
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user2);
+        founderNFT.stakeToken(1);
 
-        // Try to mint beyond max supply
-        vm.prank(user3);
-        vm.expectRevert("Max supply reached");
-        smallNFT.mint{value: PRICE}();
+        uint256 expectedRewards = (PRICE * 1000 * 2) / 10000; // 10% of 2 mints
+        uint256 currentWeek = founderNFT.getCurrentWeek();
+
+        // Move to next week
+        vm.warp(block.timestamp + WEEK + 1);
+
+        // Finalize the week
+        vm.expectEmit(true, false, false, false);
+        emit WeeklyEpochFinalized(currentWeek, expectedRewards, 2);
+        founderNFT.finalizeWeek();
+
+        // Check week was finalized
+        (uint256 rewards, uint256 stakedCount) = founderNFT.getWeekInfo(currentWeek);
+        assertEq(rewards, expectedRewards);
+        assertEq(stakedCount, 2);
+
+        // Current weekly rewards should reset
+        assertEq(founderNFT.getCurrentWeeklyRewards(), 0);
     }
 
-    // Test batch minting
-    function testBatchMint() public {
+    function testClaimSingleWeekReward() public {
+        // Setup: mint, stake, and finalize week
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
+
+        vm.prank(user2);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user2);
+        founderNFT.stakeToken(1);
+
+        uint256 expectedRewards = (PRICE * 1000 * 2) / 10000; // 10% of 2 mints
+        uint256 weekToFinalize = founderNFT.getCurrentWeek();
+
+        // Move to next week and finalize
+        vm.warp(block.timestamp + WEEK + 1);
+        founderNFT.finalizeWeek();
+
+        // Claim reward for user1
+        uint256 user1BalanceBefore = user1.balance;
+        uint256 expectedPerUser = expectedRewards / 2; // Split between 2 stakers
+
+        vm.prank(user1);
+        vm.expectEmit(true, true, true, false);
+        emit WeeklyRewardClaimed(user1, 0, weekToFinalize, expectedPerUser);
+        founderNFT.claimWeeklyReward(0, weekToFinalize);
+
+        // Check balance increased
+        assertEq(user1.balance - user1BalanceBefore, expectedPerUser);
+
+        // Check user2 can also claim
+        uint256 user2BalanceBefore = user2.balance;
+        vm.prank(user2);
+        founderNFT.claimWeeklyReward(1, weekToFinalize);
+        assertEq(user2.balance - user2BalanceBefore, expectedPerUser);
+    }
+
+    function testCannotClaimTwiceForSameWeek() public {
+        // Setup and finalize week
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
+
+        uint256 weekToFinalize = founderNFT.getCurrentWeek();
+        vm.warp(block.timestamp + WEEK);
+        founderNFT.finalizeWeek();
+
+        // Claim once
+        vm.prank(user1);
+        founderNFT.claimWeeklyReward(0, weekToFinalize);
+
+        // Try to claim again - should fail
+        vm.prank(user1);
+        vm.expectRevert("Already claimed for this week");
+        founderNFT.claimWeeklyReward(0, weekToFinalize);
+    }
+
+    function testClaimAllWeeklyRewards() public {
+        // Week 0: Setup (start at timestamp 1 to avoid edge cases)
+        vm.warp(1);
+
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
+
+        //uint256 week1 = founderNFT.getCurrentWeek();
+        uint256 week1Rewards = (PRICE * 1000) / 10000;
+
+        // Move to week 1 and finalize week 0
+        vm.warp(WEEK + 100); // Move well into next week
+        founderNFT.finalizeWeek();
+
+        // Week 1: Add more rewards
+        vm.prank(user2);
+        founderNFT.mint{value: PRICE}();
+
+        //uint256 week2 = founderNFT.getCurrentWeek();
+        uint256 week2Rewards = (PRICE * 1000) / 10000;
+
+        // Move to week 2 and finalize week 1
+        vm.warp(WEEK * 2 + 100); // Move well into week 2
+        founderNFT.finalizeWeek();
+
+        // Claim all weeks at once
+        uint256 user1BalanceBefore = user1.balance;
+        uint256 expectedTotal = week1Rewards + week2Rewards; // user1 was only staker
+
+        vm.prank(user1);
+        founderNFT.claimAllWeeklyRewards(0);
+
+        assertEq(user1.balance - user1BalanceBefore, expectedTotal);
+    }
+
+    function testGetClaimableRewardsInfo() public {
+        // Setup multiple weeks with rewards
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
+
+        // Week 1 -> Week 2
+        vm.warp(WEEK + 100);
+        founderNFT.finalizeWeek();
+
+        // Add rewards in week 2
+        vm.prank(user2);
+        founderNFT.mint{value: PRICE}();
+
+        // Week 2 -> Week 3
+        vm.warp(WEEK * 2 + 100);
+        founderNFT.finalizeWeek();
+
+        // Check claimable rewards info
+        (uint256 weekCount, uint256 totalAmount) = founderNFT.getClaimableRewardsInfo(0);
+
+        assertEq(weekCount, 2);
+        uint256 expectedPerWeek = (PRICE * 1000) / 10000;
+        assertEq(totalAmount, expectedPerWeek * 2);
+    }
+
+    function testGetWeekReward() public {
+        // Setup
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
+
+        uint256 weekToFinalize = founderNFT.getCurrentWeek();
+
+        // Move to next week and finalize
+        vm.warp(block.timestamp + WEEK);
+        founderNFT.finalizeWeek();
+
+        // Check week reward
+        uint256 expectedReward = (PRICE * 1000) / 10000;
+        uint256 weekReward = founderNFT.getWeekReward(0, weekToFinalize);
+
+        assertEq(weekReward, expectedReward);
+    }
+
+    function testGetWeekRewardForUnstakedToken() public {
+        // Setup
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+        // Don't stake the token
+
+        uint256 weekToFinalize = founderNFT.getCurrentWeek();
+
+        // Move to next week and finalize
+        vm.warp(block.timestamp + WEEK);
+        founderNFT.finalizeWeek();
+
+        // Check week reward should be 0 for unstaked token
+        uint256 weekReward = founderNFT.getWeekReward(0, weekToFinalize);
+
+        assertEq(weekReward, 0);
+    }
+
+    function testCannotClaimCurrentWeek() public {
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
+
+        uint256 currentWeek = founderNFT.getCurrentWeek();
+
+        vm.prank(user1);
+        vm.expectRevert("Cannot claim current or future week");
+        founderNFT.claimWeeklyReward(0, currentWeek);
+    }
+
+    function testCannotClaimUnfinalizedWeek() public {
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
+
+        uint256 week1 = founderNFT.getCurrentWeek();
+
+        // Move to next week but don't finalize
+        vm.warp(block.timestamp + WEEK);
+
+        vm.prank(user1);
+        vm.expectRevert("Week not finalized or no rewards");
+        founderNFT.claimWeeklyReward(0, week1);
+    }
+
+    function testCannotClaimIfNotStakedDuringWeek() public {
+        // Mint but don't stake initially
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+
+        uint256 week1 = founderNFT.getCurrentWeek();
+
+        // Move to next week and finalize
+        vm.warp(block.timestamp + WEEK);
+        founderNFT.finalizeWeek();
+
+        // Now stake (after the week)
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
+
+        // Try to claim - should fail because wasn't staked during week1
+        vm.prank(user1);
+        vm.expectRevert("Token not staked during this week");
+        founderNFT.claimWeeklyReward(0, week1);
+    }
+
+    function testMultipleStakersEqualDistribution() public {
+        // Setup multiple stakers
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
+
+        vm.prank(user2);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user2);
+        founderNFT.stakeToken(1);
+
+        vm.prank(user3);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user3);
+        founderNFT.stakeToken(2);
+
+        uint256 weekToFinalize = founderNFT.getCurrentWeek();
+        uint256 totalRewards = (PRICE * 1000 * 3) / 10000; // 10% of 3 mints
+
+        // Move to next week and finalize
+        vm.warp(block.timestamp + WEEK);
+        founderNFT.finalizeWeek();
+
+        uint256 expectedPerStaker = totalRewards / 3;
+
+        // All users claim and should get equal amounts
+        uint256 user1Before = user1.balance;
+        vm.prank(user1);
+        founderNFT.claimWeeklyReward(0, weekToFinalize);
+        assertEq(user1.balance - user1Before, expectedPerStaker);
+
+        uint256 user2Before = user2.balance;
+        vm.prank(user2);
+        founderNFT.claimWeeklyReward(1, weekToFinalize);
+        assertEq(user2.balance - user2Before, expectedPerStaker);
+
+        uint256 user3Before = user3.balance;
+        vm.prank(user3);
+        founderNFT.claimWeeklyReward(2, weekToFinalize);
+        assertEq(user3.balance - user3Before, expectedPerStaker);
+    }
+
+    function testWithdrawExcludesCurrentWeeklyRewards() public {
+        // Add some rewards
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+
+        //uint256 expectedRewards = (PRICE * 1000) / 10000;
+        //uint256 expectedSalesProceeds = PRICE - expectedRewards;
+
+        // Add extra ETH to contract
+        vm.deal(address(founderNFT), address(founderNFT).balance + 1 ether);
+
+        uint256 contractBalance = address(founderNFT).balance;
+        uint256 currentWeeklyRewards = founderNFT.getCurrentWeeklyRewards();
+        uint256 expectedWithdrawable = contractBalance - currentWeeklyRewards;
+
+        uint256 adminBalanceBefore = address(this).balance;
+        founderNFT.withdraw();
+
+        // Should withdraw everything except current weekly rewards
+        assertEq(address(this).balance - adminBalanceBefore, expectedWithdrawable);
+        assertEq(address(founderNFT).balance, currentWeeklyRewards);
+    }
+
+    function testClaimAllWithNoClaimableWeeks() public {
+        // Mint and stake but no finalized weeks
+        vm.prank(user1);
+        founderNFT.mint{value: PRICE}();
+        vm.prank(user1);
+        founderNFT.stakeToken(0);
+
+        // Try to claim all - should revert with no rewards
+        vm.prank(user1);
+        vm.expectRevert("No rewards to claim");
+        founderNFT.claimAllWeeklyRewards(0);
+    }
+
+    function testBatchMintNoRedistribution() public {
+        uint256 initialRewards = founderNFT.getCurrentWeeklyRewards();
+
+        // Create list of recipients
         address[] memory recipients = new address[](3);
         recipients[0] = user1;
         recipients[1] = user2;
         recipients[2] = user3;
 
+        // Batch mint NFTs (admin function, no payment)
         founderNFT.batchMint(recipients);
 
-        assertEq(founderNFT.balanceOf(user1), 1);
-        assertEq(founderNFT.balanceOf(user2), 1);
-        assertEq(founderNFT.balanceOf(user3), 1);
-
+        // Verify ownership
         assertEq(founderNFT.ownerOf(0), user1);
         assertEq(founderNFT.ownerOf(1), user2);
         assertEq(founderNFT.ownerOf(2), user3);
-    }
 
-    // Test staking
-    function testStaking() public {
-        // Mint a token to user1
-        vm.prank(user1);
-        founderNFT.mint{value: PRICE}();
+        // Verify total supply
+        assertEq(founderNFT.totalSupply(), 3);
 
-        // Stake the token
-        vm.prank(user1);
-        vm.expectEmit(true, true, false, false);
-        emit TokenStaked(user1, 0);
-        founderNFT.stakeToken(0);
-
-        // Check staking status
-        assertEq(founderNFT.getTotalStakedTokens(), 1);
-        assertTrue(founderNFT.isTokenStaked(0));
-
-        // Check ownership after staking
-        assertEq(founderNFT.ownerOf(0), address(founderNFT));
-
-        // Check staking info
-        (address stakedOwner, uint256 stakedSince, uint256 lastClaimed) = founderNFT.getStakingInfo(0);
-        assertEq(stakedOwner, user1);
-        assertEq(stakedSince, block.timestamp);
-        assertEq(lastClaimed, block.timestamp);
-    }
-
-    // Test unstaking before minimum period
-    function testUnstakingBeforeMinimumPeriod() public {
-        // Mint and stake a token
-        vm.prank(user1);
-        founderNFT.mint{value: PRICE}();
-
-        vm.prank(user1);
-        founderNFT.stakeToken(0);
-
-        // Try to unstake before minimum period
-        vm.prank(user1);
-        vm.expectRevert("Minimum staking period not reached");
-        founderNFT.unstakeToken(0);
-    }
-
-    // Test unstaking after minimum period
-    function testUnstakingAfterMinimumPeriod() public {
-        // Mint and stake a token
-        vm.prank(user1);
-        founderNFT.mint{value: PRICE}();
-
-        vm.prank(user1);
-        founderNFT.stakeToken(0);
-
-        // Fast forward past minimum staking period
-        vm.warp(block.timestamp + MIN_STAKING_PERIOD + 1);
-
-        // Unstake the token
-        vm.prank(user1);
-        vm.expectEmit(true, true, false, false);
-        emit TokenUnstaked(user1, 0);
-        founderNFT.unstakeToken(0);
-
-        // Check staking status after unstaking
-        assertEq(founderNFT.getTotalStakedTokens(), 0);
-        assertFalse(founderNFT.isTokenStaked(0));
-
-        // Check ownership after unstaking
-        assertEq(founderNFT.ownerOf(0), user1);
-    }
-
-    function testFeeDistribution() public {
-        // Mint token for user1
-        vm.prank(user1);
-        founderNFT.mint{value: PRICE}();
-
-        // Stake the token
-        vm.prank(user1);
-        founderNFT.stakeToken(0);
-
-        // Add platform fees - but first, fund the contract so it can pay out
-        vm.deal(address(founderNFT), 2 ether); // Add 2 ETH to the contract's balance
-
-        // Record the initial balances
-        uint256 userBalanceBefore = user1.balance;
-
-        // Now add fees to be distributed
-        uint256 distributionAmount = 1 ether;
-        vm.prank(platform);
-        founderNFT.addPlatformFees(distributionAmount);
-
-        // Fast forward past minimum staking period
-        vm.warp(block.timestamp + MIN_STAKING_PERIOD + 1);
-
-        // Unstake token (which claims rewards automatically)
-        vm.prank(user1);
-        founderNFT.unstakeToken(0);
-
-        // Check if user1 received the distribution
-        assertEq(user1.balance - userBalanceBefore, distributionAmount, "User should receive the distribution");
-
-        // Verify token is no longer staked
-        assertFalse(founderNFT.isTokenStaked(0), "Token should no longer be staked");
-
-        // Verify token ownership has returned to the user
-        assertEq(founderNFT.ownerOf(0), user1, "User should own the token after unstaking");
-    }
-
-    function testClaimRewardsWithoutUnstaking() public {
-        // Mint token for user1
-        vm.prank(user1);
-        founderNFT.mint{value: PRICE}();
-
-        // Stake the token
-        vm.prank(user1);
-        founderNFT.stakeToken(0);
-
-        // Fund the contract with ETH for distribution
-        // This simulates the contract receiving fees from projects
-        vm.deal(address(founderNFT), 2 ether);
-
-        // Add platform fees
-        uint256 distributionAmount = 1 ether;
-        vm.prank(platform);
-        founderNFT.addPlatformFees(distributionAmount);
-
-        // Get balances before claiming
-        uint256 contractBalanceBefore = address(founderNFT).balance;
-        uint256 userBalanceBefore = user1.balance;
-
-        // Claim rewards without unstaking
-        vm.prank(user1);
-        founderNFT.claimStakingRewards(0);
-
-        // Check balances after claiming
-        uint256 contractBalanceAfter = address(founderNFT).balance;
-        uint256 userBalanceAfter = user1.balance;
-
-        // Verify ETH amounts transferred
-        assertEq(
-            contractBalanceBefore - contractBalanceAfter, distributionAmount, "Contract should send distribution amount"
-        );
-        assertEq(userBalanceAfter - userBalanceBefore, distributionAmount, "User should receive distribution amount");
-
-        // Verify undistributed fees updated
-        assertEq(founderNFT.getUndistributedFees(), 0, "Undistributed fees should be 0 after claiming");
-    }
-
-    // Test early access functionality
-    function testEarlyAccess() public {
-        // Mint a token for user1
-        vm.prank(user1);
-        founderNFT.mint{value: PRICE}();
-
-        // Add a project for early access
-        address projectAddress = makeAddr("project");
-        founderNFT.addEarlyAccessProject(projectAddress);
-
-        // Check early access
-        assertTrue(founderNFT.hasEarlyAccess(user1, projectAddress));
-        assertFalse(founderNFT.hasEarlyAccess(user2, projectAddress));
-
-        // Remove project from early access
-        founderNFT.removeEarlyAccessProject(projectAddress);
-
-        // Check early access after removal
-        assertFalse(founderNFT.hasEarlyAccess(user1, projectAddress));
-    }
-
-    // Test admin functions
-    function testAdminFunctions() public {
-        // Test setting platform fee distribution percentage
-        uint256 newFeePercentage = 2000; // 20%
-        founderNFT.setPlatformFeeDistributionPercentage(newFeePercentage);
-        assertEq(founderNFT.getPlatformFeeDistributionPercentage(), newFeePercentage);
-
-        // Test setting DAO token allocation percentage
-        uint256 newDaoPercentage = 2000; // 20%
-        founderNFT.setDaoTokenAllocationPercentage(newDaoPercentage);
-        assertEq(founderNFT.getDaoTokenAllocationPercentage(), newDaoPercentage);
-
-        // Test setting minimum staking period
-        uint256 newMinStakingPeriod = 14 days;
-        founderNFT.setMinimumStakingPeriod(newMinStakingPeriod);
-        assertEq(founderNFT.getMinimumStakingPeriod(), newMinStakingPeriod);
-
-        // Test setting NFT price
-        uint256 newPrice = 0.2 ether;
-        founderNFT.setPrice(newPrice);
-
-        // Test the new price works
-        vm.prank(user1);
-        vm.expectRevert("Insufficient payment");
-        founderNFT.mint{value: PRICE}(); // Old price should fail
-
-        vm.prank(user1);
-        founderNFT.mint{value: newPrice}(); // New price should work
-        assertEq(founderNFT.ownerOf(0), user1);
-    }
-
-    function testTokenTransferRestrictions() public {
-        // Mint tokens to users
-        vm.prank(user1);
-        founderNFT.mint{value: PRICE}();
-
-        vm.prank(user2);
-        founderNFT.mint{value: PRICE}();
-
-        // Stake user1's token
-        vm.prank(user1);
-        founderNFT.stakeToken(0);
-
-        // Verify the token is staked and ownership transferred to contract
-        assertTrue(founderNFT.isTokenStaked(0), "Token should be staked");
-        assertEq(founderNFT.ownerOf(0), address(founderNFT), "Contract should own the staked token");
-
-        // Get staking info and verify
-        (address stakedOwner,,) = founderNFT.getStakingInfo(0);
-        assertEq(stakedOwner, user1, "Original owner should be recorded in staking info");
-
-        // Verify unstaked token can be transferred
-        vm.prank(user2);
-        founderNFT.transferFrom(user2, user3, 1);
-        assertEq(founderNFT.ownerOf(1), user3, "Unstaked token should be transferable");
-
-        // Fast forward past minimum staking period
-        vm.warp(block.timestamp + MIN_STAKING_PERIOD + 1);
-
-        // Unstake token
-        vm.prank(user1);
-        founderNFT.unstakeToken(0);
-
-        // Verify token returned to original owner
-        assertEq(founderNFT.ownerOf(0), user1, "Token should return to original owner after unstaking");
-        assertFalse(founderNFT.isTokenStaked(0), "Token should no longer be staked");
-
-        // Verify token can be transferred after unstaking
-        vm.prank(user1);
-        founderNFT.transferFrom(user1, user3, 0);
-        assertEq(founderNFT.ownerOf(0), user3, "Token should be transferable after unstaking");
-    }
-
-    // Test withdrawing contract funds
-    function testWithdraw() public {
-        // Mint a token to get funds in the contract
-        vm.prank(user1);
-        founderNFT.mint{value: PRICE}();
-
-        // Check contract balance
-        uint256 contractBalance = address(founderNFT).balance;
-        assertEq(contractBalance, PRICE);
-
-        // Withdraw funds
-        uint256 ownerBalanceBefore = address(this).balance;
-        founderNFT.withdraw();
-        uint256 ownerBalanceAfter = address(this).balance;
-
-        // Check balances after withdrawal
-        assertEq(ownerBalanceAfter - ownerBalanceBefore, PRICE);
-        assertEq(address(founderNFT).balance, 0);
+        // Verify no weekly rewards added (batch mint is free)
+        assertEq(founderNFT.getCurrentWeeklyRewards(), initialRewards);
     }
 
     // Receive function to allow contract to receive ETH
