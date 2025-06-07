@@ -38,6 +38,9 @@ contract DeployInitialSetup is Script {
         ERC1967Proxy platformRegistryProxy = new ERC1967Proxy(address(platformRegistryImpl), platformRegistryData);
         console.log("PlatformRegistry proxy deployed at:", address(platformRegistryProxy));
 
+        // Save deployment addresses to file
+        saveDeploymentAddresses(address(platformRegistryImpl), address(platformRegistryProxy));
+
         // Update registry with factory address
 
         // Grant roles for various contracts
@@ -52,5 +55,58 @@ contract DeployInitialSetup is Script {
         console.log("1. Verify contracts on block explorer");
         console.log("2. Configure additional roles and permissions");
         console.log("3. Set up frontend to interact with deployed contracts");
+    }
+
+    /**
+     * @dev Save deployment addresses to JSON file for future reference
+     */
+    function saveDeploymentAddresses(address implementation, address proxy) internal {
+        string memory networkName = getNetworkName();
+        string memory deploymentData = string(
+            abi.encodePacked(
+                "{\n",
+                '  "network": "',
+                networkName,
+                '",\n',
+                '  "blockNumber": ',
+                vm.toString(block.number),
+                ",\n",
+                '  "timestamp": ',
+                vm.toString(block.timestamp),
+                ",\n",
+                '  "PlatformRegistry": {\n',
+                '    "implementation": "',
+                vm.toString(implementation),
+                '",\n',
+                '    "proxy": "',
+                vm.toString(proxy),
+                '"\n',
+                "  }\n",
+                "}"
+            )
+        );
+
+        string memory filename = string(abi.encodePacked("./deployments/platformregistry-", networkName, ".json"));
+
+        vm.writeFile(filename, deploymentData);
+        console.log("Deployment data saved to:", filename);
+    }
+
+    /**
+     * @dev Get network name for logging
+     */
+    function getNetworkName() internal view returns (string memory) {
+        uint256 chainId = block.chainid;
+
+        if (chainId == 1) return "mainnet";
+        if (chainId == 11155111) return "sepolia";
+        if (chainId == 17000) return "holesky";
+        if (chainId == 137) return "polygon";
+        if (chainId == 10) return "optimism";
+        if (chainId == 42161) return "arbitrum";
+        if (chainId == 8453) return "base";
+        if (chainId == 31337) return "localhost";
+
+        return string(abi.encodePacked("chain-", vm.toString(chainId)));
     }
 }

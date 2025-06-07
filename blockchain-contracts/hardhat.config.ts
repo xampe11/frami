@@ -20,6 +20,7 @@ const config: HardhatUserConfig = {
         enabled: true,
         runs: 200,
       },
+      viaIR: true, // Enable the IR-based code generator
     },
   },
   // Use same directory structure as Foundry for compatibility

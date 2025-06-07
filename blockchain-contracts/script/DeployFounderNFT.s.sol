@@ -194,9 +194,7 @@ contract DeployFounderNFT is Script {
             )
         );
 
-        string memory filename = string(
-            abi.encodePacked("./deployments/foundernft-", networkName, "-", vm.toString(block.timestamp), ".json")
-        );
+        string memory filename = string(abi.encodePacked("./deployments/foundernft-", networkName, ".json"));
 
         vm.writeFile(filename, deploymentData);
         console.log("Deployment data saved to:", filename);
