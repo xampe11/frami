@@ -8,6 +8,7 @@ import {FounderNFT} from "../src/FounderNFT.sol";
 contract DebugFounderNFT is Script {
     address FOUNDER_NFT_PROXY = vm.envAddress("FOUNDER_NFT_PROXY_ADDRESS");
 
+
     function run() external {
         console.log("=== DEBUGGING FOUNDER NFT CONTRACT ===");
         console.log("Proxy Address:", FOUNDER_NFT_PROXY);
@@ -128,11 +129,12 @@ contract DebugFounderNFT is Script {
 
         uint256 testPrice = price * 5; // Try minting 5 NFTs
 
-        console.log("Attempting to mint 1 NFT with price:", testPrice, "wei");
+        console.log("Attempting to mint 5 NFTs with price:", testPrice, "wei");
 
-        vm.startPrank(testAccount);
+        vm.startBroadcast(testAccount);
         try founderNFT.mintMultiple{value: testPrice}(5) {
             console.log(" SUCCESS: mintMultiple(5) worked!");
+            console.log("Current Supply:", founderNFT.totalSupply());
         } catch (bytes memory reason) {
             console.log(" FAILED: mintMultiple(5) reverted");
             console.log("Error data length:", reason.length);
@@ -156,7 +158,7 @@ contract DebugFounderNFT is Script {
                 }
             }
         }
-        vm.stopPrank();
+        vm.stopBroadcast();
 
         console.log("");
         console.log("=== DEBUG COMPLETE ===");

@@ -42,11 +42,11 @@ export default function FounderNFT () {
     isLoading: contractLoading,
     error: contractError,
     mintMultiple,
-    debugMintMultiple,
+    //debugMintMultiple,
     mintState,
     resetMintState,
-    //estimateGas,
-    //calculateTotalCost,
+    estimateGas,
+    calculateTotalCost,
     refreshData,
     isContractReady,
   } = useFounderNFT();
@@ -169,19 +169,20 @@ export default function FounderNFT () {
       return;
     }
 
-    try {
+    resetMintState();
+    await mintMultiple(quantity);
+
+/*     try {
       const debugResult = await debugMintMultiple(quantity);
       console.log('Debug result:', debugResult);
       if (!debugResult.error) {
          resetMintState();
       await mintMultiple(quantity);
       }
-      //resetMintState();
-      //await mintMultiple(quantity);
     } catch (error: any) {
       // Error handling is done in the hook and useEffect above
       console.error("Mint error:", error);
-    }
+    } */
   };
 
   // Calculate supply percentage

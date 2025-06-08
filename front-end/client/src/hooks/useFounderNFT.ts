@@ -114,6 +114,24 @@ export const useFounderNFT = () => {
     initializeContract();
   }, [isConnected]);
 
+  // In your useFounderNFT hook, add chain verification
+  useEffect(() => {
+    const checkNetwork = async () => {
+      if (provider) {
+        const network = await provider.getNetwork();
+        console.log("Current network:", network.chainId);
+
+        // Make sure we're on the expected network
+        if (network.chainId !== 31337n) {
+          console.warn("Wrong network! Expected 31337, got", network.chainId);
+          // Request network switch or show error
+        }
+      }
+    };
+
+    checkNetwork();
+  }, [provider]);
+
   // Fetch contract data
   const fetchContractData = useCallback(async () => {
     if (!contract || !address) return;
@@ -164,7 +182,7 @@ export const useFounderNFT = () => {
   }, [contract, address, fetchContractData]);
 
   // Estimate gas for minting
-  /*   const estimateGas = useCallback(
+  const estimateGas = useCallback(
     async (quantity: number): Promise<GasEstimate | null> => {
       if (!contract || !provider || !address) return null;
 
@@ -188,20 +206,16 @@ export const useFounderNFT = () => {
             Object.keys(contract.interface.fragments)
           );
           // Method 1: Direct estimateGas
-          const gasLimit = await (
-            contractWithSigner as any
-          ).estimateGas.mintMultiple(quantity, {
-            value: totalCost,
-          });
+          const gasLimit = 400000;
           console.log("Gas estimation successful:", gasLimit.toString());
 
           const feeData = await provider.getFeeData();
           const gasPrice = feeData.gasPrice || 0n;
 
           return {
-            gasLimit: (gasLimit * 120n) / 100n,
+            gasLimit: BigInt(gasLimit),
             gasPrice,
-            gasCost: ethers.formatEther(gasLimit * gasPrice),
+            gasCost: ethers.formatEther(BigInt(gasLimit) * gasPrice),
           };
         } catch (estimateError) {
           console.error("Direct gas estimation failed:", estimateError);
@@ -224,10 +238,11 @@ export const useFounderNFT = () => {
       }
     },
     [contract, provider, address, contractData.priceWei]
-  ); */
+  );
+
   // Add this debug function to your useFounderNFT hook
 
-  const debugMintMultiple = async (quantity: number) => {
+/*   const debugMintMultiple = async (quantity: number) => {
     if (!contract || !provider || !address) {
       throw new Error("Contract not initialized or wallet not connected");
     }
@@ -323,6 +338,23 @@ export const useFounderNFT = () => {
         return { error: "mintMultiple function does not exist" };
       }
 
+      // In your debugMintMultiple function, add this before gas estimation:
+      console.log("=== FRONTEND CONTRACT DEBUG ===");
+      console.log("Contract address:", await contract.getAddress());
+      console.log("Signer address:", await signer.getAddress());
+      console.log("Provider network:", await signer.provider.getNetwork());
+
+      // Check if we're calling the right function
+      console.log("Function exists:", typeof contract.mintMultiple === 'function');
+
+      // Try a simple view function first
+      try {
+        const currentSupply = await contract.totalSupply();
+        console.log("View function works, supply:", currentSupply.toString());
+      } catch (error: any) {
+        console.log("Even view functions fail:", error.message);
+      }
+
       // 5. Try calling mintMultiple with quantity 1 first
       console.log("\n--- Gas Estimation Test ---");
       try {
@@ -365,7 +397,7 @@ export const useFounderNFT = () => {
       console.error("❌ Debug failed:", error);
       return { error: "Debug failed: " + error.message };
     }
-  };
+  }; */
 
   // Call this before attempting to mint
   // const debugResult = await debugMintMultiple(3);
@@ -393,11 +425,11 @@ export const useFounderNFT = () => {
         const totalCost = contractData.priceWei * BigInt(quantity);
 
         // Estimate gas
-        //const gasEstimate = await estimateGas(quantity);
+        const gasEstimate = 400000;
 
-        /*         if (!gasEstimate) {
+        if (!gasEstimate) {
           throw new Error("Failed to estimate gas");
-        } */
+        }
 
         // Send transaction
         const transaction = await contractWithSigner.mintMultiple(quantity, {
@@ -461,13 +493,13 @@ export const useFounderNFT = () => {
       provider,
       address,
       contractData.priceWei,
-      //estimateGas,
+      estimateGas,
       fetchContractData,
     ]
   );
 
   // Calculate total cost including gas
-  /*   const calculateTotalCost = useCallback(
+  const calculateTotalCost = useCallback(
     async (quantity: number) => {
       const mintCost = parseFloat(contractData.price) * quantity;
       const gasEstimate = await estimateGas(quantity);
@@ -480,7 +512,7 @@ export const useFounderNFT = () => {
       };
     },
     [contractData.price, estimateGas]
-  ); */
+  );
 
   // Reset mintMultiple state
   const resetMintState = useCallback(() => {
@@ -533,11 +565,11 @@ export const useFounderNFT = () => {
     resetMintState,
 
     // Debugging Function
-    debugMintMultiple,
+    //debugMintMultiple,
 
     // Utilities
-    //estimateGas,
-    //calculateTotalCost,
+    estimateGas,
+    calculateTotalCost,
     refreshData: fetchContractData,
 
     // Connection status
