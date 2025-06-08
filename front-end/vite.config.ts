@@ -13,7 +13,7 @@ export default defineConfig({
     process.env.VITE_REPL_ID !== undefined
       ? [
           await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
+            m.cartographer()
           ),
         ]
       : []),
@@ -30,10 +30,10 @@ export default defineConfig({
     outDir: "./dist/public",
     emptyOutDir: true,
   },
-  server: {
+  /*   server: {
     allowedHosts: ["all", "7a29d217-39cd-417a-96be-cdf84316ef4a-00-14iknayvdpegq.riker.replit.dev"],
     hmr: {
       clientPort: 443,
     },
-  },
+  }, */
 });

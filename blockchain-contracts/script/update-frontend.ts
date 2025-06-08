@@ -89,7 +89,7 @@ class FrontendUpdater {
       console.log("\n✅ Frontend update completed successfully!");
       console.log("\nGenerated files:");
       console.log(`📁 ${this.options.frontendDir}/${this.options.outputDir}/`);
-      console.log("  ├── config.js");
+      console.log("  ├── config.ts");
       console.log("  ├── contracts.json");
       console.log("  ├── addresses.ts");
       console.log("  ├── abis/");
@@ -251,10 +251,10 @@ class FrontendUpdater {
     );
     await fs.ensureDir(outputPath);
 
-    // Generate JavaScript config
-    const jsConfig = this.generateJSConfig(config);
-    await fs.writeFile(path.join(outputPath, "config.js"), jsConfig);
-    console.log("   ✓ Generated JavaScript config");
+    // Generate TyepeScript config
+    const TsConfig = this.generateJSConfig(config);
+    await fs.writeFile(path.join(outputPath, "config.ts"), TsConfig);
+    console.log("   ✓ Generated TyepeScript config");
 
     // Generate JSON config
     await fs.writeJSON(path.join(outputPath, "contracts.json"), config, {

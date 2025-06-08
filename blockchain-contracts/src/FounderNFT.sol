@@ -138,9 +138,38 @@ contract FounderNFT is
         uint256 tokenId = _nextTokenId;
         _nextTokenId++;
 
-        _safeMint(msg.sender, tokenId);
+        _mint(msg.sender, tokenId);
 
         emit FounderNFTMinted(msg.sender, tokenId);
+    }
+
+    /**
+     * @dev Mints multiple Founder NFT with weekly sales redistribution
+     */
+    function mintMultiple(uint256 quantity) external payable {
+        require(_saleActive, "Sale is not active");
+        require(quantity > 0 && quantity <= 10, "Invalid quantity"); // Add reasonable limit
+        require(totalSupply() + quantity <= _maxSupply, "Max supply exceeded");
+        require(msg.value >= _price * quantity, "Insufficient payment");
+
+        // Calculate redistribution for total payment
+        uint256 redistributionAmount = (msg.value * SALES_REDISTRIBUTION_PERCENTAGE) / BASIS_POINTS;
+        uint256 salesProceedsAmount = msg.value - redistributionAmount;
+
+        _totalSalesProceeds += salesProceedsAmount;
+        emit SaleProceedsReceived(salesProceedsAmount);
+
+        if (redistributionAmount > 0) {
+            _currentWeeklyRewards += redistributionAmount;
+            emit SalesRedistributed(redistributionAmount);
+        }
+
+        for (uint256 i = 0; i < quantity; i++) {
+            uint256 tokenId = _nextTokenId;
+            _nextTokenId++;
+            _mint(msg.sender, tokenId);
+            emit FounderNFTMinted(msg.sender, tokenId);
+        }
     }
 
     /**
@@ -153,8 +182,7 @@ contract FounderNFT is
         for (uint256 i = 0; i < recipients.length; i++) {
             uint256 tokenId = _nextTokenId;
             _nextTokenId++;
-
-            _safeMint(recipients[i], tokenId);
+            _mint(recipients[i], tokenId);
 
             emit FounderNFTMinted(recipients[i], tokenId);
         }
@@ -429,8 +457,20 @@ contract FounderNFT is
         _saleActive = status;
     }
 
+    function getSaleStatus() external view returns (bool) {
+        return _saleActive;
+    }
+
     function setPrice(uint256 newPrice) external onlyRole(ADMIN_ROLE) {
         _price = newPrice;
+    }
+
+    function getPrice() external view returns (uint256) {
+        return _price;
+    }
+
+    function getMaxSupply() external view returns (uint256) {
+        return _maxSupply;
     }
 
     function withdrawSalesProceeds() external onlyRole(ADMIN_ROLE) {

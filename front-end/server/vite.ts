@@ -22,11 +22,16 @@ export function log(message: string, source = "express") {
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
-    hmr: { 
+    hmr: {
       server,
-      clientPort: 443
+      clientPort: 5000,
     },
-    allowedHosts: ["localhost", "all", "7a29d217-39cd-417a-96be-cdf84316ef4a-00-14iknayvdpegq.riker.replit.dev", ".replit.dev"],
+    allowedHosts: [
+      "localhost",
+      "all",
+      "7a29d217-39cd-417a-96be-cdf84316ef4a-00-14iknayvdpegq.riker.replit.dev",
+      ".replit.dev",
+    ],
   };
 
   const vite = await createViteServer({

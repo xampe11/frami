@@ -2,7 +2,7 @@
 import '@rainbow-me/rainbowkit/styles.css';
 import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
-import { mainnet, polygon } from 'wagmi/chains';
+import { localhost, mainnet, polygon } from 'wagmi/chains';
 import { http } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Switch, Route, useLocation } from "wouter";
@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { WalletProvider } from "@/contexts/wallet-context";
 import { apiRequest } from "@/lib/queryClient";
 import { ThemeProvider } from "next-themes";
+import { defineChain } from 'viem'
 
 import Home from "@/pages/home";
 import Projects from "@/pages/projects";
@@ -55,14 +56,26 @@ const queryClient = new QueryClient({
   },
 });
 
+const anvilMainnetFork = defineChain({
+  id: 31337,
+  name: 'Anvil Mainnet Fork',
+  network: 'anvil-mainnet-fork',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['http://127.0.0.1:8545'] },
+    public: { http: ['http://127.0.0.1:8545'] },
+  },
+})
+
 // Create Wagmi config with RainbowKit
 const config = getDefaultConfig({
   appName: 'Frami',
   projectId: projectId,
-  chains: [mainnet, polygon],
+  chains: [mainnet, polygon, anvilMainnetFork],
   transports: {
     [mainnet.id]: http(),
     [polygon.id]: http(),
+    [anvilMainnetFork.id]: http('http://127.0.0.1:8545'),
   },
   ssr: false, // Disable SSR to prevent duplicate initialization
 });
