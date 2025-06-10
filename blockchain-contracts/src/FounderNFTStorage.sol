@@ -3,64 +3,46 @@ pragma solidity ^0.8.28;
 
 /**
  * @title FounderNFTStorage
- * @dev Storage contract for FounderNFT with weekly reward system
+ * @dev Storage contract for ModernFounderNFT with continuous reward system
+ * @notice Replaces weekly epoch system with Synthetix-style continuous rewards
  */
 contract FounderNFTStorage {
-    // Token ID counter
-    uint256 internal _nextTokenId;
-
-    // Platform registry
     address internal _platformRegistry;
-
-    // Sale configuration
     uint256 internal _maxSupply;
     uint256 internal _price;
+    uint256 internal _platformFeeDistributionPercentage;
+    uint256 internal _daoTokenAllocationPercentage;
+    uint256 internal _minimumStakingPeriod;
+    uint256 internal _nextTokenId;
+    uint256 internal _totalSalesProceeds;
     bool internal _saleActive;
 
-    // Sales proceeds tracking (separate from distribution pool)
-    uint256 internal _totalSalesProceeds;
-
-    // Legacy fee distribution tracking (kept for backward compatibility)
-    uint256 internal _totalUndistributedFees;
-
-    // Platform fee distribution percentage (e.g., 3000 = 30%)
-    uint256 internal _platformFeeDistributionPercentage;
-
-    // DAO token allocation percentage for founders
-    uint256 internal _daoTokenAllocationPercentage;
-
-    // Early access configuration
+    // Early access projects mapping
     mapping(address => bool) internal _earlyAccessProjects;
 
-    // Staking related storage
+    // Staking information structure
     struct StakeInfo {
         address owner;
         uint256 stakedSince;
         uint256 lastRewardsClaimed;
     }
 
-    // Mapping from tokenId to staking info
+    // Token staking information
     mapping(uint256 => StakeInfo) internal _stakedTokens;
 
-    // Number of staked tokens
-    uint256 internal _totalStakedTokens;
+    // Core reward system variables (Synthetix pattern)
+    uint256 internal _rewardRate; // ETH per second distributed to all stakers
+    uint256 internal _lastUpdateTime; // Last time rewards were updated
+    uint256 internal _rewardPerTokenStored; // Accumulated reward per token
+    uint256 internal _totalStakedSupply; // Total number of staked tokens
 
-    // Minimum staking period (in seconds)
-    uint256 internal _minimumStakingPeriod;
+    // Per-token reward tracking
+    mapping(uint256 => uint256) internal _userRewardPerTokenPaid; // Last reward rate user was paid at
+    mapping(uint256 => uint256) internal _rewards; // Earned but unclaimed rewards per token
 
-    // NEW: Weekly reward system storage
-    // Week number when contract was deployed
-    uint256 internal _deploymentWeek;
+    // Pending rewards
+    uint256 internal _pendingRewards;
 
-    // Current week's accumulating rewards
-    uint256 internal _currentWeeklyRewards;
-
-    // Weekly reward tracking
-    mapping(uint256 => uint256) internal _weeklyRewardPool; // week => total rewards for that week
-    mapping(uint256 => uint256) internal _weeklyStakedCount; // week => number of staked NFTs that week
-    mapping(uint256 => mapping(uint256 => bool)) internal _tokenStakedDuringWeek; // week => tokenId => was staked
-    mapping(uint256 => mapping(uint256 => bool)) internal _hasClaimedWeek; // week => tokenId => has claimed
-
-    // Reserved storage gap for future upgrades (reduced to account for new variables)
-    uint256[35] private __gap;
+    event EarlyAccessProjectAdded(address indexed projectAddress);
+    event EarlyAccessProjectRemoved(address indexed projectAddress);
 }

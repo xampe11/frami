@@ -284,7 +284,6 @@ export default function CreateProject() {
                 </span>
               ) : (
                 <span className="flex items-center">
-                  <span className="mr-2">💰</span>
                   Connect Wallet
                 </span>
               )}

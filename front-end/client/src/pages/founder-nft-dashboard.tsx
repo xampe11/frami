@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useWallet } from "@/contexts/wallet-context";
-import { useQuery } from "@tanstack/react-query";
+import { useFounderNFTDashboard } from "@/hooks/useFounderNFTDashboard";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,277 +25,104 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Clock,
-  Coins,
   TrendingUp,
   Gift,
   Shield,
   Star,
-  Calendar,
   DollarSign,
   Users,
   AlertCircle,
   CheckCircle,
-  Timer,
-  Zap,
   Bell,
   Crown,
+  Loader2,
 } from "lucide-react";
-import founderNftVideo from "@/assets/videos/FounderNFT.mp4";
-
-// Mock data for development - replace with real API calls
-const mockNFTData = [
-  {
-    id: 1,
-    tokenId: "#0042",
-    image: "/api/placeholder/200/200",
-    status: "staked",
-    stakingDuration: "127 days",
-    earnedRewards: "2.45 ETH",
-    nextUnstakeDate: "2025-08-15",
-  },
-  {
-    id: 2,
-    tokenId: "#0078",
-    image: "/api/placeholder/200/200",
-    status: "staked",
-    stakingDuration: "89 days",
-    earnedRewards: "1.67 ETH",
-    nextUnstakeDate: "2025-09-02",
-  },
-  {
-    id: 3,
-    tokenId: "#0156",
-    image: "/api/placeholder/200/200",
-    status: "unstaked",
-    stakingDuration: "0 days",
-    earnedRewards: "0 ETH",
-    nextUnstakeDate: null,
-  },
-  {
-    id: 4,
-    tokenId: "#0234",
-    image: "/api/placeholder/200/200",
-    status: "unstaked",
-    stakingDuration: "0 days",
-    earnedRewards: "0 ETH",
-    nextUnstakeDate: null,
-  },
-];
-
-const mockStakingData = {
-  totalStaked: 2,
-  totalOwned: 4,
-  currentAPY: 12.5,
-  totalRewards: "4.12 ETH",
-  minimumStakingPeriod: 7,
-  unstakeCooldown: 14,
-};
-
-const mockEarningsData = {
-  totalEarnings: "4.23 ETH",
-  platformFees: "3.15 ETH",
-  daoTokens: "850 FRAMI",
-  monthlyEarnings: [
-    { month: "Jan", amount: 0.45 },
-    { month: "Feb", amount: 0.62 },
-    { month: "Mar", amount: 0.78 },
-    { month: "Apr", amount: 0.89 },
-    { month: "May", amount: 1.23 },
-    { month: "Jun", amount: 0.96 },
-  ],
-};
-
-const mockClaims = [
-  {
-    id: 1,
-    type: "Platform Fees",
-    amount: "0.25 ETH",
-    status: "available",
-    estimatedGas: "0.003 ETH",
-    date: "2025-05-24",
-  },
-  {
-    id: 2,
-    type: "Staking Rewards",
-    amount: "0.15 ETH",
-    status: "available",
-    estimatedGas: "0.002 ETH",
-    date: "2025-05-24",
-  },
-  {
-    id: 3,
-    type: "Platform Fees",
-    amount: "0.18 ETH",
-    status: "claimed",
-    date: "2025-05-20",
-  },
-];
-
-const mockExclusiveDeals = [
-  {
-    id: 1,
-    title: "Premium Project Alpha",
-    description: "Early access to revolutionary DeFi protocol",
-    discount: "20% off",
-    endDate: "2025-06-01",
-    image: "/api/placeholder/100/100",
-  },
-  {
-    id: 2,
-    title: "NFT Collection Beta",
-    description: "Exclusive mint access for FounderNFT holders",
-    discount: "Free mint",
-    endDate: "2025-05-30",
-    image: "/api/placeholder/100/100",
-  },
-];
 
 export default function FounderNFTDashboard() {
-  const { isConnected, address } = useWallet();
-  const [selectedTab, setSelectedTab] = useState("staking");
-  const [selectedNFTs, setSelectedNFTs] = useState<number[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { isConnected, connect } = useWallet();
+  const {
+    nftData,
+    stakingData,
+    earningsData,
+    isLoading,
+    error,
+    transactionState,
+    stakeNFTs,
+    unstakeNFTs,
+    claimAllRewards,
+    refreshData,
+    resetTransactionState,
+    isContractReady,
+  } = useFounderNFTDashboard();
 
-  // Modal state for staking/unstaking
+  const [selectedTab, setSelectedTab] = useState("staking");
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
   const [unstakeModalOpen, setUnstakeModalOpen] = useState(false);
   const [stakeAmount, setStakeAmount] = useState("");
   const [unstakeAmount, setUnstakeAmount] = useState("");
 
-  const handleNFTSelection = (nftId: number) => {
-    setSelectedNFTs((prev) =>
-      prev.includes(nftId)
-        ? prev.filter((id) => id !== nftId)
-        : [...prev, nftId],
-    );
-  };
+  // Get available and staked NFTs
+  const availableNFTs = nftData.filter(nft => nft.status === "unstaked");
+  const stakedNFTs = nftData.filter(nft => nft.status === "staked");
+  const unstakeableNFTs = stakedNFTs.filter(nft => nft.canUnstake);
 
-  const handleSelectAllUnstaked = () => {
-    const unstakedNFTs = mockNFTData.filter((nft) => nft.status === "unstaked");
-    const unstakedIds = unstakedNFTs.map((nft) => nft.id);
-    setSelectedNFTs((prev) => {
-      const combined = [...prev, ...unstakedIds];
-      return combined.filter((id, index) => combined.indexOf(id) === index);
-    });
-  };
-
-  const handleSelectAllStaked = () => {
-    const stakedNFTs = mockNFTData.filter((nft) => nft.status === "staked");
-    const stakedIds = stakedNFTs.map((nft) => nft.id);
-    setSelectedNFTs((prev) => {
-      const combined = [...prev, ...stakedIds];
-      return combined.filter((id, index) => combined.indexOf(id) === index);
-    });
-  };
-
-  const handleDeselectAllUnstaked = () => {
-    const unstakedIds = mockNFTData
-      .filter((nft) => nft.status === "unstaked")
-      .map((nft) => nft.id);
-    setSelectedNFTs((prev) => prev.filter((id) => !unstakedIds.includes(id)));
-  };
-
-  const handleDeselectAllStaked = () => {
-    const stakedIds = mockNFTData
-      .filter((nft) => nft.status === "staked")
-      .map((nft) => nft.id);
-    setSelectedNFTs((prev) => prev.filter((id) => !stakedIds.includes(id)));
-  };
-
-  const handleDeselectAll = () => {
-    setSelectedNFTs([]);
-  };
-
-  const handleBulkStake = async () => {
-    setIsProcessing(true);
+  // Handle connect wallet
+  const handleConnect = async () => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Staking NFTs:", selectedNFTs);
-      setSelectedNFTs([]);
+      await connect();
     } catch (error) {
-      console.error("Staking failed:", error);
-    } finally {
-      setIsProcessing(false);
+      console.error("Failed to connect wallet:", error);
     }
   };
 
-  const handleBulkUnstake = async () => {
-    setIsProcessing(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Unstaking NFTs:", selectedNFTs);
-      setSelectedNFTs([]);
-    } catch (error) {
-      console.error("Unstaking failed:", error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const getSelectedStaked = () => {
-    return selectedNFTs.filter(
-      (id) => mockNFTData.find((nft) => nft.id === id)?.status === "staked",
-    );
-  };
-
-  const getSelectedUnstaked = () => {
-    return selectedNFTs.filter(
-      (id) => mockNFTData.find((nft) => nft.id === id)?.status === "unstaked",
-    );
-  };
-
-  // Handle stake modal actions
-  const handleStakeModalOpen = () => {
-    const availableCount = mockNFTData.filter((nft) => nft.status === "unstaked").length;
-    setStakeAmount(availableCount.toString());
-    setStakeModalOpen(true);
-  };
-
+  // Handle staking
   const handleStakeConfirm = async () => {
     const amount = parseInt(stakeAmount);
-    const maxAvailable = mockNFTData.filter((nft) => nft.status === "unstaked").length;
-    
-    if (amount > 0 && amount <= maxAvailable) {
-      setIsProcessing(true);
+    if (amount > 0 && amount <= availableNFTs.length) {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        alert(`Successfully staked ${amount} NFTs`);
+        const tokenIds = availableNFTs.slice(0, amount).map(nft => nft.id);
+        await stakeNFTs(tokenIds);
         setStakeModalOpen(false);
         setStakeAmount("");
       } catch (error) {
         console.error("Staking failed:", error);
-      } finally {
-        setIsProcessing(false);
       }
     }
   };
 
-  // Handle unstake modal actions
-  const handleUnstakeModalOpen = () => {
-    const stakedCount = mockNFTData.filter((nft) => nft.status === "staked").length;
-    setUnstakeAmount(stakedCount.toString());
-    setUnstakeModalOpen(true);
-  };
-
+  // Handle unstaking
   const handleUnstakeConfirm = async () => {
     const amount = parseInt(unstakeAmount);
-    const maxStaked = mockNFTData.filter((nft) => nft.status === "staked").length;
-    
-    if (amount > 0 && amount <= maxStaked) {
-      setIsProcessing(true);
+    if (amount > 0 && amount <= unstakeableNFTs.length) {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        alert(`Successfully unstaked ${amount} NFTs`);
+        const tokenIds = unstakeableNFTs.slice(0, amount).map(nft => nft.id);
+        await unstakeNFTs(tokenIds);
         setUnstakeModalOpen(false);
         setUnstakeAmount("");
       } catch (error) {
         console.error("Unstaking failed:", error);
-      } finally {
-        setIsProcessing(false);
       }
     }
+  };
+
+  // Handle claiming rewards
+  const handleClaimAllRewards = async () => {
+    try {
+      await claimAllRewards();
+    } catch (error) {
+      console.error("Claiming failed:", error);
+    }
+  };
+
+  // Handle modal opens
+  const handleStakeModalOpen = () => {
+    setStakeAmount(availableNFTs.length.toString());
+    setStakeModalOpen(true);
+  };
+
+  const handleUnstakeModalOpen = () => {
+    setUnstakeAmount(unstakeableNFTs.length.toString());
+    setUnstakeModalOpen(true);
   };
 
   if (!isConnected) {
@@ -310,7 +136,58 @@ export default function FounderNFTDashboard() {
               Please connect your wallet to access the FounderNFT Dashboard
             </CardDescription>
           </CardHeader>
+          <CardContent className="text-center">
+            <Button onClick={handleConnect} className="bg-[#8A63D2] hover:bg-[#7651c0]">
+              Connect Wallet
+            </Button>
+          </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-[#111827] pt-20">
+        <div className="container mx-auto px-4 max-w-[110rem] py-8">
+          <div className="mb-8">
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="bg-white dark:bg-[#1a1e31]">
+                <CardContent className="p-6">
+                  <Skeleton className="h-16 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <Skeleton className="h-96 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-[#111827] pt-20">
+        <div className="container mx-auto px-4 max-w-[110rem] py-8">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error}
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-4"
+                onClick={refreshData}
+              >
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </div>
       </div>
     );
   }
@@ -326,17 +203,26 @@ export default function FounderNFTDashboard() {
                 FounderNFT Dashboard
               </h1>
               <p className="text-gray-600 dark:text-gray-300">
-                Manage your FounderNFTs, track earnings, and access exclusive
-                benefits
+                Manage your FounderNFTs, track earnings, and access exclusive benefits
               </p>
             </div>
-            <Badge
-              variant="secondary"
-              className="bg-[#8A63D2]/10 text-[#8A63D2] border-[#8A63D2]/20"
-            >
-              <Crown className="h-4 w-4 mr-1" />
-              Founder Status
-            </Badge>
+            <div className="flex items-center space-x-4">
+              <Badge
+                variant="secondary"
+                className="bg-[#8A63D2]/10 text-[#8A63D2] border-[#8A63D2]/20"
+              >
+                <Crown className="h-4 w-4 mr-1" />
+                Founder Status
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshData}
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -350,7 +236,7 @@ export default function FounderNFTDashboard() {
                     Total NFTs
                   </p>
                   <p className="text-2xl font-bold">
-                    {mockStakingData.totalOwned}
+                    {stakingData.totalOwned}
                   </p>
                 </div>
                 <Crown className="h-8 w-8 text-[#8A63D2]" />
@@ -366,7 +252,7 @@ export default function FounderNFTDashboard() {
                     Staked NFTs
                   </p>
                   <p className="text-2xl font-bold">
-                    {mockStakingData.totalStaked}
+                    {stakingData.totalStaked}
                   </p>
                 </div>
                 <Shield className="h-8 w-8 text-green-500" />
@@ -382,7 +268,7 @@ export default function FounderNFTDashboard() {
                     Total Earnings
                   </p>
                   <p className="text-2xl font-bold">
-                    {mockEarningsData.totalEarnings}
+                    {earningsData.totalEarnings}
                   </p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-blue-500" />
@@ -395,11 +281,11 @@ export default function FounderNFTDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Platform Staked
+                    Available to Stake
                   </p>
-                  <p className="text-2xl font-bold">8,547</p>
+                  <p className="text-2xl font-bold">{availableNFTs.length}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    of 10,000 total NFTs
+                    of {stakingData.totalOwned} total NFTs
                   </p>
                 </div>
                 <Users className="h-8 w-8 text-purple-500" />
@@ -407,6 +293,37 @@ export default function FounderNFTDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Transaction Status Alert */}
+        {transactionState.status !== "idle" && (
+          <Alert className={`mb-6 ${transactionState.status === "pending"
+              ? "border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20"
+              : transactionState.status === "success"
+                ? "border-green-300 bg-green-50 dark:bg-green-900/20"
+                : "border-red-300 bg-red-50 dark:bg-red-900/20"
+            }`}>
+            <div className="flex items-center">
+              {transactionState.status === "pending" && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {transactionState.status === "success" && <CheckCircle className="h-4 w-4 mr-2 text-green-600" />}
+              {transactionState.status === "error" && <AlertCircle className="h-4 w-4 mr-2 text-red-600" />}
+              <AlertDescription>
+                {transactionState.status === "pending" && "Transaction in progress..."}
+                {transactionState.status === "success" && "Transaction completed successfully!"}
+                {transactionState.status === "error" && (transactionState.error || "Transaction failed")}
+              </AlertDescription>
+              {transactionState.status !== "pending" && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={resetTransactionState}
+                  className="ml-auto"
+                >
+                  ×
+                </Button>
+              )}
+            </div>
+          </Alert>
+        )}
 
         {/* Main Tabs */}
         <Tabs
@@ -444,20 +361,44 @@ export default function FounderNFTDashboard() {
                   <div className="flex justify-center">
                     <div className="w-1/2 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
                       <p className="text-3xl font-bold text-[#8A63D2] mb-2">
-                        {mockNFTData.filter((nft) => nft.status === "unstaked").length}
+                        {availableNFTs.length}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         NFTs Available
                       </p>
                     </div>
                   </div>
+
+                  {/* Show list of available NFTs if any */}
+                  {availableNFTs.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Available NFTs:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {availableNFTs.slice(0, 5).map(nft => (
+                          <Badge key={nft.id} variant="outline" className="text-xs">
+                            {nft.tokenId}
+                          </Badge>
+                        ))}
+                        {availableNFTs.length > 5 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{availableNFTs.length - 5} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex justify-center">
                     <Button
                       onClick={handleStakeModalOpen}
-                      disabled={mockNFTData.filter((nft) => nft.status === "unstaked").length === 0}
+                      disabled={availableNFTs.length === 0 || transactionState.isLoading || !isContractReady}
                       className="bg-[#8A63D2] hover:bg-[#7651c0] w-1/2"
                     >
-                      <Shield className="h-4 w-4 mr-2" />
+                      {transactionState.isLoading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Shield className="h-4 w-4 mr-2" />
+                      )}
                       Stake NFTs
                     </Button>
                   </div>
@@ -479,31 +420,61 @@ export default function FounderNFTDashboard() {
                   <div className="flex justify-center">
                     <div className="w-1/2 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 text-center">
                       <p className="text-3xl font-bold text-green-600 mb-2">
-                        {mockNFTData.filter((nft) => nft.status === "staked").length}
+                        {stakedNFTs.length}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         NFTs Earning
                       </p>
                     </div>
                   </div>
+
+                  {/* Show list of staked NFTs if any */}
+                  {stakedNFTs.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Staked NFTs:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {stakedNFTs.slice(0, 5).map(nft => (
+                          <Badge
+                            key={nft.id}
+                            variant="outline"
+                            className={`text-xs ${nft.canUnstake ? 'border-green-300 text-green-700' : 'border-orange-300 text-orange-700'}`}
+                          >
+                            {nft.tokenId} {nft.canUnstake ? '✓' : '⏳'}
+                          </Badge>
+                        ))}
+                        {stakedNFTs.length > 5 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{stakedNFTs.length - 5} more
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        ✓ = Can unstake, ⏳ = Minimum period not reached
+                      </p>
+                    </div>
+                  )}
+
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600 dark:text-gray-400">Total Rewards Earned:</span>
-                      <span className="font-medium">
-                        {mockNFTData
-                          .filter((nft) => nft.status === "staked")
-                          .reduce((total, nft) => total + parseFloat(nft.earnedRewards.replace(' ETH', '')), 0)
-                          .toFixed(3)} ETH
-                      </span>
+                      <span className="font-medium">{stakingData.totalRewards}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Can Unstake:</span>
+                      <span className="font-medium">{unstakeableNFTs.length} NFTs</span>
                     </div>
                     <div className="flex justify-center">
                       <Button
                         onClick={handleUnstakeModalOpen}
-                        disabled={mockNFTData.filter((nft) => nft.status === "staked").length === 0}
+                        disabled={unstakeableNFTs.length === 0 || transactionState.isLoading || !isContractReady}
                         variant="outline"
                         className="w-1/2 border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-600 dark:text-orange-400"
                       >
-                        <Clock className="h-4 w-4 mr-2" />
+                        {transactionState.isLoading ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Clock className="h-4 w-4 mr-2" />
+                        )}
                         Unstake NFTs
                       </Button>
                     </div>
@@ -511,11 +482,20 @@ export default function FounderNFTDashboard() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Minimum Staking Period Info */}
+            {stakingData.minimumStakingPeriod > 0 && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Note:</strong> NFTs must be staked for at least {stakingData.minimumStakingPeriod} days before they can be unstaked.
+                </AlertDescription>
+              </Alert>
+            )}
           </TabsContent>
 
           {/* Earnings & Claims Tab */}
           <TabsContent value="earnings" className="space-y-6 p-6">
-            {/* Top Row - Earnings Details and Claiming */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Earnings Details Card */}
               <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
@@ -531,22 +511,18 @@ export default function FounderNFTDashboard() {
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm">Platform Fees</span>
-                      <span className="font-semibold">
-                        {mockEarningsData.platformFees}
-                      </span>
+                      <span className="text-sm">Weekly Rewards</span>
+                      <span className="font-semibold">{earningsData.totalEarnings}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm">DAO Tokens</span>
-                      <span className="font-semibold">
-                        {mockEarningsData.daoTokens}
-                      </span>
+                      <span className="text-sm">Staked NFTs</span>
+                      <span className="font-semibold">{stakingData.totalStaked}</span>
                     </div>
                     <div className="border-t pt-3">
                       <div className="flex justify-between items-center">
                         <span className="font-medium text-lg">Total Earned</span>
                         <span className="font-bold text-xl text-[#8A63D2]">
-                          {mockEarningsData.totalEarnings}
+                          {earningsData.totalEarnings}
                         </span>
                       </div>
                     </div>
@@ -573,64 +549,82 @@ export default function FounderNFTDashboard() {
                           Available to Claim
                         </p>
                         <p className="text-3xl font-bold text-[#8A63D2]">
-                          {mockEarningsData.totalEarnings}
+                          {earningsData.claimableAmount}
                         </p>
                       </div>
                     </div>
                     <div className="flex justify-center">
                       <Button
                         className="w-2/5 bg-[#8A63D2] hover:bg-[#7651c0] text-white"
-                        onClick={() => {
-                          alert("Claiming earnings...");
-                        }}
+                        onClick={handleClaimAllRewards}
+                        disabled={
+                          parseFloat(earningsData.claimableAmount.replace(' ETH', '')) === 0 ||
+                          transactionState.isLoading ||
+                          !isContractReady ||
+                          stakedNFTs.length === 0
+                        }
                       >
-                        <Gift className="h-4 w-4 mr-2" />
+                        {transactionState.isLoading ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Gift className="h-4 w-4 mr-2" />
+                        )}
                         Claim All Earnings
                       </Button>
                     </div>
                     <p className="text-xs text-gray-500">
-                      Claiming will transfer earnings to your wallet
+                      {stakedNFTs.length === 0
+                        ? "No staked NFTs to claim rewards for"
+                        : "Claiming will transfer earnings to your wallet"
+                      }
                     </p>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Bottom Row - Claims History */}
-            <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <CheckCircle className="h-5 w-5 mr-2" />
-                  Claim History
-                </CardTitle>
-                <CardDescription>
-                  Your recent earnings claims and transactions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {mockClaims.map((claim) => (
-                    <div
-                      key={claim.id}
-                      className="flex items-center justify-between p-4 border rounded-lg border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                        <div>
-                          <p className="font-medium">{claim.type}</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {claim.date}
-                          </p>
+            {/* NFT Rewards Breakdown */}
+            {stakedNFTs.length > 0 && (
+              <Card className="bg-white dark:bg-[#1a1e31] border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <CheckCircle className="h-5 w-5 mr-2" />
+                    Individual NFT Rewards
+                  </CardTitle>
+                  <CardDescription>
+                    Breakdown of rewards for each staked NFT
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {stakedNFTs.map((nft) => (
+                      <div
+                        key={nft.id}
+                        className="flex items-center justify-between p-4 border rounded-lg border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Shield className="h-5 w-5 text-green-500" />
+                          <div>
+                            <p className="font-medium">{nft.tokenId}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              Staked for {nft.stakingDuration}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-semibold">{nft.earnedRewards}</span>
+                          {!nft.canUnstake && nft.nextUnstakeDate && (
+                            <p className="text-xs text-orange-500">
+                              Can unstake: {nft.nextUnstakeDate}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <span className="font-semibold">{claim.amount}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Exclusive Access Tab */}
@@ -640,43 +634,44 @@ export default function FounderNFTDashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Star className="h-5 w-5 mr-2" />
-                    Exclusive Investment Opportunities
+                    Founder Benefits
                   </CardTitle>
                   <CardDescription>
-                    Early access to premium projects and deals
+                    Your exclusive access and privileges
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockExclusiveDeals.map((deal) => (
-                    <div
-                      key={deal.id}
-                      className="flex items-center space-x-4 p-4 border rounded-lg"
-                    >
-                      <div className="w-16 h-16 bg-gradient-to-br from-[#8A63D2]/20 to-[#583c8e]/20 rounded-lg flex items-center justify-center">
-                        <Star className="h-8 w-8 text-[#8A63D2]" />
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm">Platform Fee Distribution</span>
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium">{deal.title}</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {deal.description}
-                        </p>
-                        <div className="flex items-center space-x-4 mt-2">
-                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                            {deal.discount}
-                          </Badge>
-                          <span className="text-xs text-gray-500">
-                            Ends {deal.endDate}
-                          </span>
-                        </div>
-                      </div>
-                      <Button
-                        size="sm"
-                        className="bg-[#8A63D2] hover:bg-[#7651c0]"
-                      >
-                        Access
-                      </Button>
+                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        Active
+                      </Badge>
                     </div>
-                  ))}
+
+                    <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Crown className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm">Early Access to Projects</span>
+                      </div>
+                      <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        Enabled
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Shield className="h-4 w-4 text-purple-500" />
+                        <span className="text-sm">Weekly Reward System</span>
+                      </div>
+                      <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                        {stakingData.totalStaked > 0 ? 'Earning' : 'Available'}
+                      </Badge>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -684,42 +679,28 @@ export default function FounderNFTDashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Bell className="h-5 w-5 mr-2" />
-                    Notifications & Features
+                    Your Status
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">
-                          Premium Features Enabled
-                        </span>
-                      </div>
+                    <div className="text-center p-4 bg-[#8A63D2]/10 rounded-lg border border-[#8A63D2]/20">
+                      <Crown className="h-8 w-8 mx-auto mb-2 text-[#8A63D2]" />
+                      <p className="font-semibold text-[#8A63D2]">Founder Status</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        You own {stakingData.totalOwned} FounderNFT{stakingData.totalOwned !== 1 ? 's' : ''}
+                      </p>
                     </div>
 
-                    <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <Bell className="h-4 w-4 text-blue-500" />
-                        <span className="text-sm">
-                          Exclusive Deal Notifications
-                        </span>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-lg font-bold text-green-600">{stakingData.totalStaked}</p>
+                        <p className="text-xs text-gray-500">Staked</p>
                       </div>
-                      <Button size="sm" variant="outline">
-                        Configure
-                      </Button>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <Users className="h-4 w-4 text-purple-500" />
-                        <span className="text-sm">
-                          Founder Community Access
-                        </span>
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-lg font-bold text-blue-600">{availableNFTs.length}</p>
+                        <p className="text-xs text-gray-500">Available</p>
                       </div>
-                      <Button size="sm" variant="outline">
-                        Join
-                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -747,13 +728,13 @@ export default function FounderNFTDashboard() {
                   id="stake-amount"
                   type="number"
                   min="1"
-                  max={mockNFTData.filter((nft) => nft.status === "unstaked").length}
+                  max={availableNFTs.length}
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
                   placeholder="Enter amount"
                 />
                 <p className="text-sm text-gray-500">
-                  Available: {mockNFTData.filter((nft) => nft.status === "unstaked").length} NFTs
+                  Available: {availableNFTs.length} NFTs
                 </p>
               </div>
             </div>
@@ -761,16 +742,23 @@ export default function FounderNFTDashboard() {
               <Button
                 variant="outline"
                 onClick={() => setStakeModalOpen(false)}
-                disabled={isProcessing}
+                disabled={transactionState.isLoading}
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleStakeConfirm}
-                disabled={isProcessing || !stakeAmount || parseInt(stakeAmount) < 1}
+                disabled={transactionState.isLoading || !stakeAmount || parseInt(stakeAmount) < 1 || parseInt(stakeAmount) > availableNFTs.length}
                 className="bg-[#8A63D2] hover:bg-[#7651c0]"
               >
-                {isProcessing ? "Staking..." : `Stake ${stakeAmount || 0} NFT${parseInt(stakeAmount) !== 1 ? 's' : ''}`}
+                {transactionState.isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Staking...
+                  </>
+                ) : (
+                  `Stake ${stakeAmount || 0} NFT${parseInt(stakeAmount) !== 1 ? 's' : ''}`
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -795,31 +783,43 @@ export default function FounderNFTDashboard() {
                   id="unstake-amount"
                   type="number"
                   min="1"
-                  max={mockNFTData.filter((nft) => nft.status === "staked").length}
+                  max={unstakeableNFTs.length}
                   value={unstakeAmount}
                   onChange={(e) => setUnstakeAmount(e.target.value)}
                   placeholder="Enter amount"
                 />
                 <p className="text-sm text-gray-500">
-                  Currently Staked: {mockNFTData.filter((nft) => nft.status === "staked").length} NFTs
+                  Can unstake: {unstakeableNFTs.length} NFTs (out of {stakedNFTs.length} staked)
                 </p>
+                {stakedNFTs.length > unstakeableNFTs.length && (
+                  <p className="text-sm text-orange-600">
+                    {stakedNFTs.length - unstakeableNFTs.length} NFT{stakedNFTs.length - unstakeableNFTs.length !== 1 ? 's' : ''} haven't reached minimum staking period
+                  </p>
+                )}
               </div>
             </div>
             <DialogFooter>
               <Button
                 variant="outline"
                 onClick={() => setUnstakeModalOpen(false)}
-                disabled={isProcessing}
+                disabled={transactionState.isLoading}
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleUnstakeConfirm}
-                disabled={isProcessing || !unstakeAmount || parseInt(unstakeAmount) < 1}
+                disabled={transactionState.isLoading || !unstakeAmount || parseInt(unstakeAmount) < 1 || parseInt(unstakeAmount) > unstakeableNFTs.length}
                 variant="outline"
                 className="border-orange-300 text-orange-600 hover:bg-orange-50"
               >
-                {isProcessing ? "Unstaking..." : `Unstake ${unstakeAmount || 0} NFT${parseInt(unstakeAmount) !== 1 ? 's' : ''}`}
+                {transactionState.isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Unstaking...
+                  </>
+                ) : (
+                  `Unstake ${unstakeAmount || 0} NFT${parseInt(unstakeAmount) !== 1 ? 's' : ''}`
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

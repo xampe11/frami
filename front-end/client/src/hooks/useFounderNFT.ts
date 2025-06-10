@@ -53,7 +53,44 @@ export const useFounderNFT = () => {
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
   const [contract, setContract] = useState<ethers.Contract | null>(null);
 
-  // Initialize provider and contract
+  // NEW: Add read-only provider and contract for public data
+  const [readOnlyProvider, setReadOnlyProvider] =
+    useState<ethers.JsonRpcProvider | null>(null);
+  const [readOnlyContract, setReadOnlyContract] =
+    useState<ethers.Contract | null>(null);
+
+  // NEW: Initialize read-only provider (no wallet needed)
+  useEffect(() => {
+    const initializeReadOnlyProvider = async () => {
+      try {
+        // Use your local Anvil RPC or replace with your target network RPC
+        const rpcUrl = "http://127.0.0.1:8545"; // or process.env.REACT_APP_RPC_URL
+        const readProvider = new ethers.JsonRpcProvider(rpcUrl);
+
+        const readContract = new ethers.Contract(
+          contractConfig.contracts.FounderNFT.address,
+          FOUNDER_NFT_ABI,
+          readProvider
+        );
+
+        setReadOnlyProvider(readProvider);
+        setReadOnlyContract(readContract);
+
+        console.log("Read-only provider initialized successfully");
+      } catch (error) {
+        console.error("Failed to initialize read-only provider:", error);
+        setContractData((prev) => ({
+          ...prev,
+          error: "Failed to connect to contract",
+          isLoading: false,
+        }));
+      }
+    };
+
+    initializeReadOnlyProvider();
+  }, []); // No dependencies - runs once on mount
+
+  // Initialize wallet provider and contract (for transactions)
   useEffect(() => {
     const initializeContract = async () => {
       try {
@@ -114,6 +151,90 @@ export const useFounderNFT = () => {
     initializeContract();
   }, [isConnected]);
 
+  // NEW: Fetch public contract data (no wallet needed)
+  const fetchPublicData = useCallback(async () => {
+    if (!readOnlyContract) return;
+
+    try {
+      setContractData((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      const [price, totalSupply, maxSupply, saleActive] = await Promise.all([
+        readOnlyContract.getPrice(),
+        readOnlyContract.totalSupply(),
+        readOnlyContract.getMaxSupply(),
+        readOnlyContract.getSaleStatus(),
+      ]);
+
+      console.log("Public data fetched:", {
+        price: ethers.formatEther(price),
+        totalSupply: Number(totalSupply),
+        maxSupply: Number(maxSupply),
+        saleActive,
+      });
+
+      setContractData((prev) => ({
+        ...prev,
+        price: ethers.formatEther(price),
+        priceWei: price,
+        totalSupply: Number(totalSupply),
+        maxSupply: Number(maxSupply),
+        isLoading: false,
+        error: null,
+      }));
+    } catch (error) {
+      console.error("Failed to fetch public contract data:", error);
+      setContractData((prev) => ({
+        ...prev,
+        error: "Failed to fetch contract data",
+        isLoading: false,
+      }));
+    }
+  }, [readOnlyContract]);
+
+  // NEW: Fetch user-specific data (requires wallet)
+  const fetchUserData = useCallback(async () => {
+    if (!contract || !address) return;
+
+    try {
+      const userBalance = await contract.balanceOf(address);
+
+      setContractData((prev) => ({
+        ...prev,
+        userBalance: Number(userBalance),
+      }));
+
+      console.log("User data fetched:", {
+        userBalance: Number(userBalance),
+      });
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+    }
+  }, [contract, address]);
+
+  // UPDATED: Fetch public data immediately when read-only contract is ready
+  useEffect(() => {
+    if (readOnlyContract) {
+      fetchPublicData();
+    }
+  }, [readOnlyContract, fetchPublicData]);
+
+  // UPDATED: Fetch user data only when wallet is connected
+  useEffect(() => {
+    if (contract && address) {
+      fetchUserData();
+    }
+  }, [contract, address, fetchUserData]);
+
+  // LEGACY: Keep the old fetchContractData for backward compatibility
+  const fetchContractData = useCallback(async () => {
+    // First fetch public data
+    await fetchPublicData();
+    // Then fetch user data if wallet is connected
+    if (isConnected) {
+      await fetchUserData();
+    }
+  }, [fetchPublicData, fetchUserData, isConnected]);
+
   // In your useFounderNFT hook, add chain verification
   useEffect(() => {
     const checkNetwork = async () => {
@@ -131,55 +252,6 @@ export const useFounderNFT = () => {
 
     checkNetwork();
   }, [provider]);
-
-  // Fetch contract data
-  const fetchContractData = useCallback(async () => {
-    if (!contract || !address) return;
-
-    try {
-      setContractData((prev) => ({ ...prev, isLoading: true, error: null }));
-
-      const [price, totalSupply, maxSupply, userBalance, saleActive] =
-        await Promise.all([
-          contract.getPrice(),
-          contract.totalSupply(),
-          contract.getMaxSupply(),
-          contract.balanceOf(address),
-          contract.getSaleStatus(),
-        ]);
-
-      console.log({
-        price: ethers.formatEther(price),
-        totalSupply: Number(totalSupply),
-        maxSupply: Number(maxSupply),
-        saleActive, // Check if minting is enabled
-      });
-
-      setContractData({
-        price: ethers.formatEther(price),
-        priceWei: price,
-        totalSupply: Number(totalSupply),
-        maxSupply: Number(maxSupply),
-        userBalance: Number(userBalance),
-        isLoading: false,
-        error: null,
-      });
-    } catch (error) {
-      console.error("Failed to fetch contract data:", error);
-      setContractData((prev) => ({
-        ...prev,
-        error: "Failed to fetch contract data",
-        isLoading: false,
-      }));
-    }
-  }, [contract, address]);
-
-  // Fetch data when contract is ready
-  useEffect(() => {
-    if (contract && address) {
-      fetchContractData();
-    }
-  }, [contract, address, fetchContractData]);
 
   // Estimate gas for minting
   const estimateGas = useCallback(
@@ -239,169 +311,6 @@ export const useFounderNFT = () => {
     },
     [contract, provider, address, contractData.priceWei]
   );
-
-  // Add this debug function to your useFounderNFT hook
-
-/*   const debugMintMultiple = async (quantity: number) => {
-    if (!contract || !provider || !address) {
-      throw new Error("Contract not initialized or wallet not connected");
-    }
-    try {
-      const signer = await provider.getSigner();
-      console.log("=== DEBUGGING MINT MULTIPLE ===");
-      console.log("Quantity requested:", quantity);
-
-      // 1. Check if contract is connected
-      const contractAddress = await contract.getAddress();
-      const signerAddress = await signer.getAddress();
-      console.log("Contract address:", contractAddress);
-      console.log("Signer address:", signerAddress);
-
-      // 2. Check basic contract state
-      console.log("\n--- Contract State ---");
-
-      // Check if functions exist and work
-      try {
-        const saleActive = await contract.getSaleStatus();
-        console.log("Sale active:", saleActive);
-
-        if (!saleActive) {
-          console.error("❌ ISSUE FOUND: Sale is not active!");
-          return { error: "Sale not active" };
-        }
-      } catch (error: any) {
-        console.error("❌ getSaleStatus() failed:", error.message);
-        return { error: "Cannot check sale status" };
-      }
-
-      try {
-        const currentSupply = await contract.totalSupply();
-        const maxSupply = await contract.getMaxSupply();
-        console.log("Current supply:", currentSupply.toString());
-        console.log("Max supply:", maxSupply.toString());
-
-        if (currentSupply + BigInt(quantity) > maxSupply) {
-          console.error("❌ ISSUE FOUND: Would exceed max supply!");
-          return { error: "Exceeds max supply" };
-        }
-      } catch (error: any) {
-        console.error("❌ Supply check failed:", error.message);
-        return { error: "Cannot check supply" };
-      }
-
-      // 3. Check pricing and payment
-      console.log("\n--- Payment Check ---");
-      try {
-        const price = await contract.getPrice();
-        const totalCost = price * BigInt(quantity);
-        const userBalance = await signer.provider.getBalance(signerAddress);
-
-        console.log("NFT price:", ethers.formatEther(price), "ETH");
-        console.log(
-          "Total cost for",
-          quantity,
-          "NFTs:",
-          ethers.formatEther(totalCost),
-          "ETH"
-        );
-        console.log("User balance:", ethers.formatEther(userBalance), "ETH");
-
-        if (userBalance < totalCost) {
-          console.error("❌ ISSUE FOUND: Insufficient balance!");
-          return { error: "Insufficient balance" };
-        }
-      } catch (error: any) {
-        console.error("❌ Payment check failed:", error.message);
-        return { error: "Cannot check payment requirements" };
-      }
-
-      // 4. Check if mintMultiple function exists
-      console.log("\n--- Function Check ---");
-      try {
-        const fragment = contract.interface.getFunction("mintMultiple");
-        if (fragment) {
-          console.log("✅ mintMultiple function found:", fragment.name);
-        } else {
-          throw new Error("Function not found");
-        }
-      } catch (error) {
-        console.error("❌ ISSUE FOUND: mintMultiple function not found!");
-        console.log(
-          "Available functions:",
-          contract.interface.fragments
-            .filter((f) => f.type === "function")
-            .forEach((f) => {
-              const funcFragment = f as ethers.FunctionFragment;
-              console.log(" -", funcFragment.name);
-            })
-        );
-        return { error: "mintMultiple function does not exist" };
-      }
-
-      // In your debugMintMultiple function, add this before gas estimation:
-      console.log("=== FRONTEND CONTRACT DEBUG ===");
-      console.log("Contract address:", await contract.getAddress());
-      console.log("Signer address:", await signer.getAddress());
-      console.log("Provider network:", await signer.provider.getNetwork());
-
-      // Check if we're calling the right function
-      console.log("Function exists:", typeof contract.mintMultiple === 'function');
-
-      // Try a simple view function first
-      try {
-        const currentSupply = await contract.totalSupply();
-        console.log("View function works, supply:", currentSupply.toString());
-      } catch (error: any) {
-        console.log("Even view functions fail:", error.message);
-      }
-
-      // 5. Try calling mintMultiple with quantity 1 first
-      console.log("\n--- Gas Estimation Test ---");
-      try {
-        const price = await contract.getPrice();
-        console.log("Testing gas estimation for quantity 1...");
-
-        const gasEstimate = await contract.mintMultiple.estimateGas(1, {
-          value: price,
-        });
-        console.log("✅ Gas estimate for 1 NFT:", gasEstimate.toString());
-
-        // Now try the requested quantity
-        console.log(`Testing gas estimation for quantity ${quantity}...`);
-        const gasEstimateMultiple = await contract.mintMultiple.estimateGas(
-          quantity,
-          {
-            value: price * BigInt(quantity),
-          }
-        );
-        console.log(
-          `✅ Gas estimate for ${quantity} NFTs:`,
-          gasEstimateMultiple.toString()
-        );
-
-        return { success: true, gasEstimate: gasEstimateMultiple };
-      } catch (error: any) {
-        console.error("❌ ISSUE FOUND: Gas estimation failed!");
-        console.error("Error details:", error.message);
-
-        // Try to get more specific error info
-        if (error.message.includes("require(false)")) {
-          console.log(
-            "This suggests a require() statement is failing in the contract"
-          );
-        }
-
-        return { error: "Gas estimation failed: " + error.message };
-      }
-    } catch (error: any) {
-      console.error("❌ Debug failed:", error);
-      return { error: "Debug failed: " + error.message };
-    }
-  }; */
-
-  // Call this before attempting to mint
-  // const debugResult = await debugMintMultiple(3);
-  // console.log('Debug result:', debugResult);
 
   // Mint function
   const mintMultiple = useCallback(
@@ -564,9 +473,6 @@ export const useFounderNFT = () => {
     mintState,
     resetMintState,
 
-    // Debugging Function
-    //debugMintMultiple,
-
     // Utilities
     estimateGas,
     calculateTotalCost,
@@ -574,7 +480,10 @@ export const useFounderNFT = () => {
 
     // Connection status
     isContractReady: !!contract && !!provider,
+    isPublicDataReady: !!readOnlyContract, // NEW: For checking if public data is available
     provider,
     contract,
+    readOnlyProvider, // NEW: Expose read-only provider
+    readOnlyContract, // NEW: Expose read-only contract
   };
 };

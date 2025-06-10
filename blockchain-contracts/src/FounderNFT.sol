@@ -10,8 +10,9 @@ import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol
 import {FounderNFTStorage} from "./FounderNFTStorage.sol";
 
 /**
- * @title FounderNFT
- * @dev NFT for platform founders with special privileges and weekly reward epochs
+ * @title ModernFounderNFT
+ * @dev NFT for platform founders with continuous reward accrual system
+ * @notice Implements Synthetix-style staking rewards with automatic distribution
  */
 contract FounderNFT is
     Initializable,
@@ -27,22 +28,18 @@ contract FounderNFT is
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant PLATFORM_ROLE = keccak256("PLATFORM_ROLE");
 
-    // Weekly epoch constants
-    uint256 public constant WEEK = 7 days;
+    // Reward system constants
     uint256 public constant SALES_REDISTRIBUTION_PERCENTAGE = 1000; // 10%
     uint256 public constant BASIS_POINTS = 10000; // 100%
+    uint256 public constant PRECISION = 1e18; // For reward calculations
 
     // Events
     event FounderNFTMinted(address indexed to, uint256 indexed tokenId);
-    event WeeklyEpochFinalized(uint256 indexed week, uint256 totalRewards, uint256 stakedCount);
-    event WeeklyRewardClaimed(address indexed user, uint256 indexed tokenId, uint256 indexed week, uint256 amount);
-    event SalesRedistributed(uint256 amount);
-    event SaleProceedsReceived(uint256 amount);
-    event FeeDistributionReceived(uint256 amount);
-    event EarlyAccessProjectAdded(address indexed projectAddress);
-    event EarlyAccessProjectRemoved(address indexed projectAddress);
+    event RewardAdded(uint256 amount, uint256 newRewardRate);
+    event RewardClaimed(address indexed user, uint256 indexed tokenId, uint256 amount);
     event TokenStaked(address indexed owner, uint256 indexed tokenId);
     event TokenUnstaked(address indexed owner, uint256 indexed tokenId);
+    event RewardRateUpdated(uint256 oldRate, uint256 newRate);
     event ETHReceived(address indexed from, uint256 amount);
 
     /**
@@ -79,11 +76,11 @@ contract FounderNFT is
         _daoTokenAllocationPercentage = daoTokenAllocationPercentage;
         _minimumStakingPeriod = minimumStakingPeriod;
         _nextTokenId = 0;
-        _totalStakedTokens = 0;
 
-        // Initialize weekly system
-        _deploymentWeek = getCurrentWeek();
-        _currentWeeklyRewards = 0;
+        // Initialize continuous reward system
+        _lastUpdateTime = block.timestamp;
+        _rewardPerTokenStored = 0;
+        _totalStakedSupply = 0;
 
         // Set up access control
         _grantRole(DEFAULT_ADMIN_ROLE, initialOwner);
@@ -93,17 +90,17 @@ contract FounderNFT is
     }
 
     /**
-     * @dev Get current week number since epoch
+     * @dev Modifier to update rewards before any staking operation
      */
-    function getCurrentWeek() public view returns (uint256) {
-        return block.timestamp / WEEK;
-    }
+    modifier updateReward(uint256 tokenId) {
+        _rewardPerTokenStored = rewardPerToken();
+        _lastUpdateTime = block.timestamp;
 
-    /**
-     * @dev Get week number for a specific timestamp
-     */
-    function getWeekOf(uint256 timestamp) public pure returns (uint256) {
-        return timestamp / WEEK;
+        if (tokenId != 0 && _stakedTokens[tokenId].owner != address(0)) {
+            _rewards[tokenId] = earned(tokenId);
+            _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
+        }
+        _;
     }
 
     /**
@@ -114,9 +111,57 @@ contract FounderNFT is
     }
 
     /**
-     * @dev Mint a Founder NFT with weekly sales redistribution
+     * @dev Calculate reward per token
      */
-    function mint() external payable {
+    function rewardPerToken() public view returns (uint256) {
+        if (_totalStakedSupply == 0) {
+            return _rewardPerTokenStored;
+        }
+
+        return
+            _rewardPerTokenStored + ((block.timestamp - _lastUpdateTime) * _rewardRate * PRECISION / _totalStakedSupply);
+    }
+
+    /**
+     * @dev Calculate earned rewards for a specific token
+     */
+    function earned(uint256 tokenId) public view returns (uint256) {
+        if (_stakedTokens[tokenId].owner == address(0)) {
+            return 0;
+        }
+
+        return (rewardPerToken() - _userRewardPerTokenPaid[tokenId]) * 1 / PRECISION + _rewards[tokenId];
+    }
+
+    /**
+     * @dev Get total claimable rewards for a token
+     */
+    function getClaimableRewards(uint256 tokenId) external view returns (uint256) {
+        return earned(tokenId);
+    }
+
+    /**
+     * @dev Add rewards to the system (internal function)
+     */
+    function _addRewards(uint256 amount) internal updateReward(0) {
+        if (_totalStakedSupply > 0) {
+            // Distribute over time to prevent flash loan attacks
+            uint256 rewardDuration = 86400; // 24 hours
+            uint256 newRewardRate = amount / rewardDuration;
+            _rewardRate += newRewardRate;
+
+            emit RewardAdded(amount, _rewardRate);
+            emit RewardRateUpdated(_rewardRate - newRewardRate, _rewardRate);
+        } else {
+            // No stakers yet, hold rewards for when staking begins
+            _pendingRewards += amount;
+        }
+    }
+
+    /**
+     * @dev Mint a Founder NFT with automatic reward distribution
+     */
+    function mint() external payable nonReentrant {
         require(_saleActive, "Sale is not active");
         require(totalSupply() < _maxSupply, "Max supply reached");
         require(msg.value >= _price, "Insufficient payment");
@@ -127,12 +172,10 @@ contract FounderNFT is
 
         // Add to sales proceeds (90% of the payment)
         _totalSalesProceeds += salesProceedsAmount;
-        emit SaleProceedsReceived(salesProceedsAmount);
 
-        // Add redistribution amount to current week's rewards
+        // Immediately distribute 10% to current stakers
         if (redistributionAmount > 0) {
-            _currentWeeklyRewards += redistributionAmount;
-            emit SalesRedistributed(redistributionAmount);
+            _addRewards(redistributionAmount);
         }
 
         uint256 tokenId = _nextTokenId;
@@ -144,11 +187,11 @@ contract FounderNFT is
     }
 
     /**
-     * @dev Mints multiple Founder NFT with weekly sales redistribution
+     * @dev Mint multiple Founder NFTs with automatic reward distribution
      */
-    function mintMultiple(uint256 quantity) external payable {
+    function mintMultiple(uint256 quantity) external payable nonReentrant {
         require(_saleActive, "Sale is not active");
-        require(quantity > 0 && quantity <= 10, "Invalid quantity"); // Add reasonable limit
+        require(quantity > 0 && quantity <= 10, "Invalid quantity");
         require(totalSupply() + quantity <= _maxSupply, "Max supply exceeded");
         require(msg.value >= _price * quantity, "Insufficient payment");
 
@@ -157,11 +200,10 @@ contract FounderNFT is
         uint256 salesProceedsAmount = msg.value - redistributionAmount;
 
         _totalSalesProceeds += salesProceedsAmount;
-        emit SaleProceedsReceived(salesProceedsAmount);
 
+        // Immediately distribute rewards
         if (redistributionAmount > 0) {
-            _currentWeeklyRewards += redistributionAmount;
-            emit SalesRedistributed(redistributionAmount);
+            _addRewards(redistributionAmount);
         }
 
         for (uint256 i = 0; i < quantity; i++) {
@@ -189,17 +231,19 @@ contract FounderNFT is
     }
 
     /**
-     * @dev Add platform fees to current week's reward pool
+     * @dev Add platform fees to reward system
      */
-    function addPlatformFees(uint256 amount) external onlyRole(PLATFORM_ROLE) {
-        _currentWeeklyRewards += amount;
-        emit FeeDistributionReceived(amount);
+    function addPlatformFees(uint256 amount) external payable onlyRole(PLATFORM_ROLE) {
+        uint256 rewardAmount = msg.value > 0 ? msg.value : amount;
+        require(rewardAmount > 0, "No rewards to add");
+
+        _addRewards(rewardAmount);
     }
 
     /**
-     * @dev Stake token to participate in weekly reward distribution
+     * @dev Stake token to participate in reward distribution
      */
-    function stakeToken(uint256 tokenId) external nonReentrant {
+    function stakeToken(uint256 tokenId) external nonReentrant updateReward(tokenId) {
         require(ownerOf(tokenId) == msg.sender, "Not the token owner");
         require(_stakedTokens[tokenId].owner == address(0), "Token already staked");
 
@@ -210,11 +254,14 @@ contract FounderNFT is
         _stakedTokens[tokenId] =
             StakeInfo({owner: msg.sender, stakedSince: block.timestamp, lastRewardsClaimed: block.timestamp});
 
-        _totalStakedTokens++;
+        _totalStakedSupply++;
+        _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
 
-        // Mark as staked for current week
-        uint256 currentWeek = getCurrentWeek();
-        _tokenStakedDuringWeek[currentWeek][tokenId] = true;
+        // If this is the first staker and we have pending rewards, start distributing
+        if (_totalStakedSupply == 1 && _pendingRewards > 0) {
+            _addRewards(_pendingRewards);
+            _pendingRewards = 0;
+        }
 
         emit TokenStaked(msg.sender, tokenId);
     }
@@ -222,167 +269,238 @@ contract FounderNFT is
     /**
      * @dev Unstake token
      */
-    function unstakeToken(uint256 tokenId) external nonReentrant {
+    function unstakeToken(uint256 tokenId) external nonReentrant updateReward(tokenId) {
         require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
         require(
             block.timestamp >= _stakedTokens[tokenId].stakedSince + _minimumStakingPeriod,
             "Minimum staking period not reached"
         );
 
+        // Automatically claim rewards before unstaking
+        uint256 reward = _rewards[tokenId];
+        if (reward > 0) {
+            _rewards[tokenId] = 0;
+            (bool success,) = msg.sender.call{value: reward}("");
+            require(success, "Reward transfer failed");
+            emit RewardClaimed(msg.sender, tokenId, reward);
+        }
+
         // Transfer token back to owner
         _transfer(address(this), msg.sender, tokenId);
 
         // Clear staking information
         delete _stakedTokens[tokenId];
+        delete _userRewardPerTokenPaid[tokenId];
 
-        _totalStakedTokens--;
+        _totalStakedSupply--;
 
         emit TokenUnstaked(msg.sender, tokenId);
     }
 
     /**
-     * @dev Finalize the current week and start a new one
+     * @dev Stake multiple tokens in a single transaction
+     * @param tokenIds Array of token IDs to stake
      */
-    function finalizeWeek() external {
-        uint256 currentWeek = getCurrentWeek();
-        require(currentWeek > _deploymentWeek, "Cannot finalize deployment week");
+    function stakeMultipleTokens(uint256[] calldata tokenIds) external nonReentrant {
+        require(tokenIds.length > 0, "No tokens to stake");
+        require(tokenIds.length <= 20, "Too many tokens in single transaction"); // Prevent gas limit issues
 
-        uint256 weekToFinalize = currentWeek - 1;
-        require(_weeklyRewardPool[weekToFinalize] == 0, "Week already finalized");
+        // Update global reward state once
+        _rewardPerTokenStored = rewardPerToken();
+        _lastUpdateTime = block.timestamp;
 
-        // Snapshot the previous week's data
-        _weeklyRewardPool[weekToFinalize] = _currentWeeklyRewards;
-        _weeklyStakedCount[weekToFinalize] = _totalStakedTokens;
+        uint256 newlyStaked = 0;
 
-        // Mark all currently staked tokens as staked during that week
-        for (uint256 i = 0; i < totalSupply(); i++) {
-            uint256 tokenId = tokenByIndex(i);
-            if (_stakedTokens[tokenId].owner != address(0)) {
-                _tokenStakedDuringWeek[weekToFinalize][tokenId] = true;
-            }
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            uint256 tokenId = tokenIds[i];
+
+            require(ownerOf(tokenId) == msg.sender, "Not the token owner");
+            require(_stakedTokens[tokenId].owner == address(0), "Token already staked");
+
+            // Transfer token to this contract
+            _transfer(msg.sender, address(this), tokenId);
+
+            // Record staking information
+            _stakedTokens[tokenId] =
+                StakeInfo({owner: msg.sender, stakedSince: block.timestamp, lastRewardsClaimed: block.timestamp});
+
+            _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
+            newlyStaked++;
+
+            emit TokenStaked(msg.sender, tokenId);
         }
 
-        emit WeeklyEpochFinalized(weekToFinalize, _currentWeeklyRewards, _totalStakedTokens);
+        _totalStakedSupply += newlyStaked;
 
-        // Reset for new week
-        _currentWeeklyRewards = 0;
+        // If this brings the first stakers and we have pending rewards, start distributing
+        if (_totalStakedSupply == newlyStaked && _pendingRewards > 0) {
+            _addRewards(_pendingRewards);
+            _pendingRewards = 0;
+        }
     }
 
     /**
-     * @dev Claim reward for a specific week for a token
+     * @dev Unstake multiple tokens in a single transaction
+     * @param tokenIds Array of token IDs to unstake
      */
-    function claimWeeklyReward(uint256 tokenId, uint256 week) external nonReentrant {
-        require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
+    function unstakeMultipleTokens(uint256[] calldata tokenIds) external nonReentrant {
+        require(tokenIds.length > 0, "No tokens to unstake");
+        require(tokenIds.length <= 20, "Too many tokens in single transaction"); // Prevent gas limit issues
 
-        // Validation checks
-        require(week < getCurrentWeek(), "Cannot claim current or future week");
-        require(_weeklyRewardPool[week] > 0, "Week not finalized or no rewards");
-        require(!_hasClaimedWeek[week][tokenId], "Already claimed for this week");
-        require(_tokenStakedDuringWeek[week][tokenId], "Token not staked during this week");
+        // Update global reward state once
+        _rewardPerTokenStored = rewardPerToken();
+        _lastUpdateTime = block.timestamp;
 
-        // Calculate reward for this week
-        uint256 weekReward = _weeklyRewardPool[week] / _weeklyStakedCount[week];
-
-        // Mark as claimed
-        _hasClaimedWeek[week][tokenId] = true;
-
-        // Transfer reward
-        (bool success,) = msg.sender.call{value: weekReward}("");
-        require(success, "Transfer failed");
-
-        emit WeeklyRewardClaimed(msg.sender, tokenId, week, weekReward);
-    }
-
-    /**
-     * @dev Claim rewards for all claimable weeks for a token
-     */
-    function claimAllWeeklyRewards(uint256 tokenId) external nonReentrant {
-        require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
-
-        uint256 currentWeek = getCurrentWeek();
         uint256 totalRewards = 0;
+        uint256 unstaked = 0;
 
-        for (uint256 week = _deploymentWeek; week < currentWeek; week++) {
-            if (_weeklyRewardPool[week] > 0 && _tokenStakedDuringWeek[week][tokenId] && !_hasClaimedWeek[week][tokenId])
-            {
-                uint256 weekReward = _weeklyRewardPool[week] / _weeklyStakedCount[week];
-                totalRewards += weekReward;
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            uint256 tokenId = tokenIds[i];
 
-                // Mark as claimed
-                _hasClaimedWeek[week][tokenId] = true;
+            require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
+            require(
+                block.timestamp >= _stakedTokens[tokenId].stakedSince + _minimumStakingPeriod,
+                "Minimum staking period not reached"
+            );
 
-                emit WeeklyRewardClaimed(msg.sender, tokenId, week, weekReward);
+            // Update and calculate rewards for this token
+            _rewards[tokenId] = earned(tokenId);
+            uint256 reward = _rewards[tokenId];
+
+            if (reward > 0) {
+                _rewards[tokenId] = 0;
+                totalRewards += reward;
+                emit RewardClaimed(msg.sender, tokenId, reward);
             }
+
+            // Transfer token back to owner
+            _transfer(address(this), msg.sender, tokenId);
+
+            // Clear staking information
+            delete _stakedTokens[tokenId];
+            delete _userRewardPerTokenPaid[tokenId];
+
+            unstaked++;
+            emit TokenUnstaked(msg.sender, tokenId);
         }
 
-        require(totalRewards > 0, "No rewards to claim");
+        _totalStakedSupply -= unstaked;
 
-        // Transfer total rewards
-        (bool success,) = msg.sender.call{value: totalRewards}("");
-        require(success, "Transfer failed");
+        // Transfer all accumulated rewards in one transaction
+        if (totalRewards > 0) {
+            (bool success,) = msg.sender.call{value: totalRewards}("");
+            require(success, "Reward transfer failed");
+        }
     }
 
     /**
-     * @dev Get claimable weeks count and total amount for a token
+     * @dev Claim rewards for a specific token
      */
-    function getClaimableRewardsInfo(uint256 tokenId) external view returns (uint256 weekCount, uint256 totalAmount) {
-        require(_stakedTokens[tokenId].owner != address(0), "Token not staked");
+    function claimReward(uint256 tokenId) external nonReentrant updateReward(tokenId) {
+        require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
 
-        uint256 currentWeek = getCurrentWeek();
-        uint256 count = 0;
-        uint256 total = 0;
+        uint256 reward = _rewards[tokenId];
+        require(reward > 0, "No rewards to claim");
 
-        for (uint256 week = _deploymentWeek; week < currentWeek; week++) {
-            if (_weeklyRewardPool[week] > 0 && _tokenStakedDuringWeek[week][tokenId] && !_hasClaimedWeek[week][tokenId])
-            {
-                count++;
-                total += _weeklyRewardPool[week] / _weeklyStakedCount[week];
-            }
-        }
+        _rewards[tokenId] = 0;
+        _stakedTokens[tokenId].lastRewardsClaimed = block.timestamp;
 
-        return (count, total);
+        (bool success,) = msg.sender.call{value: reward}("");
+        require(success, "Reward transfer failed");
+
+        emit RewardClaimed(msg.sender, tokenId, reward);
     }
 
     /**
-     * @dev Get reward amount for a specific week and token
+     * @dev Claim rewards for multiple tokens
      */
-    function getWeekReward(uint256 tokenId, uint256 week) external view returns (uint256) {
-        if (_weeklyRewardPool[week] == 0 || !_tokenStakedDuringWeek[week][tokenId] || _hasClaimedWeek[week][tokenId]) {
+    function claimMultipleRewards(uint256[] calldata tokenIds) external nonReentrant {
+        uint256 totalReward = 0;
+
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            uint256 tokenId = tokenIds[i];
+            require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
+
+            // Update rewards for this token
+            _rewardPerTokenStored = rewardPerToken();
+            _lastUpdateTime = block.timestamp;
+
+            if (_stakedTokens[tokenId].owner != address(0)) {
+                _rewards[tokenId] = earned(tokenId);
+                _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
+            }
+
+            uint256 reward = _rewards[tokenId];
+            if (reward > 0) {
+                _rewards[tokenId] = 0;
+                _stakedTokens[tokenId].lastRewardsClaimed = block.timestamp;
+                totalReward += reward;
+                emit RewardClaimed(msg.sender, tokenId, reward);
+            }
+        }
+
+        require(totalReward > 0, "No rewards to claim");
+
+        (bool success,) = msg.sender.call{value: totalReward}("");
+        require(success, "Reward transfer failed");
+    }
+
+    /**
+     * @dev Get current reward rate (ETH per second distributed to all stakers)
+     */
+    function getCurrentRewardRate() external view returns (uint256) {
+        return _rewardRate;
+    }
+
+    /**
+     * @dev Get total staked supply
+     */
+    function getTotalStakedSupply() external view returns (uint256) {
+        return _totalStakedSupply;
+    }
+
+    /**
+     * @dev Check if token is staked
+     */
+    function isTokenStaked(uint256 tokenId) external view returns (bool) {
+        return _stakedTokens[tokenId].owner != address(0);
+    }
+
+    /**
+     * @dev Get staking information for a token
+     */
+    function getStakingInfo(uint256 tokenId)
+        external
+        view
+        returns (address owner, uint256 stakedSince, uint256 lastRewardsClaimed)
+    {
+        StakeInfo memory info = _stakedTokens[tokenId];
+        return (info.owner, info.stakedSince, info.lastRewardsClaimed);
+    }
+
+    /**
+     * @dev Get estimated APR for staking (approximate, based on recent reward rate)
+     */
+    function getEstimatedAPR() external view returns (uint256) {
+        if (_totalStakedSupply == 0 || address(this).balance == 0) {
             return 0;
         }
 
-        return _weeklyRewardPool[week] / _weeklyStakedCount[week];
+        // Annual rewards at current rate
+        uint256 annualRewards = _rewardRate * 365 days;
+
+        // Total value staked (approximate as current contract balance / 2)
+        uint256 totalStakedValue = address(this).balance / 2;
+
+        if (totalStakedValue == 0) {
+            return 0;
+        }
+
+        // APR = (annual rewards / total staked value) * 100
+        return (annualRewards * 10000) / totalStakedValue; // Return in basis points
     }
 
-    /**
-     * @dev Get current weekly rewards accumulating
-     */
-    function getCurrentWeeklyRewards() external view returns (uint256) {
-        return _currentWeeklyRewards;
-    }
-
-    /**
-     * @dev Get week info
-     */
-    function getWeekInfo(uint256 week) external view returns (uint256 rewards, uint256 stakedCount) {
-        return (_weeklyRewardPool[week], _weeklyStakedCount[week]);
-    }
-
-    /**
-     * @dev Check if token was staked during a specific week
-     */
-    function tokenStakedDuringWeek(uint256 week, uint256 tokenId) external view returns (bool) {
-        return _tokenStakedDuringWeek[week][tokenId];
-    }
-
-    /**
-     * @dev Check if token has claimed rewards for a specific week
-     */
-    function hasClaimedWeek(uint256 week, uint256 tokenId) external view returns (bool) {
-        return _hasClaimedWeek[week][tokenId];
-    }
-
-    // ===== ALL OTHER EXISTING FUNCTIONS (same as before) =====
+    // ===== EXISTING FUNCTIONS (updated to remove epoch dependencies) =====
 
     function isFounder(address account) external view returns (bool) {
         return balanceOf(account) > 0;
@@ -398,23 +516,6 @@ contract FounderNFT is
 
     function getSalesRedistributionPercentage() external pure returns (uint256) {
         return SALES_REDISTRIBUTION_PERCENTAGE;
-    }
-
-    function isTokenStaked(uint256 tokenId) external view returns (bool) {
-        return _stakedTokens[tokenId].owner != address(0);
-    }
-
-    function getStakingInfo(uint256 tokenId)
-        external
-        view
-        returns (address owner, uint256 stakedSince, uint256 lastRewardsClaimed)
-    {
-        StakeInfo memory info = _stakedTokens[tokenId];
-        return (info.owner, info.stakedSince, info.lastRewardsClaimed);
-    }
-
-    function getTotalStakedTokens() external view returns (uint256) {
-        return _totalStakedTokens;
     }
 
     function getMinimumStakingPeriod() external view returns (uint256) {
@@ -505,11 +606,34 @@ contract FounderNFT is
         return super._update(to, tokenId, auth);
     }
 
-    function withdraw() external onlyRole(ADMIN_ROLE) {
-        uint256 balance = address(this).balance - _currentWeeklyRewards;
-        require(balance > 0, "No funds to withdraw");
+    /**
+     * @dev Emergency function to adjust reward rate (admin only)
+     */
+    function setRewardRate(uint256 newRate) external onlyRole(ADMIN_ROLE) updateReward(0) {
+        uint256 oldRate = _rewardRate;
+        _rewardRate = newRate;
+        emit RewardRateUpdated(oldRate, newRate);
+    }
 
-        (bool success,) = msg.sender.call{value: balance}("");
+    /**
+     * @dev Withdraw excess ETH (excludes staking rewards)
+     */
+    function withdraw() external onlyRole(ADMIN_ROLE) {
+        // Calculate total pending rewards
+        uint256 totalPendingRewards = _pendingRewards;
+
+        // Add up all individual token rewards
+        for (uint256 i = 0; i < totalSupply(); i++) {
+            uint256 tokenId = tokenByIndex(i);
+            if (_stakedTokens[tokenId].owner != address(0)) {
+                totalPendingRewards += earned(tokenId);
+            }
+        }
+
+        uint256 withdrawable = address(this).balance - totalPendingRewards;
+        require(withdrawable > 0, "No withdrawable funds");
+
+        (bool success,) = msg.sender.call{value: withdrawable}("");
         require(success, "Transfer failed");
     }
 

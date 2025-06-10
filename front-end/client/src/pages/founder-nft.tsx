@@ -23,16 +23,16 @@ import {
 import gsap from "gsap";
 import founderNftVideo from "../assets/videos/FounderNFT.mp4";
 
-export default function FounderNFT () {
+export default function FounderNFT() {
   const nftImageRef = useRef<HTMLDivElement>(null);
   const textContentRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [quantity, setQuantity] = useState(1);
   const [gasEstimate, setGasEstimate] = useState<string>("0.005");
-  
+
   const { isConnected, connect } = useWallet();
   const { toast } = useToast();
-  
+
   // Use our ethers.js hook
   const {
     price,
@@ -100,22 +100,22 @@ export default function FounderNFT () {
   }, []);
 
   // Update gas estimate when quantity changes
-/*   useEffect(() => {
-    const updateGasEstimate = async () => {
-      if (isContractReady && quantity > 0) {
-        try {
-          const estimate = await estimateGas(quantity);
-          if (estimate) {
-            setGasEstimate(estimate.gasCost);
+  /*   useEffect(() => {
+      const updateGasEstimate = async () => {
+        if (isContractReady && quantity > 0) {
+          try {
+            const estimate = await estimateGas(quantity);
+            if (estimate) {
+              setGasEstimate(estimate.gasCost);
+            }
+          } catch (error) {
+            console.error("Failed to estimate gas:", error);
           }
-        } catch (error) {
-          console.error("Failed to estimate gas:", error);
         }
-      }
-    }; 
-
-    updateGasEstimate();
-  }, [quantity, isContractReady, estimateGas]);*/
+      }; 
+  
+      updateGasEstimate();
+    }, [quantity, isContractReady, estimateGas]);*/
 
   // Show toast when mint state changes
   useEffect(() => {
@@ -147,18 +147,9 @@ export default function FounderNFT () {
 
   const handleMint = async () => {
     if (!isConnected) {
-      try {
-        await connect();
-        return;
-      } catch (error) {
-        toast({
-          title: "Wallet Connection Failed",
-          description: "Please try connecting your wallet again.",
-          variant: "destructive",
-        });
-        return;
-      }
+      return handleConnect();
     }
+
 
     if (!isContractReady) {
       toast({
@@ -172,17 +163,33 @@ export default function FounderNFT () {
     resetMintState();
     await mintMultiple(quantity);
 
-/*     try {
-      const debugResult = await debugMintMultiple(quantity);
-      console.log('Debug result:', debugResult);
-      if (!debugResult.error) {
-         resetMintState();
-      await mintMultiple(quantity);
-      }
-    } catch (error: any) {
-      // Error handling is done in the hook and useEffect above
-      console.error("Mint error:", error);
-    } */
+    /*     try {
+          const debugResult = await debugMintMultiple(quantity);
+          console.log('Debug result:', debugResult);
+          if (!debugResult.error) {
+             resetMintState();
+          await mintMultiple(quantity);
+          }
+        } catch (error: any) {
+          // Error handling is done in the hook and useEffect above
+          console.error("Mint error:", error);
+        } */
+  };
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+      toast({
+        title: "Wallet Connected! 🎉",
+        description: "You can now mint Founder NFTs.",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: "Please try connecting your wallet again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Calculate supply percentage
@@ -190,7 +197,7 @@ export default function FounderNFT () {
 
   // Calculate total cost
   const totalMintCost = parseFloat(price) * quantity;
-  const totalCostWithGas = totalMintCost+ parseFloat(gasEstimate);
+  const totalCostWithGas = totalMintCost + parseFloat(gasEstimate);
 
   return (
     <section className="w-full py-16 md:py-24 lg:py-28 bg-white dark:bg-[#111827] text-black dark:text-white">
@@ -262,14 +269,14 @@ export default function FounderNFT () {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white dark:bg-[#1a1e31] p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-md">
                 <div className="text-sm text-gray-500 dark:text-gray-300">
-                  Supply
+                  Minted
                 </div>
                 <div className="text-xl font-bold text-black dark:text-white">
                   {contractLoading ? "Loading..." : `${totalSupply} / ${maxSupply}`}
                 </div>
-                <Progress 
-                  value={supplyPercentage} 
-                  className="h-1.5 mt-2 bg-[#8A63D2]/50" 
+                <Progress
+                  value={supplyPercentage}
+                  className="h-1.5 mt-2 bg-[#8A63D2]/50"
                 />
               </div>
               <div className="bg-white dark:bg-[#1a1e31] p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-md">
@@ -363,7 +370,7 @@ export default function FounderNFT () {
                       x{quantity}
                     </span>
                   </div>
-{/*                   <div className="flex justify-between text-sm">
+                  {/*                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600 dark:text-gray-300">
                       Estimated Gas Fee
                     </span>
@@ -386,13 +393,12 @@ export default function FounderNFT () {
                 {/* Transaction Status */}
                 {mintState.status !== 'idle' && (
                   <div
-                    className={`p-3 rounded-md ${
-                      mintState.status === "pending"
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200"
-                        : mintState.status === "success"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200"
-                          : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200"
-                    }`}
+                    className={`p-3 rounded-md ${mintState.status === "pending"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200"
+                      : mintState.status === "success"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200"
+                      }`}
                   >
                     <div className="flex items-center">
                       {mintState.status === "pending" && (
@@ -430,12 +436,12 @@ export default function FounderNFT () {
 
               <CardFooter>
                 <Button
-                  onClick={handleMint}
+                  onClick={!isConnected ? handleConnect : handleMint}
                   className="w-[30%] mx-auto bg-[#8A63D2] hover:bg-[#7651c0] text-white text-sm rounded-md py-1.5 h-auto shadow-md"
-                  disabled={mintState.isLoading || contractLoading || !isContractReady}
+                  disabled={mintState.isLoading || (isConnected && (contractLoading || !isContractReady))}
                 >
                   {!isConnected
-                    ? "Connect Wallet to Mint"
+                    ? "Connect Wallet"
                     : !isContractReady
                       ? "Loading Contract..."
                       : mintState.isLoading
