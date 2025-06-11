@@ -6,9 +6,9 @@ dataSources:
     name: FounderNFT
     network: anvil # Changed from mainnet to anvil
     source:
-      address: "0xe256cC09C5b20e90f753384CfD3D34f4774711C6" # Update this
+      address: "0xe6570e5A8499326Ce15E3F5641fD2B1FadE90A77" # Update this
       abi: FounderNFT
-      startBlock: 22677005 # Update this to your deployment block
+      startBlock: 22678284 # Update this to your deployment block
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

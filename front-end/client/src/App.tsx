@@ -5,6 +5,7 @@ import { WagmiProvider } from 'wagmi';
 import { localhost, mainnet, polygon } from 'wagmi/chains';
 import { http } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import { Switch, Route, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,6 +29,7 @@ import NotFound from "@/pages/not-found";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { useMediaQuery } from "@/hooks/use-mobile";
+import { env } from 'process';
 
 // Get environment variables with fallback
 const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
@@ -37,6 +39,12 @@ console.log("Wallet Connect Project ID:", projectId ? "Found" : "Not found");
 if (!projectId) {
   console.error("Missing VITE_WALLET_CONNECT_PROJECT_ID. Wallet Connect may not work properly.");
 }
+
+// Create a client for graphql query
+const apolloClient = new ApolloClient({
+  uri: import.meta.env.SUBGRAPH_ENDPOINT, // The Graph Protocol endpoint
+  cache: new InMemoryCache(),
+});
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -162,14 +170,16 @@ function App() {
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider>
-            <WalletProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Router />
-              </TooltipProvider>
-            </WalletProvider>
-          </RainbowKitProvider>
+          <ApolloProvider client={apolloClient}>
+            <RainbowKitProvider>
+              <WalletProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Router />
+                </TooltipProvider>
+              </WalletProvider>
+            </RainbowKitProvider>
+          </ApolloProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </ThemeProvider>
