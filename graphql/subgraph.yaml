@@ -1,0 +1,41 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: FounderNFT
+    network: anvil # Changed from mainnet to anvil
+    source:
+      address: "0xe256cC09C5b20e90f753384CfD3D34f4774711C6" # Update this
+      abi: FounderNFT
+      startBlock: 22677005 # Update this to your deployment block
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - User
+        - FounderNFT
+        - StakeEvent
+        - RewardClaim
+        - PlatformStats
+        - RewardRate
+      abis:
+        - name: FounderNFT
+          file: ./abis/FounderNFT.json
+      eventHandlers:
+        - event: FounderNFTMinted(indexed address,indexed uint256)
+          handler: handleFounderNFTMinted
+        - event: TokenStaked(indexed address,indexed uint256)
+          handler: handleTokenStaked
+        - event: TokenUnstaked(indexed address,indexed uint256)
+          handler: handleTokenUnstaked
+        - event: RewardClaimed(indexed address,indexed uint256,uint256)
+          handler: handleRewardClaimed
+        - event: RewardAdded(uint256,uint256)
+          handler: handleRewardAdded
+        - event: RewardRateUpdated(uint256,uint256)
+          handler: handleRewardRateUpdated
+        - event: ETHReceived(indexed address,uint256)
+          handler: handleETHReceived
+      file: ./src/founder-nft.ts

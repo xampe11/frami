@@ -62,8 +62,8 @@ const anvilMainnetFork = defineChain({
   network: 'anvil-mainnet-fork',
   nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
   rpcUrls: {
-    default: { http: ['http://127.0.0.1:8545'] },
-    public: { http: ['http://127.0.0.1:8545'] },
+    default: { http: ['http://0.0.0.0:8545'] },
+    public: { http: ['http://0.0.0.0:8545'] },
   },
 })
 
@@ -75,7 +75,7 @@ const config = getDefaultConfig({
   transports: {
     [mainnet.id]: http(),
     [polygon.id]: http(),
-    [anvilMainnetFork.id]: http('http://127.0.0.1:8545'),
+    [anvilMainnetFork.id]: http('http://0.0.0.0:8545'),
   },
   ssr: false, // Disable SSR to prevent duplicate initialization
 });
@@ -96,16 +96,16 @@ function Router() {
       if (typeof window !== "undefined") {
         const { gsap } = await import("gsap");
         const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-        
+
         gsap.registerPlugin(ScrollTrigger);
-        
+
         // Return cleanup function to kill all ScrollTriggers when component unmounts
         return () => {
           ScrollTrigger.getAll().forEach(trigger => trigger.kill());
         };
       }
     };
-    
+
     initGsap();
   }, []);
 

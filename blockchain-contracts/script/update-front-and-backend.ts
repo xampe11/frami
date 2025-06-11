@@ -49,12 +49,14 @@ interface ContractConfig {
 
 interface UpdateOptions {
   frontendDir: string;
-  outputDir: string;
+  frontendOutputDir: string;
+  backendDir: string;
+  backendOutputDir: string;
   founderNftDeploymentFile?: string;
   network?: string;
 }
 
-class FrontendUpdater {
+class FrontAndBackendUpdater {
   private hre: HardhatRuntimeEnvironment;
   private options: UpdateOptions;
 
@@ -88,7 +90,9 @@ class FrontendUpdater {
 
       console.log("\n✅ Frontend update completed successfully!");
       console.log("\nGenerated files:");
-      console.log(`📁 ${this.options.frontendDir}/${this.options.outputDir}/`);
+      console.log(
+        `📁 ${this.options.frontendDir}/${this.options.frontendOutputDir}/`
+      );
       console.log("  ├── config.ts");
       console.log("  ├── contracts.json");
       console.log("  ├── addresses.ts");
@@ -247,7 +251,7 @@ class FrontendUpdater {
 
     const outputPath = path.join(
       this.options.frontendDir,
-      this.options.outputDir
+      this.options.frontendOutputDir
     );
     await fs.ensureDir(outputPath);
 
@@ -271,12 +275,18 @@ class FrontendUpdater {
   private async copyContractABIs(): Promise<void> {
     console.log("📋 Copying contract ABIs...");
 
-    const abiOutputPath = path.join(
+    const backendAbiOutputPath = path.join(
+      this.options.backendDir,
+      this.options.backendOutputDir
+    );
+    await fs.ensureDir(backendAbiOutputPath);
+
+    const frontendAbiOutputPath = path.join(
       this.options.frontendDir,
-      this.options.outputDir,
+      this.options.frontendOutputDir,
       "abis"
     );
-    await fs.ensureDir(abiOutputPath);
+    await fs.ensureDir(frontendAbiOutputPath);
 
     const contracts = [
       "FounderNFT",
@@ -289,11 +299,17 @@ class FrontendUpdater {
       try {
         const abi = await this.loadContractABI(contractName);
         await fs.writeJSON(
-          path.join(abiOutputPath, `${contractName}.json`),
+          path.join(backendAbiOutputPath, `${contractName}.json`),
           abi,
           { spaces: 2 }
         );
-        console.log(`   ✓ Copied ${contractName}.json`);
+        console.log(`   ✓ Copied ${contractName}.json to backend`);
+        await fs.writeJSON(
+          path.join(frontendAbiOutputPath, `${contractName}.json`),
+          abi,
+          { spaces: 2 }
+        );
+        console.log(`   ✓ Copied ${contractName}.json to frontend`);
       } catch (error) {
         console.log(`   ⚠️  ${contractName} ABI not found`);
       }
@@ -338,7 +354,7 @@ class FrontendUpdater {
 
     const typesOutputPath = path.join(
       this.options.frontendDir,
-      this.options.outputDir,
+      this.options.frontendOutputDir,
       "types"
     );
     await fs.ensureDir(typesOutputPath);
@@ -476,7 +492,7 @@ task(
 )
   .addOptionalParam("frontendDir", "Frontend directory path", "../frontend")
   .addOptionalParam(
-    "outputDir",
+    "frontendOutputDir",
     "Output directory within frontend",
     "src/contracts"
   )
@@ -486,9 +502,11 @@ task(
   )
   .addOptionalParam("targetNetwork", "Network to find latest deployment for")
   .setAction(async (taskArgs, hre) => {
-    const updater = new FrontendUpdater(hre, {
+    const updater = new FrontAndBackendUpdater(hre, {
       frontendDir: taskArgs.frontendDir,
-      outputDir: taskArgs.outputDir,
+      frontendOutputDir: taskArgs.frontendOutputDir,
+      backendDir: taskArgs.backendDir,
+      backendOutputDir: taskArgs.backendOutputDir,
       founderNftDeploymentFile: taskArgs.founderNftDeploymentFile,
       network: taskArgs.targetNetwork,
     });
@@ -500,9 +518,11 @@ task(
 async function main() {
   const { network } = require("hardhat");
 
-  const updater = new FrontendUpdater(require("hardhat"), {
+  const updater = new FrontAndBackendUpdater(require("hardhat"), {
     frontendDir: process.env.FRONTEND_DIR || "../frontend",
-    outputDir: process.env.OUTPUT_DIR || "src/contracts",
+    frontendOutputDir: process.env.FRONTEND_OUTPUT_DIR || "src/contracts",
+    backendDir: process.env.BACKEND_DIR || "../backend",
+    backendOutputDir: process.env.BACKEND_OUTPUT_DIR || "abis",
     founderNftDeploymentFile: process.env.DEPLOYMENT_FILE,
     network: process.env.NETWORK || network.name,
   });
@@ -520,4 +540,4 @@ if (require.main === module) {
     });
 }
 
-export { FrontendUpdater };
+export { FrontAndBackendUpdater };

@@ -1,0 +1,103 @@
+type User @entity(immutable: false) {
+  id: Bytes!
+  totalNFTsOwned: Int!
+  totalNFTsStaked: Int!
+  totalRewardsEarned: BigDecimal!
+  totalRewardsClaimed: BigDecimal!
+  nfts: [FounderNFT!]! @derivedFrom(field: "currentOwner")
+  stakingHistory: [StakeEvent!]! @derivedFrom(field: "user")
+  rewardsClaimed: [RewardClaim!]! @derivedFrom(field: "user")
+  firstInteraction: BigInt!
+  lastInteraction: BigInt!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type FounderNFT @entity(immutable: false) {
+  id: Bytes!
+  tokenId: BigInt!
+  currentOwner: User!
+  mintedBy: User!
+  isStaked: Boolean!
+  currentStaker: User
+  stakingSince: BigInt
+  totalRewardsEarned: BigDecimal!
+  totalRewardsClaimed: BigDecimal!
+  stakingHistory: [StakeEvent!]! @derivedFrom(field: "nft")
+  rewardsClaimed: [RewardClaim!]! @derivedFrom(field: "nft")
+  canUnstake: Boolean!
+  nextUnstakeDate: BigInt
+  stakingDuration: BigInt
+  mintedAt: BigInt!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type StakeEvent @entity(immutable: true) {
+  id: Bytes!
+  nft: FounderNFT!
+  user: User!
+  action: StakeAction!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  rewardPerTokenAtTime: BigDecimal
+}
+
+type RewardClaim @entity(immutable: true) {
+  id: Bytes!
+  nft: FounderNFT!
+  user: User!
+  amount: BigDecimal!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+enum StakeAction {
+  STAKE
+  UNSTAKE
+}
+
+type RewardRate @entity(immutable: false) {
+  id: Bytes!
+  oldRate: BigDecimal!
+  newRate: BigDecimal!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type PlatformStats @entity(immutable: false) {
+  id: Bytes!
+  totalNFTsMinted: Int!
+  totalNFTsStaked: Int!
+  totalUsers: Int!
+  totalStakers: Int!
+  totalRewardsDistributed: BigDecimal!
+  currentRewardRate: BigDecimal!
+  totalETHReceived: BigDecimal!
+  lastUpdated: BigInt!
+}
+
+type DailySnapshot @entity(immutable: true) {
+  id: Bytes!
+  date: BigInt!
+  totalStaked: Int!
+  totalStakers: Int!
+  totalUsers: Int!
+  rewardsDistributed: BigDecimal!
+  newStakers: Int!
+  newUsers: Int!
+  averageStakingDuration: BigDecimal!
+  rewardRate: BigDecimal!
+}
+
+type ETHReceived @entity(immutable: true) {
+  id: Bytes!
+  from: Bytes!
+  amount: BigDecimal!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
