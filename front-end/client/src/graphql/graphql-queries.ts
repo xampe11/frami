@@ -15,7 +15,9 @@ export const GET_USER_DASHBOARD = gql`
         id
         tokenId
         isStaked
-        currentStaker
+        currentStaker {
+          id
+        }
         stakingSince
         totalRewardsEarned
         totalRewardsClaimed

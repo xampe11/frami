@@ -3,6 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import fs from "fs-extra";
 import path from "path";
 import glob from "glob";
+import yaml from "js-yaml";
 //import deployment from "../deployments/foundernft-mainnet.json";
 
 interface founderNftDeploymentData {
@@ -88,6 +89,9 @@ class FrontAndBackendUpdater {
       // Generate TypeScript types
       await this.generateTypeScriptTypes(founderNftDeploymentData);
 
+      // Update subgraph configuration
+      await this.updateSubgraphConfig(founderNftDeploymentData);
+
       console.log("\n✅ Frontend update completed successfully!");
       console.log("\nGenerated files:");
       console.log(
@@ -101,6 +105,7 @@ class FrontAndBackendUpdater {
       console.log("  │   └── ERC1967Proxy.json");
       console.log("  └── types/");
       console.log("      └── contracts.ts");
+      console.log("📊 Updated subgraph.yaml with new contract address");
     } catch (error) {
       console.error("❌ Error updating frontend:", error);
       throw error;
@@ -347,6 +352,72 @@ class FrontAndBackendUpdater {
     throw new Error(`ABI not found for contract: ${contractName}`);
   }
 
+  private async updateSubgraphConfig(
+    founderData: founderNftDeploymentData
+  ): Promise<void> {
+    console.log("📊 Updating subgraph configuration...");
+
+    const subgraphPath = path.join(process.cwd(), "../graphql/subgraph.yaml");
+
+    try {
+      // Check if subgraph.yaml exists
+      if (!fs.existsSync(subgraphPath)) {
+        console.log("   ⚠️  subgraph.yaml not found, skipping subgraph update");
+        return;
+      }
+
+      // Read the current subgraph.yaml
+      const subgraphContent = await fs.readFile(subgraphPath, "utf-8");
+
+      // Parse YAML
+      const subgraphConfig = yaml.load(subgraphContent) as any;
+
+      // Update the address in dataSources
+      if (
+        subgraphConfig.dataSources &&
+        Array.isArray(subgraphConfig.dataSources)
+      ) {
+        for (const dataSource of subgraphConfig.dataSources) {
+          if (
+            dataSource.source &&
+            dataSource.source.address &&
+            dataSource.source.startBlock
+          ) {
+            const oldAddress = dataSource.source.address;
+            const oldBlock = dataSource.source.startBlock;
+            dataSource.source.address = founderData.founderNFT.proxy;
+            dataSource.source.startBlock = founderData.blockNumber - 40;
+            console.log(
+              `   ✓ Updated dataSource address from ${oldAddress} to ${founderData.founderNFT.proxy}`
+            );
+            console.log(
+              `   ✓ Updated dataSource startingBlock from ${oldBlock} to ${dataSource.source.address}`
+            );
+          }
+
+          founderData.blockNumber;
+        }
+      } else {
+        console.log("   ⚠️  No dataSources found in subgraph.yaml");
+        return;
+      }
+
+      // Write back the updated YAML
+      const updatedYaml = yaml.dump(subgraphConfig, {
+        indent: 2,
+        lineWidth: -1, // Disable line wrapping
+        noRefs: true,
+        sortKeys: false,
+      });
+
+      await fs.writeFile(subgraphPath, updatedYaml, "utf-8");
+      console.log("   ✓ Updated subgraph.yaml successfully");
+    } catch (error) {
+      console.error("   ❌ Error updating subgraph.yaml:", error);
+      // Don't throw here, just log the error so the rest of the process continues
+    }
+  }
+
   private async generateTypeScriptTypes(
     data: founderNftDeploymentData
   ): Promise<void> {
@@ -414,21 +485,6 @@ export type SupportedNetwork = typeof NETWORK;
 export type SupportedChainId = typeof CHAIN_ID;
 `;
   }
-
-  private generateEnvContent(data: founderNftDeploymentData): string {
-    return `# Contract Addresses - Auto-generated
-# Generated at: ${new Date().toISOString()}
-# Network: ${data.network}
-
-NEXT_PUBLIC_FOUNDER_NFT_ADDRESS=${data.founderNFT.proxy}
-NEXT_PUBLIC_FOUNDER_NFT_IMPLEMENTATION=${data.founderNFT.implementation}
-NEXT_PUBLIC_PLATFORM_REGISTRY_ADDRESS=${data.platformRegistry || ""}
-NEXT_PUBLIC_NETWORK=${data.network}
-NEXT_PUBLIC_CHAIN_ID=${this.getChainId(data.network)}
-NEXT_PUBLIC_BLOCK_NUMBER=${data.blockNumber}
-`;
-  }
-
   private generateTypeScriptContent(data: founderNftDeploymentData): string {
     return `// Auto-generated contract types
 // Generated at: ${new Date().toISOString()}

@@ -25,7 +25,7 @@ remappings = [
 auto_detect_env = true
 # Choose one of the following fork configurations:
 # Option 1: Fork from a public RPC endpoint
-eth_rpc_url = "${ETH_RCP_URL}"
+eth_rpc_url = "https://eth-mainnet.g.alchemy.com/v2/lBQKISpKQ9Psmc1VIYtOdqoKglWFUI4B"
 
 # Option 2: Fork from a local node
 # eth_rpc_url = "http://localhost:8545"

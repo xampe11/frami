@@ -55,6 +55,16 @@ export default function FounderNFTDashboard() {
     isContractReady,
   } = useFounderNFTDashboard();
 
+  console.log('Dashboard Debug:', {
+    isConnected,
+    nftData,
+    stakingData,
+    earningsData,
+    isLoading,
+    error,
+    isContractReady
+  });
+
   const [selectedTab, setSelectedTab] = useState("staking");
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
   const [unstakeModalOpen, setUnstakeModalOpen] = useState(false);
@@ -144,6 +154,13 @@ export default function FounderNFTDashboard() {
         </Card>
       </div>
     );
+  }
+  if (isLoading) {
+    console.log('Still loading...');
+  }
+
+  if (error) {
+    console.log('Error detected:', error);
   }
 
   if (isLoading) {
@@ -297,10 +314,10 @@ export default function FounderNFTDashboard() {
         {/* Transaction Status Alert */}
         {transactionState.status !== "idle" && (
           <Alert className={`mb-6 ${transactionState.status === "pending"
-              ? "border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20"
-              : transactionState.status === "success"
-                ? "border-green-300 bg-green-50 dark:bg-green-900/20"
-                : "border-red-300 bg-red-50 dark:bg-red-900/20"
+            ? "border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20"
+            : transactionState.status === "success"
+              ? "border-green-300 bg-green-50 dark:bg-green-900/20"
+              : "border-red-300 bg-red-50 dark:bg-red-900/20"
             }`}>
             <div className="flex items-center">
               {transactionState.status === "pending" && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
@@ -420,7 +437,7 @@ export default function FounderNFTDashboard() {
                   <div className="flex justify-center">
                     <div className="w-1/2 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 text-center">
                       <p className="text-3xl font-bold text-green-600 mb-2">
-                        {stakedNFTs.length}
+                        {stakingData.totalStaked}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         NFTs Earning

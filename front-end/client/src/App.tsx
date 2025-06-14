@@ -40,9 +40,15 @@ if (!projectId) {
   console.error("Missing VITE_WALLET_CONNECT_PROJECT_ID. Wallet Connect may not work properly.");
 }
 
+
+const subgraphEndpoint = import.meta.env.VITE_SUBGRAPH_ENDPOINT ||
+  'http://localhost:8000/subgraphs/id/QmS4iK7V2vCMcub96XJ1Dif7Kg2YKHhPVZRZB8dbdyF1Tm';
+
+console.log('Using subgraph endpoint:', subgraphEndpoint);
+
 // Create a client for graphql query
 const apolloClient = new ApolloClient({
-  uri: import.meta.env.SUBGRAPH_ENDPOINT, // The Graph Protocol endpoint
+  uri: subgraphEndpoint, // The Graph Protocol endpoint
   cache: new InMemoryCache(),
 });
 
@@ -70,8 +76,8 @@ const anvilMainnetFork = defineChain({
   network: 'anvil-mainnet-fork',
   nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
   rpcUrls: {
-    default: { http: ['http://0.0.0.0:8545'] },
-    public: { http: ['http://0.0.0.0:8545'] },
+    default: { http: ['http://127.0.0.1:8545'] },
+    public: { http: ['http://127.0.0.1:8545'] },
   },
 })
 
@@ -83,7 +89,7 @@ const config = getDefaultConfig({
   transports: {
     [mainnet.id]: http(),
     [polygon.id]: http(),
-    [anvilMainnetFork.id]: http('http://0.0.0.0:8545'),
+    [anvilMainnetFork.id]: http('http://127.0.0.1:8545'),
   },
   ssr: false, // Disable SSR to prevent duplicate initialization
 });
