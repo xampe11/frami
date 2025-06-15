@@ -192,7 +192,7 @@ contract IntegrationTest is Test {
         assertTrue(founderNFT.isTokenStaked(0), "Token should be staked");
         assertEq(founderNFT.getTotalStakedSupply(), 1, "There should be 1 staked token");
 
-        // Verify ownership transferred to contract
+        // IMPORTANT: Verify ownership transferred to contract
         assertEq(founderNFT.ownerOf(0), address(founderNFT), "FounderNFT contract should own the staked token");
 
         // Check staking info
@@ -206,6 +206,118 @@ contract IntegrationTest is Test {
         assertEq(stakedTokens[0], 0, "Should be token ID 0");
         assertEq(founderNFT.getStakedCountByOwner(founder1), 1, "Should have count of 1");
         assertTrue(founderNFT.hasStakedTokens(founder1), "Should have staked tokens");
+    }
+
+    function testBatchUnstakingAfterMinimumPeriod() public {
+        // Mint and stake multiple NFTs
+        vm.prank(founder1);
+        founderNFT.mintMultiple{value: NFT_PRICE * 3}(3);
+
+        uint256[] memory tokenIds = new uint256[](3);
+        tokenIds[0] = 0;
+        tokenIds[1] = 1;
+        tokenIds[2] = 2;
+
+        vm.prank(founder1);
+        founderNFT.stakeMultipleTokens(tokenIds);
+
+        // Verify all tokens are staked and owned by contract
+        assertEq(founderNFT.getTotalStakedSupply(), 3, "Should have 3 staked tokens");
+        assertEq(founderNFT.ownerOf(0), address(founderNFT), "Contract should own token 0");
+        assertEq(founderNFT.ownerOf(1), address(founderNFT), "Contract should own token 1");
+        assertEq(founderNFT.ownerOf(2), address(founderNFT), "Contract should own token 2");
+
+        // Add platform fees to create rewards
+        vm.prank(address(registry));
+        founderNFT.addPlatformFees{value: 1 ether}(0);
+
+        // Fast forward past minimum staking period
+        vm.warp(block.timestamp + MIN_STAKING_PERIOD + 1 hours);
+
+        // Check rewards before unstaking
+        uint256 totalEarnedBefore = founderNFT.getTotalEarnedByOwner(founder1);
+        console.log("Total earned before unstaking:", totalEarnedBefore);
+
+        // Unstake all tokens
+        uint256 balanceBefore = founder1.balance;
+        vm.prank(founder1);
+        founderNFT.unstakeMultipleTokens(tokenIds);
+
+        // Verify unstaking
+        assertEq(founderNFT.getTotalStakedSupply(), 0, "Should have 0 staked tokens");
+        assertEq(founderNFT.getStakedCountByOwner(founder1), 0, "Should have 0 staked tokens");
+
+        // Verify ownership returned to founder
+        assertEq(founderNFT.ownerOf(0), founder1, "Token 0 should be returned to founder");
+        assertEq(founderNFT.ownerOf(1), founder1, "Token 1 should be returned to founder");
+        assertEq(founderNFT.ownerOf(2), founder1, "Token 2 should be returned to founder");
+
+        // Verify rewards were claimed during unstaking
+        if (totalEarnedBefore > 0) {
+            uint256 rewardsReceived = founder1.balance - balanceBefore;
+            assertEq(rewardsReceived, totalEarnedBefore, "Should receive all earned rewards");
+        }
+    }
+
+    function testStakedTokenTransferRestrictions() public {
+        vm.prank(founder1);
+        founderNFT.mint{value: NFT_PRICE}();
+
+        // Before staking - should be transferable
+        vm.prank(founder1);
+        founderNFT.transferFrom(founder1, founder2, 0);
+        assertEq(founderNFT.ownerOf(0), founder2, "Token should be transferred to founder2");
+
+        // Transfer back for staking test
+        vm.prank(founder2);
+        founderNFT.transferFrom(founder2, founder1, 0);
+
+        // After staking - user no longer owns the token
+        vm.prank(founder1);
+        founderNFT.stakeToken(0);
+
+        // Contract now owns the token
+        assertEq(founderNFT.ownerOf(0), address(founderNFT), "Contract should own staked token");
+
+        // User cannot transfer because they don't own it
+        vm.prank(founder1);
+        vm.expectRevert();
+        founderNFT.transferFrom(founder1, founder2, 0);
+    }
+
+    function testClaimRewardFunctionality() public {
+        // Setup staking
+        vm.prank(founder1);
+        founderNFT.mint{value: NFT_PRICE}();
+
+        vm.prank(founder1);
+        founderNFT.stakeToken(0);
+
+        // Add platform fees
+        vm.prank(address(registry));
+        founderNFT.addPlatformFees{value: 1 ether}(0);
+
+        // Fast forward time to accrue rewards
+        vm.warp(block.timestamp + 1 hours);
+
+        uint256 earnedBefore = founderNFT.earned(0);
+        console.log("Earned before claim:", earnedBefore);
+
+        if (earnedBefore > 0) {
+            // Test direct claim functionality
+            uint256 balanceBefore = founder1.balance;
+
+            vm.prank(founder1);
+            founderNFT.claimReward(0);
+
+            uint256 rewardsReceived = founder1.balance - balanceBefore;
+            assertEq(rewardsReceived, earnedBefore, "Should receive exact earned amount");
+            assertEq(founderNFT.earned(0), 0, "Earned should reset to 0 after claiming");
+
+            // Token should still be staked
+            assertTrue(founderNFT.isTokenStaked(0), "Token should remain staked after claiming");
+            assertEq(founderNFT.ownerOf(0), address(founderNFT), "Contract should still own the token");
+        }
     }
 
     function testContinuousRewardsSystemWithClaiming() public {

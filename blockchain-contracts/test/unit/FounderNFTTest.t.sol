@@ -414,8 +414,28 @@ contract FounderNFTTest is Test {
         // Step 5: Claim rewards for user1
         uint256 balanceBefore = user1.balance;
 
+        console.log("=== SIMPLE DEBUG ===");
+        console.log("User1 earned before claim:", founderNFT.earned(0));
+        console.log("User2 earned before claim:", founderNFT.earned(1));
+        console.log("Contract balance:", address(founderNFT).balance);
+        console.log("Total staked supply:", founderNFT.getTotalStakedSupply());
+        console.log("Current reward rate:", founderNFT.getCurrentRewardRate());
+
+        console.log("=== INTERNAL STATE DEBUG ===");
+        console.log("_rewards[0]:", founderNFT.getRewards(0));
+        console.log("_userRewardPerTokenPaid[0]:", founderNFT.getUserRewardPerTokenPaid(0));
+        console.log("_rewardPerTokenStored:", founderNFT.getRewardPerTokenStored());
+        console.log("rewardPerToken():", founderNFT.rewardPerToken());
+        console.log("_lastUpdateTime:", founderNFT.getLastUpdateTime());
+        console.log("block.timestamp:", block.timestamp);
+
         vm.prank(user1);
-        founderNFT.claimReward(0);
+        try founderNFT.claimReward(0) {
+            console.log("Claim succeeded!");
+        } catch {
+            console.log("Claim failed!");
+            console.log("User1 earned after failed claim:", founderNFT.earned(0));
+        }
 
         assertGt(user1.balance - balanceBefore, 0, "User1 should receive rewards");
         assertEq(founderNFT.earned(0), 0, "User1 earned should reset");

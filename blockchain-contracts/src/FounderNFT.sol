@@ -81,13 +81,16 @@ contract FounderNFT is
      * @param tokenId The token ID to update rewards for (0 for global update)
      */
     modifier updateReward(uint256 tokenId) {
-        _rewardPerTokenStored = rewardPerToken();
-        _lastUpdateTime = block.timestamp;
+        uint256 newRewardPerToken = rewardPerToken();
 
         if (tokenId != 0 && _stakedTokens[tokenId].owner != address(0)) {
-            _rewards[tokenId] = earned(tokenId);
-            _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
+            uint256 rewardPerTokenDiff = newRewardPerToken - _userRewardPerTokenPaid[tokenId];
+            _rewards[tokenId] += rewardPerTokenDiff / PRECISION;
+            _userRewardPerTokenPaid[tokenId] = newRewardPerToken;
         }
+
+        _rewardPerTokenStored = newRewardPerToken;
+        _lastUpdateTime = block.timestamp;
         _;
     }
 
@@ -227,9 +230,13 @@ contract FounderNFT is
      * @dev Transfers NFT to contract and starts reward accrual
      * @param tokenId The ID of the token to stake
      */
-    function stakeToken(uint256 tokenId) external nonReentrant updateReward(tokenId) {
+    function stakeToken(uint256 tokenId) external nonReentrant {
         if (ownerOf(tokenId) != msg.sender) revert TokenNotOwned(tokenId, msg.sender);
         if (_stakedTokens[tokenId].owner != address(0)) revert TokenAlreadyStaked(tokenId);
+
+        // Update global reward state FIRST
+        _rewardPerTokenStored = rewardPerToken();
+        _lastUpdateTime = block.timestamp;
 
         _stakeToken(msg.sender, tokenId);
     }
@@ -253,6 +260,9 @@ contract FounderNFT is
 
             if (ownerOf(tokenId) != msg.sender) revert TokenNotOwned(tokenId, msg.sender);
             if (_stakedTokens[tokenId].owner != address(0)) revert TokenAlreadyStaked(tokenId);
+
+            // CRITICAL FIX: Transfer NFT to contract BEFORE updating state
+            _transfer(msg.sender, address(this), tokenId);
 
             _stakeTokenInternal(msg.sender, tokenId);
             unchecked {
@@ -309,9 +319,43 @@ contract FounderNFT is
                 revert MinimumStakingPeriodNotMet(tokenId, _minimumStakingPeriod - timeStaked);
             }
 
-            totalRewards += _unstakeTokenInternal(msg.sender, tokenId);
+            // Calculate and accumulate rewards
+            uint256 reward = earned(tokenId);
+            if (reward > 0) {
+                totalRewards += reward;
+                emit RewardClaimed(msg.sender, tokenId, reward);
+            }
+
+            // Clear staking data before transfer
+            delete _stakedTokens[tokenId];
+            delete _userRewardPerTokenPaid[tokenId];
+            delete _rewards[tokenId];
+
+            // Transfer NFT back to owner
+            _transfer(address(this), msg.sender, tokenId);
+
+            emit TokenUnstaked(msg.sender, tokenId);
             unchecked {
                 ++unstaked;
+                ++i;
+            }
+        }
+
+        // Clean up the user staked tokens array after all unstaking is complete
+        // This prevents array manipulation issues during the loop
+        uint256[] storage userTokens = _userStakedTokens[msg.sender];
+        for (uint256 i = 0; i < length;) {
+            uint256 tokenId = tokenIds[i];
+
+            // Find and remove the token from the array
+            for (uint256 j = 0; j < userTokens.length; j++) {
+                if (userTokens[j] == tokenId) {
+                    // Move last element to this position and pop
+                    userTokens[j] = userTokens[userTokens.length - 1];
+                    userTokens.pop();
+                    delete _userStakedTokenIndex[msg.sender][tokenId];
+                    break;
+                }
             }
             unchecked {
                 ++i;
@@ -330,13 +374,23 @@ contract FounderNFT is
      * @dev NFT remains staked, only rewards are claimed
      * @param tokenId The ID of the token to claim rewards for
      */
-    function claimReward(uint256 tokenId) external nonReentrant updateReward(tokenId) {
+    function claimReward(uint256 tokenId) external nonReentrant {
         if (_stakedTokens[tokenId].owner != msg.sender) revert TokenNotStaked(tokenId);
 
-        uint256 reward = _rewards[tokenId];
+        // Update global reward state
+        uint256 newRewardPerToken = rewardPerToken();
+        _rewardPerTokenStored = newRewardPerToken;
+        _lastUpdateTime = block.timestamp;
+
+        // Calculate earned rewards
+        uint256 rewardPerTokenDiff = newRewardPerToken - _userRewardPerTokenPaid[tokenId];
+        uint256 reward = rewardPerTokenDiff / PRECISION + _rewards[tokenId];
+
         if (reward == 0) revert NoRewardsToClaim();
 
+        // Update user state
         _rewards[tokenId] = 0;
+        _userRewardPerTokenPaid[tokenId] = newRewardPerToken;
         _stakedTokens[tokenId].lastRewardsClaimed = block.timestamp;
 
         _transferRewards(msg.sender, reward);
@@ -559,8 +613,25 @@ contract FounderNFT is
     }
 
     // Additional view functions (getters)
+
     function getCurrentRewardRate() external view returns (uint256) {
         return _rewardRate;
+    }
+
+    function getRewards(uint256 tokenId) external view returns (uint256) {
+        return _rewards[tokenId];
+    }
+
+    function getUserRewardPerTokenPaid(uint256 tokenId) external view returns (uint256) {
+        return _userRewardPerTokenPaid[tokenId];
+    }
+
+    function getRewardPerTokenStored() external view returns (uint256) {
+        return _rewardPerTokenStored;
+    }
+
+    function getLastUpdateTime() external view returns (uint256) {
+        return _lastUpdateTime;
     }
 
     function getTotalStakedSupply() external view returns (uint256) {
@@ -745,6 +816,7 @@ contract FounderNFT is
         _stakedTokens[tokenId] =
             StakeInfo({owner: owner, stakedSince: block.timestamp, lastRewardsClaimed: block.timestamp});
 
+        // CRITICAL: Use the UPDATED _rewardPerTokenStored value
         _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
         _userStakedTokens[owner].push(tokenId);
         _userStakedTokenIndex[owner][tokenId] = _userStakedTokens[owner].length - 1;
@@ -777,9 +849,13 @@ contract FounderNFT is
             emit RewardClaimed(owner, tokenId, reward);
         }
 
-        _transfer(address(this), owner, tokenId);
+        // CRITICAL FIX: Clear staking data BEFORE transferring the NFT
+        // This prevents _update from seeing the token as staked during transfer
         _removeFromUserStakedTokens(owner, tokenId);
         _clearStakingData(tokenId);
+
+        // Now safe to transfer since _stakedTokens[tokenId].owner is now address(0)
+        _transfer(address(this), owner, tokenId);
 
         emit TokenUnstaked(owner, tokenId);
         return reward;
