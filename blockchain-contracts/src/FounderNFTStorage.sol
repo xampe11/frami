@@ -3,8 +3,7 @@ pragma solidity ^0.8.28;
 
 /**
  * @title FounderNFTStorage
- * @dev Storage contract for ModernFounderNFT with continuous reward system
- * @notice Replaces weekly epoch system with Synthetix-style continuous rewards
+ * @dev Storage contract for FounderNFT with continuous reward system
  */
 contract FounderNFTStorage {
     address internal _platformRegistry;
@@ -29,8 +28,10 @@ contract FounderNFTStorage {
 
     // Token staking information
     mapping(uint256 => StakeInfo) internal _stakedTokens;
+    mapping(address => uint256[]) internal _userStakedTokens;
+    mapping(address => mapping(uint256 => uint256)) internal _userStakedTokenIndex;
 
-    // Core reward system variables (Synthetix pattern)
+    // Core reward system variables
     uint256 internal _rewardRate; // ETH per second distributed to all stakers
     uint256 internal _lastUpdateTime; // Last time rewards were updated
     uint256 internal _rewardPerTokenStored; // Accumulated reward per token

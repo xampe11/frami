@@ -9,7 +9,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "anvil": "anvil --fork-url https://eth-mainnet.g.alchemy.com/v2/lBQKISpKQ9Psmc1VIYtOdqoKglWFUI4B --host 0.0.0.0 --port 8545 --chain-id 31337"
+    "anvil": "anvil --fork-url https://eth-mainnet.g.alchemy.com/v2/lBQKISpKQ9Psmc1VIYtOdqoKglWFUI4B --host 0.0.0.0 --port 8545 --chain-id 31337",
+    "deploy-initial": "forge script script/DeployInitialSetup.s.sol --rpc-url http://0.0.0.0:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast",
+    "deploy-founder": "forge script script/DeployFounderNFT.s.sol --rpc-url http://0.0.0.0:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast"
   },
   "keywords": [],
   "author": "",

@@ -97,6 +97,9 @@ contract DeployFounderNFT is Script {
         // Log deployment summary
         logDeploymentSummary(address(implementation), address(proxy), config);
 
+        //Update .env file
+        updateEnvVariable("FOUNDER_NFT_PROXY_ADDRESS", addressToString(address(proxy)));
+
         // Save deployment addresses to file
         saveDeploymentAddresses(address(implementation), address(proxy));
 
@@ -215,6 +218,70 @@ contract DeployFounderNFT is Script {
         if (chainId == 31337) return "localhost";
 
         return string(abi.encodePacked("chain-", vm.toString(chainId)));
+    }
+
+    function updateEnvVariable(string memory key, string memory value) internal {
+        // Read the current .env file
+        string memory currentEnv = vm.readFile(".env");
+
+        // Split into lines
+        string[] memory lines = vm.split(currentEnv, "\n");
+
+        string memory updatedEnv = "";
+        bool variableFound = false;
+        string memory targetPrefix = string.concat(key, "=");
+
+        // Process each line
+        for (uint256 i = 0; i < lines.length; i++) {
+            if (startsWith(lines[i], targetPrefix)) {
+                // Replace the line with new value
+                updatedEnv = string.concat(updatedEnv, key, "=", value, "\n");
+                variableFound = true;
+            } else {
+                // Keep the existing line
+                updatedEnv = string.concat(updatedEnv, lines[i], "\n");
+            }
+        }
+
+        // If variable wasn't found, append it
+        if (!variableFound) {
+            updatedEnv = string.concat(updatedEnv, key, "=", value, "\n");
+        }
+
+        // Write the updated content back to .env
+        vm.writeFile(".env", updatedEnv);
+    }
+
+    function startsWith(string memory str, string memory prefix) internal pure returns (bool) {
+        bytes memory strBytes = bytes(str);
+        bytes memory prefixBytes = bytes(prefix);
+
+        if (prefixBytes.length > strBytes.length) {
+            return false;
+        }
+
+        for (uint256 i = 0; i < prefixBytes.length; i++) {
+            if (strBytes[i] != prefixBytes[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function addressToString(address addr) internal pure returns (string memory) {
+        bytes32 value = bytes32(uint256(uint160(addr)));
+        bytes memory alphabet = "0123456789abcdef";
+        bytes memory str = new bytes(42);
+        str[0] = "0";
+        str[1] = "x";
+
+        for (uint256 i = 0; i < 20; i++) {
+            str[2 + i * 2] = alphabet[uint8(value[i + 12] >> 4)];
+            str[3 + i * 2] = alphabet[uint8(value[i + 12] & 0x0f)];
+        }
+
+        return string(str);
     }
 }
 

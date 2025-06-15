@@ -25,6 +25,7 @@ type FounderNFT @entity(immutable: false) {
   totalRewardsClaimed: BigDecimal!
   stakingHistory: [StakeEvent!]! @derivedFrom(field: "nft")
   rewardsClaimed: [RewardClaim!]! @derivedFrom(field: "nft")
+  lastRewardUpdate: BigInt!
   canUnstake: Boolean!
   nextUnstakeDate: BigInt
   stakingDuration: BigInt

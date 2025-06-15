@@ -8,7 +8,7 @@ dataSources:
     source:
       address: '0x4B651dcC3C2e4d2Fa6feF95D73eaEC48432b5d6a'
       abi: FounderNFT
-      startBlock: 22690939
+      startBlock: 22704200
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

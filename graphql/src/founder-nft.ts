@@ -7,6 +7,7 @@ import {
   RewardRateUpdated,
   RewardAdded,
   ETHReceived,
+  FounderNFT as FounderNFTContract,
 } from "../generated/FounderNFT/FounderNFT";
 import {
   User,
@@ -65,6 +66,38 @@ function getOrCreatePlatformStats(timestamp: BigInt): PlatformStats {
   return stats as PlatformStats;
 }
 
+function updateRewardsFromContract(
+  nftId: Bytes,
+  tokenId: BigInt,
+  contractAddress: Address,
+  timestamp: BigInt
+): void {
+  // Load the NFT entity
+  let nft = FounderNFT.load(nftId);
+  if (nft == null) return;
+
+  // Only update if the token is currently staked
+  if (!nft.isStaked) return;
+
+  // Bind to the contract and get current earned rewards
+  let contract = FounderNFTContract.bind(contractAddress);
+  let earnedResult = contract.try_earned(tokenId);
+
+  if (!earnedResult.reverted) {
+    // Convert BigInt to BigDecimal (assuming 18 decimals)
+    let earnedAmount = toDecimal(earnedResult.value);
+
+    // Update the total rewards earned with real-time value from contract
+    nft.totalRewardsEarned = earnedAmount;
+    nft.lastRewardUpdate = timestamp;
+    nft.updatedAt = timestamp;
+    nft.save();
+
+    // Log for debugging (optional)
+    // log.info("Updated rewards for token {}: {} ETH", [tokenId.toString(), earnedAmount.toString()]);
+  }
+}
+
 export function handleFounderNFTMinted(event: FounderNFTMinted): void {
   let tokenId = event.params.tokenId;
   let to = event.params.to;
@@ -99,6 +132,7 @@ export function handleFounderNFTMinted(event: FounderNFTMinted): void {
   nft.stakingSince = null;
   nft.totalRewardsEarned = ZERO_BD;
   nft.totalRewardsClaimed = ZERO_BD;
+  nft.lastRewardUpdate = timestamp;
   nft.canUnstake = false;
   nft.nextUnstakeDate = null;
   nft.stakingDuration = ZERO_BI;
@@ -124,6 +158,9 @@ export function handleTokenStaked(event: TokenStaked): void {
   nft.stakingSince = timestamp;
   nft.canUnstake = false;
   nft.updatedAt = timestamp;
+  nft.lastRewardUpdate = timestamp;
+  //Update rewards from contract after staking
+  updateRewardsFromContract(nftId, tokenId, event.address, timestamp);
   nft.save();
 
   // Update user
@@ -159,6 +196,9 @@ export function handleTokenUnstaked(event: TokenUnstaked): void {
   let nft = FounderNFT.load(nftId);
   if (nft == null) return;
 
+  //Update rewards from contract before unstaking
+  updateRewardsFromContract(nftId, tokenId, event.address, timestamp);
+
   // Calculate staking duration - FIXED VERSION
   let stakingSinceValue = nft.stakingSince;
   if (stakingSinceValue !== null) {
@@ -174,6 +214,7 @@ export function handleTokenUnstaked(event: TokenUnstaked): void {
   nft.canUnstake = false;
   nft.nextUnstakeDate = null;
   nft.updatedAt = timestamp;
+  nft.lastRewardUpdate = timestamp;
   nft.save();
 
   // Update user
@@ -215,6 +256,11 @@ export function handleRewardClaimed(event: RewardClaimed): void {
   // Update NFT rewards
   nft.totalRewardsClaimed = nft.totalRewardsClaimed.plus(rewardAmount);
   nft.updatedAt = timestamp;
+  nft.lastRewardUpdate = timestamp;
+  // Update current earned rewards from contract
+  // After claiming, the earned amount should be much lower or zero
+  updateRewardsFromContract(nftId, tokenId, event.address, timestamp);
+
   nft.save();
 
   // Update user rewards

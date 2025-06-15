@@ -1,18 +1,47 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.28;
+pragma solidity 0.8.28;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+// 1. Imports (explicit imports following modern practices)
+import {ERC721EnumerableUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {FounderNFTStorage} from "./FounderNFTStorage.sol";
+
+// 2. Errors (custom errors following ERC-6093 specification)
+error SaleNotActive();
+error MaxSupplyReached();
+error InsufficientPayment(uint256 required, uint256 provided);
+error InvalidQuantity(uint256 provided, uint256 max);
+error TokenNotOwned(uint256 tokenId, address caller);
+error TokenAlreadyStaked(uint256 tokenId);
+error TokenNotStaked(uint256 tokenId);
+error MinimumStakingPeriodNotMet(uint256 tokenId, uint256 timeRemaining);
+error NoRewardsToAdd();
+error NoRewardsToClaim();
+error NoStakedTokens();
+error TooManyTokensInTransaction(uint256 provided, uint256 max);
+error TransferFailed();
+error InvalidOwnerAddress();
+error InvalidPercentage(uint256 provided);
+error NoSalesProceedsToWithdraw();
+error NoWithdrawableFunds();
+error CannotTransferStakedToken(uint256 tokenId);
+
+// 3. Interfaces
+// None required for this contract
+
+// 4. Libraries
+// Using libraries declared in contract
 
 /**
  * @title ModernFounderNFT
- * @dev NFT for platform founders with continuous reward accrual system
- * @notice Implements Synthetix-style staking rewards with automatic distribution
+ * @author Frami Development Team
+ * @notice NFT for platform founders with continuous reward accrual system
+ * @dev Implements Synthetix-style staking rewards with automatic distribution
  */
 contract FounderNFT is
     Initializable,
@@ -23,17 +52,21 @@ contract FounderNFT is
     ReentrancyGuardUpgradeable,
     UUPSUpgradeable
 {
-    // Access control roles
+    // 1. Type declarations
+    // (Already defined in FounderNFTStorage)
+
+    // 2. State variables (constants and immutables)
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant PLATFORM_ROLE = keccak256("PLATFORM_ROLE");
 
-    // Reward system constants
     uint256 public constant SALES_REDISTRIBUTION_PERCENTAGE = 1000; // 10%
     uint256 public constant BASIS_POINTS = 10000; // 100%
     uint256 public constant PRECISION = 1e18; // For reward calculations
+    uint256 private constant REWARD_DURATION = 604800; // 7 days (7 * 24 * 60 * 60)
+    uint256 private constant MAX_BATCH_SIZE = 20; // Maximum tokens per batch operation
 
-    // Events
+    // 3. Events
     event FounderNFTMinted(address indexed to, uint256 indexed tokenId);
     event RewardAdded(uint256 amount, uint256 newRewardRate);
     event RewardClaimed(address indexed user, uint256 indexed tokenId, uint256 amount);
@@ -42,16 +75,50 @@ contract FounderNFT is
     event RewardRateUpdated(uint256 oldRate, uint256 newRate);
     event ETHReceived(address indexed from, uint256 amount);
 
+    // 4. Modifiers
     /**
-     * @dev Prevents initialization function from being called twice
+     * @dev Updates rewards before any staking operation
+     * @param tokenId The token ID to update rewards for (0 for global update)
      */
+    modifier updateReward(uint256 tokenId) {
+        _rewardPerTokenStored = rewardPerToken();
+        _lastUpdateTime = block.timestamp;
+
+        if (tokenId != 0 && _stakedTokens[tokenId].owner != address(0)) {
+            _rewards[tokenId] = earned(tokenId);
+            _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
+        }
+        _;
+    }
+
+    // 5. Functions
+
+    // Constructor
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
+    // Receive function
     /**
-     * @dev Initializes the contract
+     * @dev Function to receive ETH
+     */
+    receive() external payable {
+        emit ETHReceived(msg.sender, msg.value);
+    }
+
+    // External functions
+
+    /**
+     * @notice Initializes the FounderNFT contract
+     * @dev Sets up all contract parameters and access controls
+     * @param initialOwner The initial owner of the contract
+     * @param platformRegistry The platform registry address
+     * @param maxSupply Maximum number of NFTs that can be minted
+     * @param price Price per NFT in wei
+     * @param platformFeeDistributionPercentage Percentage of platform fees distributed
+     * @param daoTokenAllocationPercentage Percentage allocated to DAO tokens
+     * @param minimumStakingPeriod Minimum time tokens must be staked
      */
     function initialize(
         address initialOwner,
@@ -90,28 +157,270 @@ contract FounderNFT is
     }
 
     /**
-     * @dev Modifier to update rewards before any staking operation
+     * @notice Mint a single Founder NFT
+     * @dev Automatically distributes 10% of payment to current stakers
      */
-    modifier updateReward(uint256 tokenId) {
+    function mint() external payable nonReentrant {
+        if (!_saleActive) revert SaleNotActive();
+        if (totalSupply() >= _maxSupply) revert MaxSupplyReached();
+        if (msg.value < _price) revert InsufficientPayment(_price, msg.value);
+
+        _processMintPayment(msg.value);
+        _mintToken(msg.sender);
+    }
+
+    /**
+     * @notice Mint multiple Founder NFTs in a single transaction
+     * @dev More gas efficient than multiple single mints
+     * @param quantity Number of NFTs to mint (max 10)
+     */
+    function mintMultiple(uint256 quantity) external payable nonReentrant {
+        if (!_saleActive) revert SaleNotActive();
+        if (quantity == 0 || quantity > 10) revert InvalidQuantity(quantity, 10);
+        if (totalSupply() + quantity > _maxSupply) revert MaxSupplyReached();
+
+        uint256 totalCost = _price * quantity;
+        if (msg.value < totalCost) revert InsufficientPayment(totalCost, msg.value);
+
+        _processMintPayment(msg.value);
+
+        for (uint256 i = 0; i < quantity;) {
+            _mintToken(msg.sender);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /**
+     * @notice Admin function to batch mint NFTs to multiple recipients
+     * @dev No payment required, admin only
+     * @param recipients Array of addresses to receive NFTs
+     */
+    function batchMint(address[] memory recipients) external onlyRole(ADMIN_ROLE) {
+        if (!_saleActive) revert SaleNotActive();
+        if (totalSupply() + recipients.length > _maxSupply) revert MaxSupplyReached();
+
+        uint256 length = recipients.length;
+        for (uint256 i = 0; i < length;) {
+            _mintToken(recipients[i]);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /**
+     * @notice Add platform fees to the reward system
+     * @dev Only callable by platform contracts
+     * @param amount Amount of rewards to add (if no ETH sent)
+     */
+    function addPlatformFees(uint256 amount) external payable onlyRole(PLATFORM_ROLE) {
+        uint256 rewardAmount = msg.value > 0 ? msg.value : amount;
+        if (rewardAmount == 0) revert NoRewardsToAdd();
+
+        _addRewards(rewardAmount);
+    }
+
+    /**
+     * @notice Stake a single NFT to earn rewards
+     * @dev Transfers NFT to contract and starts reward accrual
+     * @param tokenId The ID of the token to stake
+     */
+    function stakeToken(uint256 tokenId) external nonReentrant updateReward(tokenId) {
+        if (ownerOf(tokenId) != msg.sender) revert TokenNotOwned(tokenId, msg.sender);
+        if (_stakedTokens[tokenId].owner != address(0)) revert TokenAlreadyStaked(tokenId);
+
+        _stakeToken(msg.sender, tokenId);
+    }
+
+    /**
+     * @notice Stake multiple NFTs in a single transaction
+     * @dev More gas efficient than multiple single stakes
+     * @param tokenIds Array of token IDs to stake
+     */
+    function stakeMultipleTokens(uint256[] calldata tokenIds) external nonReentrant {
+        uint256 length = tokenIds.length;
+        if (length == 0) revert NoStakedTokens();
+        if (length > MAX_BATCH_SIZE) revert TooManyTokensInTransaction(length, MAX_BATCH_SIZE);
+
         _rewardPerTokenStored = rewardPerToken();
         _lastUpdateTime = block.timestamp;
 
-        if (tokenId != 0 && _stakedTokens[tokenId].owner != address(0)) {
+        uint256 newlyStaked = 0;
+        for (uint256 i = 0; i < length;) {
+            uint256 tokenId = tokenIds[i];
+
+            if (ownerOf(tokenId) != msg.sender) revert TokenNotOwned(tokenId, msg.sender);
+            if (_stakedTokens[tokenId].owner != address(0)) revert TokenAlreadyStaked(tokenId);
+
+            _stakeTokenInternal(msg.sender, tokenId);
+            unchecked {
+                ++newlyStaked;
+            }
+            unchecked {
+                ++i;
+            }
+        }
+
+        _totalStakedSupply += newlyStaked;
+        _distributeInitialRewards();
+    }
+
+    /**
+     * @notice Unstake a single NFT and claim rewards
+     * @dev Automatically claims all pending rewards
+     * @param tokenId The ID of the token to unstake
+     */
+    function unstakeToken(uint256 tokenId) external nonReentrant updateReward(tokenId) {
+        if (_stakedTokens[tokenId].owner != msg.sender) revert TokenNotStaked(tokenId);
+
+        uint256 timeStaked = block.timestamp - _stakedTokens[tokenId].stakedSince;
+        if (timeStaked < _minimumStakingPeriod) {
+            revert MinimumStakingPeriodNotMet(tokenId, _minimumStakingPeriod - timeStaked);
+        }
+
+        _unstakeToken(msg.sender, tokenId);
+    }
+
+    /**
+     * @notice Unstake multiple NFTs in a single transaction
+     * @dev Claims all rewards and returns all NFTs
+     * @param tokenIds Array of token IDs to unstake
+     */
+    function unstakeMultipleTokens(uint256[] calldata tokenIds) external nonReentrant {
+        uint256 length = tokenIds.length;
+        if (length == 0) revert NoStakedTokens();
+        if (length > MAX_BATCH_SIZE) revert TooManyTokensInTransaction(length, MAX_BATCH_SIZE);
+
+        _rewardPerTokenStored = rewardPerToken();
+        _lastUpdateTime = block.timestamp;
+
+        uint256 totalRewards = 0;
+        uint256 unstaked = 0;
+
+        for (uint256 i = 0; i < length;) {
+            uint256 tokenId = tokenIds[i];
+
+            if (_stakedTokens[tokenId].owner != msg.sender) revert TokenNotStaked(tokenId);
+
+            uint256 timeStaked = block.timestamp - _stakedTokens[tokenId].stakedSince;
+            if (timeStaked < _minimumStakingPeriod) {
+                revert MinimumStakingPeriodNotMet(tokenId, _minimumStakingPeriod - timeStaked);
+            }
+
+            totalRewards += _unstakeTokenInternal(msg.sender, tokenId);
+            unchecked {
+                ++unstaked;
+            }
+            unchecked {
+                ++i;
+            }
+        }
+
+        _totalStakedSupply -= unstaked;
+
+        if (totalRewards > 0) {
+            _transferRewards(msg.sender, totalRewards);
+        }
+    }
+
+    /**
+     * @notice Claim rewards for a single staked NFT
+     * @dev NFT remains staked, only rewards are claimed
+     * @param tokenId The ID of the token to claim rewards for
+     */
+    function claimReward(uint256 tokenId) external nonReentrant updateReward(tokenId) {
+        if (_stakedTokens[tokenId].owner != msg.sender) revert TokenNotStaked(tokenId);
+
+        uint256 reward = _rewards[tokenId];
+        if (reward == 0) revert NoRewardsToClaim();
+
+        _rewards[tokenId] = 0;
+        _stakedTokens[tokenId].lastRewardsClaimed = block.timestamp;
+
+        _transferRewards(msg.sender, reward);
+        emit RewardClaimed(msg.sender, tokenId, reward);
+    }
+
+    /**
+     * @notice Claim rewards for multiple staked NFTs
+     * @dev More gas efficient than multiple single claims
+     * @param tokenIds Array of token IDs to claim rewards for
+     */
+    function claimMultipleRewards(uint256[] calldata tokenIds) external nonReentrant updateReward(0) {
+        uint256 length = tokenIds.length;
+        uint256 totalReward = 0;
+
+        for (uint256 i = 0; i < length;) {
+            uint256 tokenId = tokenIds[i];
+            if (_stakedTokens[tokenId].owner != msg.sender) revert TokenNotStaked(tokenId);
+
             _rewards[tokenId] = earned(tokenId);
             _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
+
+            uint256 reward = _rewards[tokenId];
+            if (reward > 0) {
+                _rewards[tokenId] = 0;
+                _stakedTokens[tokenId].lastRewardsClaimed = block.timestamp;
+                totalReward += reward;
+                emit RewardClaimed(msg.sender, tokenId, reward);
+            }
+
+            unchecked {
+                ++i;
+            }
         }
-        _;
+
+        if (totalReward == 0) revert NoRewardsToClaim();
+        _transferRewards(msg.sender, totalReward);
     }
 
     /**
-     * @dev Function to receive ETH
+     * @notice Claim rewards for all staked tokens owned by caller
+     * @dev Convenient function to claim all rewards at once
      */
-    receive() external payable {
-        emit ETHReceived(msg.sender, msg.value);
+    function claimAllRewards() external nonReentrant {
+        address owner = msg.sender;
+        uint256[] memory stakedTokens = _userStakedTokens[owner];
+        if (stakedTokens.length == 0) revert NoStakedTokens();
+
+        _rewardPerTokenStored = rewardPerToken();
+        _lastUpdateTime = block.timestamp;
+
+        uint256 totalRewards = 0;
+        uint256 length = stakedTokens.length;
+
+        for (uint256 i = 0; i < length;) {
+            uint256 tokenId = stakedTokens[i];
+
+            _rewards[tokenId] = earned(tokenId);
+            _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
+
+            uint256 reward = _rewards[tokenId];
+            if (reward > 0) {
+                _rewards[tokenId] = 0;
+                _stakedTokens[tokenId].lastRewardsClaimed = block.timestamp;
+                totalRewards += reward;
+                emit RewardClaimed(owner, tokenId, reward);
+            }
+
+            unchecked {
+                ++i;
+            }
+        }
+
+        if (totalRewards > 0) {
+            _transferRewards(owner, totalRewards);
+        }
     }
 
+    // External view functions
+
     /**
-     * @dev Calculate reward per token
+     * @notice Calculate current reward per token
+     * @dev Returns the accumulated reward per staked token
+     * @return Current reward per token in wei
      */
     function rewardPerToken() public view returns (uint256) {
         if (_totalStakedSupply == 0) {
@@ -123,384 +432,144 @@ contract FounderNFT is
     }
 
     /**
-     * @dev Calculate earned rewards for a specific token
+     * @notice Calculate earned rewards for a specific token
+     * @dev Returns pending rewards that can be claimed
+     * @param tokenId The token ID to check
+     * @return Amount of rewards earned in wei
      */
     function earned(uint256 tokenId) public view returns (uint256) {
         if (_stakedTokens[tokenId].owner == address(0)) {
             return 0;
         }
 
-        return (rewardPerToken() - _userRewardPerTokenPaid[tokenId]) * 1 / PRECISION + _rewards[tokenId];
+        return (rewardPerToken() - _userRewardPerTokenPaid[tokenId]) / PRECISION + _rewards[tokenId];
     }
 
     /**
-     * @dev Get total claimable rewards for a token
+     * @notice Get all staked token IDs for a specific owner
+     * @dev Gas-efficient O(1) lookup
+     * @param owner The address to query staked tokens for
+     * @return Array of token IDs that are currently staked by the owner
      */
-    function getClaimableRewards(uint256 tokenId) external view returns (uint256) {
-        return earned(tokenId);
+    function getStakedByOwner(address owner) external view returns (uint256[] memory) {
+        if (owner == address(0)) revert InvalidOwnerAddress();
+        return _userStakedTokens[owner];
     }
 
     /**
-     * @dev Add rewards to the system (internal function)
+     * @notice Get count of staked tokens for an owner
+     * @dev O(1) lookup operation
+     * @param owner The address to check
+     * @return Number of tokens staked by the owner
      */
-    function _addRewards(uint256 amount) internal updateReward(0) {
-        if (_totalStakedSupply > 0) {
-            // Distribute over time to prevent flash loan attacks
-            uint256 rewardDuration = 86400; // 24 hours
-            uint256 newRewardRate = amount / rewardDuration;
-            _rewardRate += newRewardRate;
-
-            emit RewardAdded(amount, _rewardRate);
-            emit RewardRateUpdated(_rewardRate - newRewardRate, _rewardRate);
-        } else {
-            // No stakers yet, hold rewards for when staking begins
-            _pendingRewards += amount;
-        }
+    function getStakedCountByOwner(address owner) external view returns (uint256) {
+        return _userStakedTokens[owner].length;
     }
 
     /**
-     * @dev Mint a Founder NFT with automatic reward distribution
+     * @notice Check if an owner has any staked tokens
+     * @dev O(1) lookup operation
+     * @param owner The address to check
+     * @return True if owner has staked tokens
      */
-    function mint() external payable nonReentrant {
-        require(_saleActive, "Sale is not active");
-        require(totalSupply() < _maxSupply, "Max supply reached");
-        require(msg.value >= _price, "Insufficient payment");
-
-        // Calculate redistribution amount (10% of sales)
-        uint256 redistributionAmount = (msg.value * SALES_REDISTRIBUTION_PERCENTAGE) / BASIS_POINTS;
-        uint256 salesProceedsAmount = msg.value - redistributionAmount;
-
-        // Add to sales proceeds (90% of the payment)
-        _totalSalesProceeds += salesProceedsAmount;
-
-        // Immediately distribute 10% to current stakers
-        if (redistributionAmount > 0) {
-            _addRewards(redistributionAmount);
-        }
-
-        uint256 tokenId = _nextTokenId;
-        _nextTokenId++;
-
-        _mint(msg.sender, tokenId);
-
-        emit FounderNFTMinted(msg.sender, tokenId);
+    function hasStakedTokens(address owner) external view returns (bool) {
+        return _userStakedTokens[owner].length > 0;
     }
 
     /**
-     * @dev Mint multiple Founder NFTs with automatic reward distribution
+     * @notice Get total rewards earned across all staked tokens for an owner
+     * @dev Calculates pending rewards for all owner's staked tokens
+     * @param owner The address to calculate total rewards for
+     * @return Total earned rewards in wei
      */
-    function mintMultiple(uint256 quantity) external payable nonReentrant {
-        require(_saleActive, "Sale is not active");
-        require(quantity > 0 && quantity <= 10, "Invalid quantity");
-        require(totalSupply() + quantity <= _maxSupply, "Max supply exceeded");
-        require(msg.value >= _price * quantity, "Insufficient payment");
+    function getTotalEarnedByOwner(address owner) external view returns (uint256) {
+        uint256[] memory stakedTokens = _userStakedTokens[owner];
+        uint256 totalEarned = 0;
+        uint256 length = stakedTokens.length;
 
-        // Calculate redistribution for total payment
-        uint256 redistributionAmount = (msg.value * SALES_REDISTRIBUTION_PERCENTAGE) / BASIS_POINTS;
-        uint256 salesProceedsAmount = msg.value - redistributionAmount;
-
-        _totalSalesProceeds += salesProceedsAmount;
-
-        // Immediately distribute rewards
-        if (redistributionAmount > 0) {
-            _addRewards(redistributionAmount);
-        }
-
-        for (uint256 i = 0; i < quantity; i++) {
-            uint256 tokenId = _nextTokenId;
-            _nextTokenId++;
-            _mint(msg.sender, tokenId);
-            emit FounderNFTMinted(msg.sender, tokenId);
-        }
-    }
-
-    /**
-     * @dev Batch mint multiple NFTs (for admin use) - NO PAYMENT REQUIRED
-     */
-    function batchMint(address[] memory recipients) external onlyRole(ADMIN_ROLE) {
-        require(_saleActive, "Sale is not active");
-        require(totalSupply() + recipients.length <= _maxSupply, "Exceeds max supply");
-
-        for (uint256 i = 0; i < recipients.length; i++) {
-            uint256 tokenId = _nextTokenId;
-            _nextTokenId++;
-            _mint(recipients[i], tokenId);
-
-            emit FounderNFTMinted(recipients[i], tokenId);
-        }
-    }
-
-    /**
-     * @dev Add platform fees to reward system
-     */
-    function addPlatformFees(uint256 amount) external payable onlyRole(PLATFORM_ROLE) {
-        uint256 rewardAmount = msg.value > 0 ? msg.value : amount;
-        require(rewardAmount > 0, "No rewards to add");
-
-        _addRewards(rewardAmount);
-    }
-
-    /**
-     * @dev Stake token to participate in reward distribution
-     */
-    function stakeToken(uint256 tokenId) external nonReentrant updateReward(tokenId) {
-        require(ownerOf(tokenId) == msg.sender, "Not the token owner");
-        require(_stakedTokens[tokenId].owner == address(0), "Token already staked");
-
-        // Transfer token to this contract
-        _transfer(msg.sender, address(this), tokenId);
-
-        // Record staking information
-        _stakedTokens[tokenId] =
-            StakeInfo({owner: msg.sender, stakedSince: block.timestamp, lastRewardsClaimed: block.timestamp});
-
-        _totalStakedSupply++;
-        _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
-
-        // If this is the first staker and we have pending rewards, start distributing
-        if (_totalStakedSupply == 1 && _pendingRewards > 0) {
-            _addRewards(_pendingRewards);
-            _pendingRewards = 0;
-        }
-
-        emit TokenStaked(msg.sender, tokenId);
-    }
-
-    /**
-     * @dev Unstake token
-     */
-    function unstakeToken(uint256 tokenId) external nonReentrant updateReward(tokenId) {
-        require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
-        require(
-            block.timestamp >= _stakedTokens[tokenId].stakedSince + _minimumStakingPeriod,
-            "Minimum staking period not reached"
-        );
-
-        // Automatically claim rewards before unstaking
-        uint256 reward = _rewards[tokenId];
-        if (reward > 0) {
-            _rewards[tokenId] = 0;
-            (bool success,) = msg.sender.call{value: reward}("");
-            require(success, "Reward transfer failed");
-            emit RewardClaimed(msg.sender, tokenId, reward);
-        }
-
-        // Transfer token back to owner
-        _transfer(address(this), msg.sender, tokenId);
-
-        // Clear staking information
-        delete _stakedTokens[tokenId];
-        delete _userRewardPerTokenPaid[tokenId];
-
-        _totalStakedSupply--;
-
-        emit TokenUnstaked(msg.sender, tokenId);
-    }
-
-    /**
-     * @dev Stake multiple tokens in a single transaction
-     * @param tokenIds Array of token IDs to stake
-     */
-    function stakeMultipleTokens(uint256[] calldata tokenIds) external nonReentrant {
-        require(tokenIds.length > 0, "No tokens to stake");
-        require(tokenIds.length <= 20, "Too many tokens in single transaction"); // Prevent gas limit issues
-
-        // Update global reward state once
-        _rewardPerTokenStored = rewardPerToken();
-        _lastUpdateTime = block.timestamp;
-
-        uint256 newlyStaked = 0;
-
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
-
-            require(ownerOf(tokenId) == msg.sender, "Not the token owner");
-            require(_stakedTokens[tokenId].owner == address(0), "Token already staked");
-
-            // Transfer token to this contract
-            _transfer(msg.sender, address(this), tokenId);
-
-            // Record staking information
-            _stakedTokens[tokenId] =
-                StakeInfo({owner: msg.sender, stakedSince: block.timestamp, lastRewardsClaimed: block.timestamp});
-
-            _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
-            newlyStaked++;
-
-            emit TokenStaked(msg.sender, tokenId);
-        }
-
-        _totalStakedSupply += newlyStaked;
-
-        // If this brings the first stakers and we have pending rewards, start distributing
-        if (_totalStakedSupply == newlyStaked && _pendingRewards > 0) {
-            _addRewards(_pendingRewards);
-            _pendingRewards = 0;
-        }
-    }
-
-    /**
-     * @dev Unstake multiple tokens in a single transaction
-     * @param tokenIds Array of token IDs to unstake
-     */
-    function unstakeMultipleTokens(uint256[] calldata tokenIds) external nonReentrant {
-        require(tokenIds.length > 0, "No tokens to unstake");
-        require(tokenIds.length <= 20, "Too many tokens in single transaction"); // Prevent gas limit issues
-
-        // Update global reward state once
-        _rewardPerTokenStored = rewardPerToken();
-        _lastUpdateTime = block.timestamp;
-
-        uint256 totalRewards = 0;
-        uint256 unstaked = 0;
-
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
-
-            require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
-            require(
-                block.timestamp >= _stakedTokens[tokenId].stakedSince + _minimumStakingPeriod,
-                "Minimum staking period not reached"
-            );
-
-            // Update and calculate rewards for this token
-            _rewards[tokenId] = earned(tokenId);
-            uint256 reward = _rewards[tokenId];
-
-            if (reward > 0) {
-                _rewards[tokenId] = 0;
-                totalRewards += reward;
-                emit RewardClaimed(msg.sender, tokenId, reward);
-            }
-
-            // Transfer token back to owner
-            _transfer(address(this), msg.sender, tokenId);
-
-            // Clear staking information
-            delete _stakedTokens[tokenId];
-            delete _userRewardPerTokenPaid[tokenId];
-
-            unstaked++;
-            emit TokenUnstaked(msg.sender, tokenId);
-        }
-
-        _totalStakedSupply -= unstaked;
-
-        // Transfer all accumulated rewards in one transaction
-        if (totalRewards > 0) {
-            (bool success,) = msg.sender.call{value: totalRewards}("");
-            require(success, "Reward transfer failed");
-        }
-    }
-
-    /**
-     * @dev Claim rewards for a specific token
-     */
-    function claimReward(uint256 tokenId) external nonReentrant updateReward(tokenId) {
-        require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
-
-        uint256 reward = _rewards[tokenId];
-        require(reward > 0, "No rewards to claim");
-
-        _rewards[tokenId] = 0;
-        _stakedTokens[tokenId].lastRewardsClaimed = block.timestamp;
-
-        (bool success,) = msg.sender.call{value: reward}("");
-        require(success, "Reward transfer failed");
-
-        emit RewardClaimed(msg.sender, tokenId, reward);
-    }
-
-    /**
-     * @dev Claim rewards for multiple tokens
-     */
-    function claimMultipleRewards(uint256[] calldata tokenIds) external nonReentrant {
-        uint256 totalReward = 0;
-
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
-            require(_stakedTokens[tokenId].owner == msg.sender, "Not the staker of this token");
-
-            // Update rewards for this token
-            _rewardPerTokenStored = rewardPerToken();
-            _lastUpdateTime = block.timestamp;
-
-            if (_stakedTokens[tokenId].owner != address(0)) {
-                _rewards[tokenId] = earned(tokenId);
-                _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
-            }
-
-            uint256 reward = _rewards[tokenId];
-            if (reward > 0) {
-                _rewards[tokenId] = 0;
-                _stakedTokens[tokenId].lastRewardsClaimed = block.timestamp;
-                totalReward += reward;
-                emit RewardClaimed(msg.sender, tokenId, reward);
+        for (uint256 i = 0; i < length;) {
+            totalEarned += earned(stakedTokens[i]);
+            unchecked {
+                ++i;
             }
         }
 
-        require(totalReward > 0, "No rewards to claim");
-
-        (bool success,) = msg.sender.call{value: totalReward}("");
-        require(success, "Reward transfer failed");
+        return totalEarned;
     }
 
     /**
-     * @dev Get current reward rate (ETH per second distributed to all stakers)
-     */
-    function getCurrentRewardRate() external view returns (uint256) {
-        return _rewardRate;
-    }
-
-    /**
-     * @dev Get total staked supply
-     */
-    function getTotalStakedSupply() external view returns (uint256) {
-        return _totalStakedSupply;
-    }
-
-    /**
-     * @dev Check if token is staked
-     */
-    function isTokenStaked(uint256 tokenId) external view returns (bool) {
-        return _stakedTokens[tokenId].owner != address(0);
-    }
-
-    /**
-     * @dev Get staking information for a token
-     */
-    function getStakingInfo(uint256 tokenId)
-        external
-        view
-        returns (address owner, uint256 stakedSince, uint256 lastRewardsClaimed)
-    {
-        StakeInfo memory info = _stakedTokens[tokenId];
-        return (info.owner, info.stakedSince, info.lastRewardsClaimed);
-    }
-
-    /**
-     * @dev Get estimated APR for staking (approximate, based on recent reward rate)
+     * @notice Get estimated APR for staking
+     * @dev Approximate calculation based on current reward rate
+     * @return APR in basis points (e.g., 500 = 5%)
      */
     function getEstimatedAPR() external view returns (uint256) {
         if (_totalStakedSupply == 0 || address(this).balance == 0) {
             return 0;
         }
 
-        // Annual rewards at current rate
         uint256 annualRewards = _rewardRate * 365 days;
-
-        // Total value staked (approximate as current contract balance / 2)
         uint256 totalStakedValue = address(this).balance / 2;
 
         if (totalStakedValue == 0) {
             return 0;
         }
 
-        // APR = (annual rewards / total staked value) * 100
-        return (annualRewards * 10000) / totalStakedValue; // Return in basis points
+        return (annualRewards * BASIS_POINTS) / totalStakedValue;
     }
 
-    // ===== EXISTING FUNCTIONS (updated to remove epoch dependencies) =====
+    /**
+     * @notice Get staking info for multiple tokens at once
+     * @dev Batch operation for frontend efficiency
+     * @param tokenIds Array of token IDs to query
+     * @return owners Array of owner addresses
+     * @return stakedAt Array of staking timestamps
+     * @return earnedRewards Array of earned rewards
+     * @return canUnstake Array of unstaking eligibility
+     */
+    function getStakingInfoBatch(uint256[] calldata tokenIds)
+        external
+        view
+        returns (
+            address[] memory owners,
+            uint256[] memory stakedAt,
+            uint256[] memory earnedRewards,
+            bool[] memory canUnstake
+        )
+    {
+        uint256 length = tokenIds.length;
+        owners = new address[](length);
+        stakedAt = new uint256[](length);
+        earnedRewards = new uint256[](length);
+        canUnstake = new bool[](length);
+
+        for (uint256 i = 0; i < length;) {
+            uint256 tokenId = tokenIds[i];
+            owners[i] = _stakedTokens[tokenId].owner;
+            stakedAt[i] = _stakedTokens[tokenId].stakedSince;
+            earnedRewards[i] = earned(tokenId);
+            canUnstake[i] = (
+                _stakedTokens[tokenId].owner != address(0)
+                    && block.timestamp >= _stakedTokens[tokenId].stakedSince + _minimumStakingPeriod
+            );
+
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    // Additional view functions (getters)
+    function getCurrentRewardRate() external view returns (uint256) {
+        return _rewardRate;
+    }
+
+    function getTotalStakedSupply() external view returns (uint256) {
+        return _totalStakedSupply;
+    }
+
+    function isTokenStaked(uint256 tokenId) external view returns (bool) {
+        return _stakedTokens[tokenId].owner != address(0);
+    }
 
     function isFounder(address account) external view returns (bool) {
         return balanceOf(account) > 0;
@@ -522,12 +591,49 @@ contract FounderNFT is
         return _minimumStakingPeriod;
     }
 
+    function getDaoTokenAllocationPercentage() external view returns (uint256) {
+        return _daoTokenAllocationPercentage;
+    }
+
+    function getSaleStatus() external view returns (bool) {
+        return _saleActive;
+    }
+
+    function getPrice() external view returns (uint256) {
+        return _price;
+    }
+
+    function getMaxSupply() external view returns (uint256) {
+        return _maxSupply;
+    }
+
+    // Admin functions
     function setMinimumStakingPeriod(uint256 newPeriod) external onlyRole(ADMIN_ROLE) {
         _minimumStakingPeriod = newPeriod;
     }
 
-    function hasEarlyAccess(address account, address projectAddress) external view returns (bool) {
-        return balanceOf(account) > 0 && _earlyAccessProjects[projectAddress];
+    function setPlatformFeeDistributionPercentage(uint256 newPercentage) external onlyRole(ADMIN_ROLE) {
+        if (newPercentage > BASIS_POINTS) revert InvalidPercentage(newPercentage);
+        _platformFeeDistributionPercentage = newPercentage;
+    }
+
+    function setDaoTokenAllocationPercentage(uint256 newPercentage) external onlyRole(ADMIN_ROLE) {
+        if (newPercentage > BASIS_POINTS) revert InvalidPercentage(newPercentage);
+        _daoTokenAllocationPercentage = newPercentage;
+    }
+
+    function setSaleStatus(bool status) external onlyRole(ADMIN_ROLE) {
+        _saleActive = status;
+    }
+
+    function setPrice(uint256 newPrice) external onlyRole(ADMIN_ROLE) {
+        _price = newPrice;
+    }
+
+    function setRewardRate(uint256 newRate) external onlyRole(ADMIN_ROLE) updateReward(0) {
+        uint256 oldRate = _rewardRate;
+        _rewardRate = newRate;
+        emit RewardRateUpdated(oldRate, newRate);
     }
 
     function addEarlyAccessProject(address projectAddress) external onlyRole(ADMIN_ROLE) {
@@ -540,104 +646,52 @@ contract FounderNFT is
         emit EarlyAccessProjectRemoved(projectAddress);
     }
 
-    function getDaoTokenAllocationPercentage() external view returns (uint256) {
-        return _daoTokenAllocationPercentage;
-    }
-
-    function setPlatformFeeDistributionPercentage(uint256 newPercentage) external onlyRole(ADMIN_ROLE) {
-        require(newPercentage <= 10000, "Invalid percentage");
-        _platformFeeDistributionPercentage = newPercentage;
-    }
-
-    function setDaoTokenAllocationPercentage(uint256 newPercentage) external onlyRole(ADMIN_ROLE) {
-        require(newPercentage <= 10000, "Invalid percentage");
-        _daoTokenAllocationPercentage = newPercentage;
-    }
-
-    function setSaleStatus(bool status) external onlyRole(ADMIN_ROLE) {
-        _saleActive = status;
-    }
-
-    function getSaleStatus() external view returns (bool) {
-        return _saleActive;
-    }
-
-    function setPrice(uint256 newPrice) external onlyRole(ADMIN_ROLE) {
-        _price = newPrice;
-    }
-
-    function getPrice() external view returns (uint256) {
-        return _price;
-    }
-
-    function getMaxSupply() external view returns (uint256) {
-        return _maxSupply;
-    }
-
     function withdrawSalesProceeds() external onlyRole(ADMIN_ROLE) {
         uint256 amount = _totalSalesProceeds;
-        require(amount > 0, "No sales proceeds to withdraw");
+        if (amount == 0) revert NoSalesProceedsToWithdraw();
 
         _totalSalesProceeds = 0;
+        _transferRewards(msg.sender, amount);
+    }
 
-        (bool success,) = msg.sender.call{value: amount}("");
-        require(success, "Transfer failed");
+    function withdraw() external onlyRole(ADMIN_ROLE) {
+        uint256 totalPendingRewards = _pendingRewards;
+        uint256 supply = totalSupply();
+
+        for (uint256 i = 0; i < supply;) {
+            uint256 tokenId = tokenByIndex(i);
+            if (_stakedTokens[tokenId].owner != address(0)) {
+                totalPendingRewards += earned(tokenId);
+            }
+            unchecked {
+                ++i;
+            }
+        }
+
+        uint256 withdrawable = address(this).balance - totalPendingRewards;
+        if (withdrawable == 0) revert NoWithdrawableFunds();
+
+        _transferRewards(msg.sender, withdrawable);
+    }
+
+    // Public functions
+    function hasEarlyAccess(address account, address projectAddress) public view returns (bool) {
+        return balanceOf(account) > 0 && _earlyAccessProjects[projectAddress];
+    }
+
+    function getStakingInfo(uint256 tokenId)
+        public
+        view
+        returns (address owner, uint256 stakedSince, uint256 lastRewardsClaimed)
+    {
+        StakeInfo memory info = _stakedTokens[tokenId];
+        return (info.owner, info.stakedSince, info.lastRewardsClaimed);
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         _requireOwned(tokenId);
         return string(abi.encodePacked(super.tokenURI(tokenId), "/founder"));
     }
-
-    function _update(address to, uint256 tokenId, address auth)
-        internal
-        override(ERC721EnumerableUpgradeable)
-        returns (address)
-    {
-        address from = _ownerOf(tokenId);
-
-        if (from != address(0) && to != address(0)) {
-            require(
-                _stakedTokens[tokenId].owner == address(0) || from == address(this) || to == address(this),
-                "Cannot transfer staked token"
-            );
-        }
-
-        return super._update(to, tokenId, auth);
-    }
-
-    /**
-     * @dev Emergency function to adjust reward rate (admin only)
-     */
-    function setRewardRate(uint256 newRate) external onlyRole(ADMIN_ROLE) updateReward(0) {
-        uint256 oldRate = _rewardRate;
-        _rewardRate = newRate;
-        emit RewardRateUpdated(oldRate, newRate);
-    }
-
-    /**
-     * @dev Withdraw excess ETH (excludes staking rewards)
-     */
-    function withdraw() external onlyRole(ADMIN_ROLE) {
-        // Calculate total pending rewards
-        uint256 totalPendingRewards = _pendingRewards;
-
-        // Add up all individual token rewards
-        for (uint256 i = 0; i < totalSupply(); i++) {
-            uint256 tokenId = tokenByIndex(i);
-            if (_stakedTokens[tokenId].owner != address(0)) {
-                totalPendingRewards += earned(tokenId);
-            }
-        }
-
-        uint256 withdrawable = address(this).balance - totalPendingRewards;
-        require(withdrawable > 0, "No withdrawable funds");
-
-        (bool success,) = msg.sender.call{value: withdrawable}("");
-        require(success, "Transfer failed");
-    }
-
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     function supportsInterface(bytes4 interfaceId)
         public
@@ -648,4 +702,138 @@ contract FounderNFT is
     {
         return super.supportsInterface(interfaceId);
     }
+
+    // Internal functions
+    function _addRewards(uint256 amount) internal updateReward(0) {
+        if (_totalStakedSupply > 0) {
+            uint256 newRewardRate = amount / REWARD_DURATION;
+            _rewardRate += newRewardRate;
+
+            emit RewardAdded(amount, _rewardRate);
+            emit RewardRateUpdated(_rewardRate - newRewardRate, _rewardRate);
+        } else {
+            _pendingRewards += amount;
+        }
+    }
+
+    function _processMintPayment(uint256 payment) internal {
+        uint256 redistributionAmount = (payment * SALES_REDISTRIBUTION_PERCENTAGE) / BASIS_POINTS;
+        uint256 salesProceedsAmount = payment - redistributionAmount;
+
+        _totalSalesProceeds += salesProceedsAmount;
+
+        if (redistributionAmount > 0) {
+            _addRewards(redistributionAmount);
+        }
+    }
+
+    function _mintToken(address to) internal {
+        uint256 tokenId = _nextTokenId;
+        _nextTokenId++;
+        _mint(to, tokenId);
+        emit FounderNFTMinted(to, tokenId);
+    }
+
+    function _stakeToken(address owner, uint256 tokenId) internal {
+        _transfer(owner, address(this), tokenId);
+        _stakeTokenInternal(owner, tokenId);
+        _totalStakedSupply++;
+        _distributeInitialRewards();
+    }
+
+    function _stakeTokenInternal(address owner, uint256 tokenId) internal {
+        _stakedTokens[tokenId] =
+            StakeInfo({owner: owner, stakedSince: block.timestamp, lastRewardsClaimed: block.timestamp});
+
+        _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
+        _userStakedTokens[owner].push(tokenId);
+        _userStakedTokenIndex[owner][tokenId] = _userStakedTokens[owner].length - 1;
+
+        emit TokenStaked(owner, tokenId);
+    }
+
+    function _unstakeToken(address owner, uint256 tokenId) internal {
+        uint256 reward = _rewards[tokenId];
+        if (reward > 0) {
+            _rewards[tokenId] = 0;
+            _transferRewards(owner, reward);
+            emit RewardClaimed(owner, tokenId, reward);
+        }
+
+        _transfer(address(this), owner, tokenId);
+        _removeFromUserStakedTokens(owner, tokenId);
+        _clearStakingData(tokenId);
+        _totalStakedSupply--;
+
+        emit TokenUnstaked(owner, tokenId);
+    }
+
+    function _unstakeTokenInternal(address owner, uint256 tokenId) internal returns (uint256) {
+        _rewards[tokenId] = earned(tokenId);
+        uint256 reward = _rewards[tokenId];
+
+        if (reward > 0) {
+            _rewards[tokenId] = 0;
+            emit RewardClaimed(owner, tokenId, reward);
+        }
+
+        _transfer(address(this), owner, tokenId);
+        _removeFromUserStakedTokens(owner, tokenId);
+        _clearStakingData(tokenId);
+
+        emit TokenUnstaked(owner, tokenId);
+        return reward;
+    }
+
+    function _removeFromUserStakedTokens(address owner, uint256 tokenId) internal {
+        uint256 tokenIndex = _userStakedTokenIndex[owner][tokenId];
+        uint256 lastTokenIndex = _userStakedTokens[owner].length - 1;
+
+        if (tokenIndex != lastTokenIndex) {
+            uint256 lastTokenId = _userStakedTokens[owner][lastTokenIndex];
+            _userStakedTokens[owner][tokenIndex] = lastTokenId;
+            _userStakedTokenIndex[owner][lastTokenId] = tokenIndex;
+        }
+
+        _userStakedTokens[owner].pop();
+        delete _userStakedTokenIndex[owner][tokenId];
+    }
+
+    function _clearStakingData(uint256 tokenId) internal {
+        delete _stakedTokens[tokenId];
+        delete _userRewardPerTokenPaid[tokenId];
+    }
+
+    function _distributeInitialRewards() internal {
+        if (_totalStakedSupply == 1 && _pendingRewards > 0) {
+            _addRewards(_pendingRewards);
+            _pendingRewards = 0;
+        }
+    }
+
+    function _transferRewards(address to, uint256 amount) internal {
+        (bool success,) = to.call{value: amount}("");
+        if (!success) revert TransferFailed();
+    }
+
+    function _update(address to, uint256 tokenId, address auth)
+        internal
+        override(ERC721EnumerableUpgradeable)
+        returns (address)
+    {
+        address from = _ownerOf(tokenId);
+
+        if (from != address(0) && to != address(0)) {
+            if (_stakedTokens[tokenId].owner != address(0) && from != address(this) && to != address(this)) {
+                revert CannotTransferStakedToken(tokenId);
+            }
+        }
+
+        return super._update(to, tokenId, auth);
+    }
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+    // Private functions
+    // (None required for this contract)
 }
