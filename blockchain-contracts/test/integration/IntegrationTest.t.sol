@@ -227,6 +227,9 @@ contract IntegrationTest is Test {
         assertEq(founderNFT.ownerOf(1), address(founderNFT), "Contract should own token 1");
         assertEq(founderNFT.ownerOf(2), address(founderNFT), "Contract should own token 2");
 
+        // Fund the registry contract so it can send platform fees
+        vm.deal(address(registry), 2 ether);
+
         // Add platform fees to create rewards
         vm.prank(address(registry));
         founderNFT.addPlatformFees{value: 1 ether}(0);
@@ -293,6 +296,9 @@ contract IntegrationTest is Test {
         vm.prank(founder1);
         founderNFT.stakeToken(0);
 
+        // Fund the registry contract so it can send platform fees
+        vm.deal(address(registry), 2 ether);
+
         // Add platform fees
         vm.prank(address(registry));
         founderNFT.addPlatformFees{value: 1 ether}(0);
@@ -331,6 +337,9 @@ contract IntegrationTest is Test {
         founderNFT.mint{value: NFT_PRICE}();
         vm.prank(founder2);
         founderNFT.stakeToken(1);
+
+        // Fund the registry contract so it can send platform fees
+        vm.deal(address(registry), 2 ether);
 
         // Add some platform fees to create rewards
         uint256 platformFees = 1 ether;
@@ -388,6 +397,9 @@ contract IntegrationTest is Test {
 
         uint256[] memory stakedTokens = founderNFT.getStakedByOwner(founder1);
         assertEq(stakedTokens.length, 3, "Should return 3 staked tokens");
+
+        // Fund the registry contract so it can send platform fees
+        vm.deal(address(registry), 2 ether);
 
         // Add platform fees
         vm.prank(address(registry));
@@ -523,6 +535,9 @@ contract IntegrationTest is Test {
         vm.prank(founder1);
         founderNFT.stakeToken(0);
 
+        // Fund the registry contract so it can send platform fees
+        vm.deal(address(registry), 2 ether);
+
         // Add platform fees to create rewards
         vm.prank(address(registry));
         founderNFT.addPlatformFees{value: 1 ether}(0);
@@ -639,6 +654,9 @@ contract IntegrationTest is Test {
         founderNFT.mint{value: NFT_PRICE}();
         vm.prank(founder2);
         founderNFT.stakeToken(1);
+
+        // Fund the registry contract so it can send platform fees
+        vm.deal(address(registry), 2 ether);
 
         // Add platform fees
         uint256 platformFees = 2 ether;
@@ -781,6 +799,9 @@ contract IntegrationTest is Test {
         founderNFT.stakeToken(0);
 
         uint256 initialRewardRate = founderNFT.getCurrentRewardRate();
+
+        // Fund the registry contract so it can send platform fees
+        vm.deal(address(registry), 2 ether);
 
         // Add platform fees should increase reward rate
         vm.prank(address(registry));
