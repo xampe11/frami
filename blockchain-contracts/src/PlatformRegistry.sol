@@ -399,6 +399,7 @@ contract PlatformRegistry is
      * @dev Remove platform extension
      */
     function removeExtension(bytes32 extensionType) external onlyRole(ADMIN_ROLE) {
+        require(_extensions[extensionType] != address(0), "Extension not registered");
         delete _extensions[extensionType];
         emit ExtensionRemoved(extensionType);
     }
