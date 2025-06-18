@@ -3,7 +3,7 @@ pragma solidity ^0.8.28;
 
 /**
  * @title PlatformRegistryStorage
- * @dev Storage contract for PlatformRegistry to avoid storage collisions during upgrades
+ * @dev Storage contract for PlatformRegistry with enhanced fee distribution
  */
 contract PlatformRegistryStorage {
     // Platform configuration
@@ -17,13 +17,36 @@ contract PlatformRegistryStorage {
     // Implementation version
     string internal _version;
 
-    // Extension registry - mapping extension type to implementation address
+    // Extension registry
     mapping(bytes32 => address) internal _extensions;
 
-    // For future token support - keeping storage slots reserved
-    // This ensures that when we add token support later, we won't have storage collision issues
-    mapping(address => bool) internal _reservedTokenSlot;
+    // ============================================================================
+    // ENHANCED FEE DISTRIBUTION STORAGE
+    // ============================================================================
 
-    // Reserve storage slots to allow for layout changes in the future
-    uint256[50] private __gap;
+    struct FeeDistribution {
+        uint256 founderNFTPercentage; // e.g., 5000 = 50%
+        uint256 treasuryPercentage; // e.g., 5000 = 50%
+    }
+
+    // Fee distribution configuration
+    FeeDistribution internal _feeDistribution;
+
+    // Fee tracking for transparency
+    mapping(address => uint256) internal _totalFeesReceived; // recipient => total fees
+    mapping(address => uint256) internal _lastFeeDistribution; // recipient => last amount
+
+    // Pending fees for failed distributions
+    uint256 internal _pendingFounderFees;
+
+    // Emergency controls
+    bool internal _emergencyFreezeDistribution;
+    address internal _emergencyFeeRecipient;
+
+    // Future expansion - reserved for additional recipients
+    mapping(bytes32 => address) internal _futureRecipients;
+    mapping(bytes32 => uint256) internal _futureRecipientPercentages;
+
+    // Reserve storage slots for future features
+    uint256[40] private __gap;
 }

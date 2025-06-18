@@ -33,14 +33,21 @@ interface IProjectFactory {
  * @dev Interface for the FounderNFT contract
  */
 interface IFounderNFT {
+    // Core fee distribution function
     function addPlatformFees(uint256 amount) external;
-    function getPlatformFeeDistributionPercentage() external view returns (uint256);
+
+    // View functions for fee distribution logic
     function getTotalStakedTokens() external view returns (uint256);
+
+    // Optional: Additional view functions that might be useful
+    function getCurrentRewardRate() external view returns (uint256);
+    function isTokenStaked(uint256 tokenId) external view returns (bool);
+    function earned(uint256 tokenId) external view returns (uint256);
 }
 
 /**
  * @title PlatformRegistry
- * @dev Main registry contract with upgrade capabilities and access control
+ * @dev Main registry contract with enhanced fee distribution
  */
 contract PlatformRegistry is
     Initializable,
@@ -54,146 +61,316 @@ contract PlatformRegistry is
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant PROJECT_CREATOR_ROLE = keccak256("PROJECT_CREATOR_ROLE");
+    bytes32 public constant FEE_MANAGER_ROLE = keccak256("FEE_MANAGER_ROLE");
 
     // Extension types
     bytes32 public constant NFT_FACTORY_EXTENSION = keccak256("NFT_FACTORY");
     bytes32 public constant TOKEN_FACTORY_EXTENSION = keccak256("TOKEN_FACTORY");
-    bytes32 public constant FOUNDER_NFT_EXTENSION = keccak256("FOUNDER_NFT_EXTENSION");
+    bytes32 public constant FOUNDER_NFT_EXTENSION = keccak256("FOUNDER_NFT");
 
-    // Project Factory (can be upgraded separately)
-    address public projectFactory;
+    // Future recipient identifiers
+    bytes32 public constant VALIDATOR_RECIPIENT = keccak256("VALIDATOR_RECIPIENT");
+    bytes32 public constant COMMUNITY_RECIPIENT = keccak256("COMMUNITY_RECIPIENT");
 
-    // Events
-    event ProjectCreated(address indexed projectAddress, address indexed creator);
+    // ============================================================================
+    // EVENTS
+    // ============================================================================
+
     event PlatformFeeUpdated(uint256 newFee);
-    event FactoryUpdated(address indexed oldFactory, address indexed newFactory);
-    event VersionUpdated(string version);
-    event ExtensionRegistered(
-        bytes32 indexed extensionType, address indexed extensionAddress, address indexed oldExtensionAddress
-    );
-    event ExtensionRemoved(bytes32 indexed extensionType, address indexed extensionAddress);
-    event FounderFeesRelayed(address indexed project, uint256 amount);
+    event ProjectCreated(address indexed projectAddress, address indexed creator);
+    event ExtensionRegistered(bytes32 indexed extensionType, address indexed extension);
+    event ExtensionRemoved(bytes32 indexed extensionType);
+
+    // Fee distribution events
+    event FeeDistributionUpdated(uint256 founderPercentage, uint256 treasuryPercentage);
+    event FeesDistributed(address indexed project, uint256 totalFee, uint256 founderAmount, uint256 treasuryAmount);
+    event PendingFeesDistributed(uint256 amount, address indexed recipient);
+    event EmergencyDistributionToggled(bool frozen, address indexed emergencyRecipient);
+    event FutureRecipientAdded(bytes32 indexed recipientType, address indexed recipient, uint256 percentage);
+    event FutureRecipientRemoved(bytes32 indexed recipientType);
 
     /**
-     * @dev Prevents initialization function from being called twice
+     * @dev Initialize the contract
      */
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
+    function initialize(
+        address owner,
+        uint256 initialPlatformFeePercentage,
+        address initialPlatformTreasury,
+        address projectFactory
+    ) public initializer {
+        require(owner != address(0), "Invalid owner");
+        require(initialPlatformTreasury != address(0), "Invalid treasury");
+        require(initialPlatformFeePercentage <= 1000, "Fee too high"); // max 10%
 
-    /**
-     * @dev Initializes the contract with initial values
-     */
-    function initialize(address initialOwner, uint256 initialFee, address treasury, address initialFactory)
-        external
-        initializer
-    {
-        __Ownable_init(initialOwner);
+        __Ownable_init(owner);
         __Pausable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
 
-        _platformFeePercentage = initialFee;
-        _platformTreasury = treasury;
-        projectFactory = initialFactory;
+        _platformFeePercentage = initialPlatformFeePercentage;
+        _platformTreasury = initialPlatformTreasury;
         _version = "1.0.0";
 
-        // Set up access control
-        _grantRole(DEFAULT_ADMIN_ROLE, initialOwner);
-        _grantRole(ADMIN_ROLE, initialOwner);
-        _grantRole(UPGRADER_ROLE, initialOwner);
-        _grantRole(PROJECT_CREATOR_ROLE, initialOwner);
+        // Initialize fee distribution with 50-50 split
+        _feeDistribution = FeeDistribution({
+            founderNFTPercentage: 5000, // 50%
+            treasuryPercentage: 5000 // 50%
+        });
+
+        // Set up roles
+        _grantRole(DEFAULT_ADMIN_ROLE, owner);
+        _grantRole(ADMIN_ROLE, owner);
+        _grantRole(UPGRADER_ROLE, owner);
+        _grantRole(FEE_MANAGER_ROLE, owner);
+
+        // Register project factory if provided
+        if (projectFactory != address(0)) {
+            _extensions[NFT_FACTORY_EXTENSION] = projectFactory;
+        }
+
+        emit FeeDistributionUpdated(5000, 5000);
     }
 
+    // ============================================================================
+    // CORE PLATFORM FUNCTIONS
+    // ============================================================================
+
     /**
-     * @dev Creates a new project through the project factory
+     * @dev Creates a new project through the factory
      */
     function createProject(
-        string memory _name,
-        string memory _description,
-        uint256 _fundingGoal,
-        uint256 _duration,
-        bool _isFlexibleFunding,
-        address[] memory _teamMembers
-    ) external whenNotPaused onlyRole(PROJECT_CREATOR_ROLE) returns (address) {
-        // Ensure project factory is set
-        require(projectFactory != address(0), "Project factory not set");
+        address creator,
+        string memory name,
+        string memory description,
+        uint256 fundingGoal,
+        uint256 duration,
+        bool isFlexibleFunding,
+        address[] memory teamMembers
+    ) external whenNotPaused returns (address) {
+        address factory = _extensions[NFT_FACTORY_EXTENSION];
+        require(factory != address(0), "Project factory not set");
 
-        // Create project through factory
-        IProjectFactory factory = IProjectFactory(projectFactory);
-        address projectAddress = factory.createProject(
-            msg.sender,
-            _name,
-            _description,
-            _fundingGoal,
-            _duration,
-            _isFlexibleFunding,
+        address project = IProjectFactory(factory).createProject(
+            creator,
+            name,
+            description,
+            fundingGoal,
+            duration,
+            isFlexibleFunding,
             _platformFeePercentage,
             _platformTreasury,
-            _teamMembers
+            teamMembers
         );
 
-        // Register project in registry
-        _registeredProjects[projectAddress] = true;
-        _allProjects.push(projectAddress);
+        _registeredProjects[project] = true;
+        _allProjects.push(project);
 
-        emit ProjectCreated(projectAddress, msg.sender);
-        return projectAddress;
+        emit ProjectCreated(project, creator);
+        return project;
     }
 
+    // ============================================================================
+    // ENHANCED FEE DISTRIBUTION FUNCTIONS
+    // ============================================================================
+
     /**
-     * @dev Updates the project factory address
+     * @dev Update fee distribution percentages (must sum to 100%)
      */
-    function updateProjectFactory(address newFactory) external onlyRole(ADMIN_ROLE) {
-        require(newFactory != address(0), "Invalid factory address");
+    function updateFeeDistribution(uint256 founderPercentage, uint256 treasuryPercentage)
+        external
+        onlyRole(FEE_MANAGER_ROLE)
+    {
+        require(founderPercentage + treasuryPercentage == 10000, "Percentages must sum to 10000 (100%)");
+        require(founderPercentage <= 10000, "Founder percentage too high");
+        require(treasuryPercentage <= 10000, "Treasury percentage too high");
 
-        address oldFactory = projectFactory;
-        projectFactory = newFactory;
+        _feeDistribution =
+            FeeDistribution({founderNFTPercentage: founderPercentage, treasuryPercentage: treasuryPercentage});
 
-        emit FactoryUpdated(oldFactory, newFactory);
+        emit FeeDistributionUpdated(founderPercentage, treasuryPercentage);
     }
 
     /**
-     * @dev Register an extension
+     * @dev Distribute platform fees to FounderNFT holders and treasury
      */
-    function registerExtension(bytes32 extensionType, address extensionAddress) external onlyRole(ADMIN_ROLE) {
-        require(extensionAddress != address(0), "Invalid extension address");
+    function distributePlatformFees(uint256 totalFee) external payable {
+        require(_registeredProjects[msg.sender], "Only registered projects");
+        require(msg.value == totalFee, "Sent ETH must match total fee");
+        require(!_emergencyFreezeDistribution, "Fee distribution frozen");
+        require(totalFee > 0, "Fee must be greater than 0");
 
-        address oldExtension = _extensions[extensionType];
-        _extensions[extensionType] = extensionAddress;
+        // Calculate distribution amounts
+        uint256 founderAmount = (totalFee * _feeDistribution.founderNFTPercentage) / 10000;
+        uint256 treasuryAmount = totalFee - founderAmount; // Ensures no wei lost to rounding
 
-        emit ExtensionRegistered(extensionType, extensionAddress, oldExtension);
+        // Distribute to FounderNFT holders
+        bool founderSuccess = _distributeFounderFees(founderAmount);
+
+        // Always send treasury portion (critical for platform operations)
+        _distributeTreasuryFees(treasuryAmount);
+
+        // Update tracking
+        _updateFeeTracking(founderAmount, treasuryAmount, founderSuccess);
+
+        emit FeesDistributed(msg.sender, totalFee, founderAmount, treasuryAmount);
     }
 
     /**
-     * @dev Remove an extension
+     * @dev Internal function to distribute fees to FounderNFT stakers
      */
-    function removeExtension(bytes32 extensionType) external onlyRole(ADMIN_ROLE) {
-        require(_extensions[extensionType] != address(0), "Extension not registered");
+    function _distributeFounderFees(uint256 amount) private returns (bool success) {
+        if (amount == 0) return true;
 
-        address oldExtension = _extensions[extensionType];
-        delete _extensions[extensionType];
+        address founderNFTAddress = _extensions[FOUNDER_NFT_EXTENSION];
+        if (founderNFTAddress == address(0)) {
+            _pendingFounderFees += amount;
+            return false;
+        }
 
-        emit ExtensionRemoved(extensionType, oldExtension);
+        // Check if there are staked tokens
+        try IFounderNFT(founderNFTAddress).getTotalStakedTokens() returns (uint256 stakedTokens) {
+            if (stakedTokens > 0) {
+                // Send ETH to FounderNFT contract
+                (bool transferSuccess,) = founderNFTAddress.call{value: amount}("");
+                if (transferSuccess) {
+                    // Notify FounderNFT contract about the new fees
+                    try IFounderNFT(founderNFTAddress).addPlatformFees(amount) {
+                        _totalFeesReceived[founderNFTAddress] += amount;
+                        return true;
+                    } catch {
+                        // ETH was sent successfully, but notification failed
+                        // This is acceptable as FounderNFT will handle the ETH
+                        _totalFeesReceived[founderNFTAddress] += amount;
+                        return true;
+                    }
+                } else {
+                    _pendingFounderFees += amount;
+                    return false;
+                }
+            } else {
+                // No stakers, accumulate for future distribution
+                _pendingFounderFees += amount;
+                return false;
+            }
+        } catch {
+            _pendingFounderFees += amount;
+            return false;
+        }
     }
 
     /**
-     * @dev Get an extension address
+     * @dev Internal function to distribute fees to treasury
      */
-    function getExtension(bytes32 extensionType) external view returns (address) {
-        return _extensions[extensionType];
+    function _distributeTreasuryFees(uint256 amount) private {
+        if (amount == 0) return;
+
+        (bool success,) = _platformTreasury.call{value: amount}("");
+        require(success, "Treasury transfer failed");
+        _totalFeesReceived[_platformTreasury] += amount;
     }
 
     /**
-     * @dev Check if an extension is registered
+     * @dev Update fee tracking for transparency
      */
-    function isExtensionRegistered(bytes32 extensionType) external view returns (bool) {
-        return _extensions[extensionType] != address(0);
+    function _updateFeeTracking(uint256 founderAmount, uint256 treasuryAmount, bool founderSuccess) private {
+        if (founderSuccess) {
+            _lastFeeDistribution[_extensions[FOUNDER_NFT_EXTENSION]] = founderAmount;
+        }
+        _lastFeeDistribution[_platformTreasury] = treasuryAmount;
+    }
+
+    // ============================================================================
+    // PENDING FEES MANAGEMENT
+    // ============================================================================
+
+    /**
+     * @dev Distribute accumulated pending FounderNFT fees
+     */
+    function distributePendingFounderFees() external onlyRole(ADMIN_ROLE) {
+        require(_pendingFounderFees > 0, "No pending founder fees");
+
+        uint256 amount = _pendingFounderFees;
+        _pendingFounderFees = 0;
+
+        bool success = _distributeFounderFees(amount);
+        if (success) {
+            emit PendingFeesDistributed(amount, _extensions[FOUNDER_NFT_EXTENSION]);
+        } else {
+            _pendingFounderFees = amount;
+            revert("Pending fee distribution failed");
+        }
     }
 
     /**
-     * @dev Updates the platform fee percentage
+     * @dev Emergency withdrawal of pending fees to treasury
+     */
+    function emergencyWithdrawPendingFees() external onlyRole(ADMIN_ROLE) {
+        require(_pendingFounderFees > 0, "No pending fees");
+
+        uint256 amount = _pendingFounderFees;
+        _pendingFounderFees = 0;
+
+        (bool success,) = _platformTreasury.call{value: amount}("");
+        require(success, "Emergency withdrawal failed");
+
+        emit PendingFeesDistributed(amount, _platformTreasury);
+    }
+
+    // ============================================================================
+    // EMERGENCY CONTROLS
+    // ============================================================================
+
+    /**
+     * @dev Emergency freeze/unfreeze fee distribution
+     */
+    function toggleEmergencyFreeze(bool freeze, address emergencyRecipient) external onlyRole(ADMIN_ROLE) {
+        if (freeze) {
+            require(emergencyRecipient != address(0), "Emergency recipient required");
+            _emergencyFeeRecipient = emergencyRecipient;
+        }
+        _emergencyFreezeDistribution = freeze;
+        emit EmergencyDistributionToggled(freeze, emergencyRecipient);
+    }
+
+    // ============================================================================
+    // FUTURE EXPANSION FUNCTIONS
+    // ============================================================================
+
+    /**
+     * @dev Add future recipient for system expansion
+     */
+    function addFutureRecipient(bytes32 recipientType, address recipient, uint256 percentage)
+        external
+        onlyRole(ADMIN_ROLE)
+    {
+        require(recipient != address(0), "Invalid recipient");
+        require(percentage <= 10000, "Percentage too high");
+        require(_futureRecipients[recipientType] == address(0), "Recipient exists");
+
+        _futureRecipients[recipientType] = recipient;
+        _futureRecipientPercentages[recipientType] = percentage;
+
+        emit FutureRecipientAdded(recipientType, recipient, percentage);
+    }
+
+    /**
+     * @dev Remove future recipient
+     */
+    function removeFutureRecipient(bytes32 recipientType) external onlyRole(ADMIN_ROLE) {
+        require(_futureRecipients[recipientType] != address(0), "Recipient does not exist");
+
+        delete _futureRecipients[recipientType];
+        delete _futureRecipientPercentages[recipientType];
+
+        emit FutureRecipientRemoved(recipientType);
+    }
+
+    // ============================================================================
+    // ADMIN FUNCTIONS
+    // ============================================================================
+
+    /**
+     * @dev Update platform fee percentage
      */
     function updatePlatformFee(uint256 newFee) external onlyRole(ADMIN_ROLE) {
         require(newFee <= 1000, "Fee too high"); // max 10%
@@ -202,131 +379,157 @@ contract PlatformRegistry is
     }
 
     /**
-     * @dev Updates the platform treasury address
+     * @dev Update platform treasury address
      */
     function updateTreasury(address newTreasury) external onlyRole(ADMIN_ROLE) {
-        require(newTreasury != address(0), "Invalid treasury address");
+        require(newTreasury != address(0), "Invalid treasury");
         _platformTreasury = newTreasury;
     }
 
     /**
-     * @dev Returns if a project is registered
+     * @dev Register platform extension
      */
-    function isProjectRegistered(address project) external view returns (bool) {
-        return _registeredProjects[project];
+    function registerExtension(bytes32 extensionType, address extensionAddress) external onlyRole(ADMIN_ROLE) {
+        require(extensionAddress != address(0), "Invalid extension address");
+        _extensions[extensionType] = extensionAddress;
+        emit ExtensionRegistered(extensionType, extensionAddress);
     }
 
     /**
-     * @dev Relay platform fees to the Founder NFT contract
-     * Only callable by registered projects
+     * @dev Remove platform extension
      */
-    function relayFounderFees(uint256 amount) external payable {
-        require(_registeredProjects[msg.sender], "Only registered projects can relay fees");
-
-        // Get the founder NFT extension
-        address founderNFTAddress = _extensions[FOUNDER_NFT_EXTENSION];
-        if (founderNFTAddress == address(0)) {
-            return; // No founder NFT extension registered
-        }
-
-        // Forward the funds to the founder NFT contract
-        (bool success,) = founderNFTAddress.call{value: amount}("");
-        if (!success) {
-            return; // Silently fail - we don't want to revert the entire transaction
-        }
-
-        // Add fees to distribution pool
-        try IFounderNFT(founderNFTAddress).addPlatformFees(amount) {
-            // Successfully added fees for distribution
-            emit FounderFeesRelayed(msg.sender, amount);
-        } catch {
-            // If call fails, we already sent the ETH, so continue
-        }
+    function removeExtension(bytes32 extensionType) external onlyRole(ADMIN_ROLE) {
+        delete _extensions[extensionType];
+        emit ExtensionRemoved(extensionType);
     }
 
     /**
-     * @dev Pauses the platform
-     */
-    function pausePlatform() external onlyRole(ADMIN_ROLE) {
-        _pause();
-    }
-
-    /**
-     * @dev Unpauses the platform
-     */
-    function unpausePlatform() external onlyRole(ADMIN_ROLE) {
-        _unpause();
-    }
-
-    /**
-     * @dev Grants PROJECT_CREATOR_ROLE to an address
+     * @dev Grant project creator role
      */
     function grantProjectCreatorRole(address account) external onlyRole(ADMIN_ROLE) {
         grantRole(PROJECT_CREATOR_ROLE, account);
     }
 
     /**
-     * @dev Returns the platform fee percentage
+     * @dev Pause platform
+     */
+    function pausePlatform() external onlyRole(ADMIN_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @dev Unpause platform
+     */
+    function unpausePlatform() external onlyRole(ADMIN_ROLE) {
+        _unpause();
+    }
+
+    // ============================================================================
+    // VIEW FUNCTIONS
+    // ============================================================================
+
+    /**
+     * @dev Get current fee distribution percentages
+     */
+    function getFeeDistribution() external view returns (uint256 founderPercentage, uint256 treasuryPercentage) {
+        return (_feeDistribution.founderNFTPercentage, _feeDistribution.treasuryPercentage);
+    }
+
+    /**
+     * @dev Get total fees received by recipient
+     */
+    function getTotalFeesReceived(address recipient) external view returns (uint256) {
+        return _totalFeesReceived[recipient];
+    }
+
+    /**
+     * @dev Get pending FounderNFT fees
+     */
+    function getPendingFounderFees() external view returns (uint256) {
+        return _pendingFounderFees;
+    }
+
+    /**
+     * @dev Get last fee distribution for recipient
+     */
+    function getLastFeeDistribution(address recipient) external view returns (uint256) {
+        return _lastFeeDistribution[recipient];
+    }
+
+    /**
+     * @dev Get fee recipients
+     */
+    function getFeeRecipients() external view returns (address founderNFT, address treasury) {
+        return (_extensions[FOUNDER_NFT_EXTENSION], _platformTreasury);
+    }
+
+    /**
+     * @dev Get emergency freeze status
+     */
+    function getEmergencyStatus() external view returns (bool frozen, address emergencyRecipient) {
+        return (_emergencyFreezeDistribution, _emergencyFeeRecipient);
+    }
+
+    /**
+     * @dev Get comprehensive fee stats
+     */
+    function getFeeStats()
+        external
+        view
+        returns (
+            uint256 founderPercentage,
+            uint256 treasuryPercentage,
+            uint256 totalFounderFees,
+            uint256 totalTreasuryFees,
+            uint256 pendingFounderFees
+        )
+    {
+        return (
+            _feeDistribution.founderNFTPercentage,
+            _feeDistribution.treasuryPercentage,
+            _totalFeesReceived[_extensions[FOUNDER_NFT_EXTENSION]],
+            _totalFeesReceived[_platformTreasury],
+            _pendingFounderFees
+        );
+    }
+
+    /**
+     * @dev Standard view functions
      */
     function platformFeePercentage() external view returns (uint256) {
         return _platformFeePercentage;
     }
 
-    /**
-     * @dev Returns the platform treasury address
-     */
     function platformTreasury() external view returns (address) {
         return _platformTreasury;
     }
 
-    /**
-     * @dev Returns if the project factory is registered
-     */
-    function isFactoryRegistered(address factory) external view returns (bool) {
-        return factory == projectFactory;
+    function isProjectRegistered(address project) external view returns (bool) {
+        return _registeredProjects[project];
     }
 
-    /**
-     * @dev Returns the number of registered projects
-     */
+    function getExtension(bytes32 extensionType) external view returns (address) {
+        return _extensions[extensionType];
+    }
+
+    function getAllProjects() external view returns (address[] memory) {
+        return _allProjects;
+    }
+
     function getProjectCount() external view returns (uint256) {
         return _allProjects.length;
     }
 
-    /**
-     * @dev Returns the address of a project by index
-     */
-    function getProjectAddress(uint256 index) external view returns (address) {
-        require(index < _allProjects.length, "Index out of bounds");
-        return _allProjects[index];
-    }
+    // ============================================================================
+    // UPGRADE FUNCTIONS
+    // ============================================================================
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     /**
-     * @dev Returns the current implementation version
+     * @dev Get implementation version
      */
-    function getVersion() external view returns (string memory) {
+    function version() external view returns (string memory) {
         return _version;
-    }
-
-    /**
-     * @dev Authorization for upgrades
-     */
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {
-        // Additional upgrade logic if needed
-    }
-
-    /**
-     * @dev Updates the version string (can be called during upgrade)
-     */
-    function setVersion(string memory newVersion) external onlyRole(UPGRADER_ROLE) {
-        _version = newVersion;
-        emit VersionUpdated(newVersion);
-    }
-
-    /**
-     * @dev Function to receive ETH
-     */
-    receive() external payable {
-        // Allow receiving ETH for relaying
     }
 }
