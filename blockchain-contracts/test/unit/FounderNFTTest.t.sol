@@ -395,6 +395,7 @@ contract FounderNFTTest is Test {
 
         // Step 2: Add substantial platform fees
         uint256 largePlatformFees = 2 ether;
+        vm.deal(platform, 5 ether);
         vm.prank(platform);
         founderNFT.addPlatformFees{value: largePlatformFees}(0);
 
