@@ -1,86 +1,165 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import {Project} from "./Project.sol";
-import {PlatformRegistryStorage} from "./PlatformRegistryStorage.sol";
-import {ExtensionKeys} from "./ExtensionKeys.sol";
-
-/**
- * @title IProjectFactory
- * @dev Interface for the Project Factory
- */
-interface IProjectFactory {
-    function createProject(
-        address creator,
-        string memory name,
-        string memory description,
-        uint256 fundingGoal,
-        uint256 duration,
-        bool isFlexibleFunding,
-        uint256 platformFeePercentage,
-        address platformTreasury,
-        address[] memory teamMembers
-    ) external returns (address);
-}
-
-/**
- * @title IFounderNFT
- * @dev Interface for the FounderNFT contract
- */
-interface IFounderNFT {
-    function addPlatformFees(uint256 amount) external;
-    function getTotalStakedTokens() external view returns (uint256);
-    function getCurrentRewardRate() external view returns (uint256);
-    function isTokenStaked(uint256 tokenId) external view returns (bool);
-    function earned(uint256 tokenId) external view returns (uint256);
-}
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
  * @title PlatformRegistry
- * @dev Main registry contract with standardized extension management and enhanced fee distribution
+ * @dev Central registry for managing platform extensions, fees, and project tracking
+ * @notice This contract serves as the main hub for the crowdfunding platform
+ *
+ * Key Features:
+ * - Dynamic extension system (no hardcoded extension types)
+ * - Role-based access control
+ * - Fee management and distribution
+ * - Project tracking and validation
+ * - Upgradeable architecture with UUPS pattern
  */
 contract PlatformRegistry is
     Initializable,
-    PlatformRegistryStorage,
-    OwnableUpgradeable,
-    PausableUpgradeable,
+    UUPSUpgradeable,
     AccessControlUpgradeable,
+    PausableUpgradeable,
     ReentrancyGuardUpgradeable,
-    UUPSUpgradeable
+    OwnableUpgradeable
 {
-    // Access control roles
+    // ============================================================================
+    // CONSTANTS & ROLES
+    // ============================================================================
+
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-    bytes32 public constant PROJECT_CREATOR_ROLE = keccak256("PROJECT_CREATOR_ROLE");
     bytes32 public constant FEE_MANAGER_ROLE = keccak256("FEE_MANAGER_ROLE");
+    bytes32 public constant PROJECT_CREATOR_ROLE = keccak256("PROJECT_CREATOR_ROLE");
 
-    // Events
-    event PlatformFeeUpdated(uint256 newFee);
-    event ProjectCreated(address indexed projectAddress, address indexed creator);
-    event ExtensionRegistered(bytes32 indexed extensionType, address indexed extension);
-    event ExtensionRemoved(bytes32 indexed extensionType);
+    // Common extension categories
+    bytes32 public constant CATEGORY_FACTORY = keccak256("FACTORY");
+    bytes32 public constant CATEGORY_ORACLE = keccak256("ORACLE");
+    bytes32 public constant CATEGORY_GOVERNANCE = keccak256("GOVERNANCE");
+    bytes32 public constant CATEGORY_TREASURY = keccak256("TREASURY");
+    bytes32 public constant CATEGORY_VALIDATOR = keccak256("VALIDATOR");
+    bytes32 public constant CATEGORY_TOKEN = keccak256("TOKEN");
+    bytes32 public constant CATEGORY_NFT = keccak256("NFT");
+    bytes32 public constant CATEGORY_UTILITY = keccak256("UTILITY");
+
+    // Common extension keys (for convenience)
+    bytes32 public constant FOUNDER_NFT = keccak256("FOUNDER_NFT");
+    bytes32 public constant PROJECT_FACTORY = keccak256("PROJECT_FACTORY");
+
+    // ============================================================================
+    // STRUCTS & STORAGE
+    // ============================================================================
+
+    struct ExtensionInfo {
+        address implementation; // Address of the extension contract
+        bytes32 category; // Category of the extension
+        bool isActive; // Whether the extension is currently active
+        uint256 addedAt; // Block timestamp when extension was added
+        string name; // Human-readable name
+        string version; // Extension version
+        string description; // Extension description
+        bytes32[] permissions; // Required permissions for this extension
+    }
+
+    struct FeeDistribution {
+        uint256 founderNFTPercentage; // Percentage to FounderNFT holders (basis points)
+        uint256 treasuryPercentage; // Percentage to platform treasury (basis points)
+    }
+
+    // Extension management
+    mapping(bytes32 => ExtensionInfo) private _extensions;
+    mapping(bytes32 => bytes32[]) private _extensionsByCategory;
+    mapping(address => bytes32) private _implementationToKey;
+    bytes32[] private _allExtensionKeys;
+
+    // Project tracking
+    mapping(address => bool) private _registeredProjects;
+    address[] private _allProjects;
+
+    // Fee management
+    uint256 private _platformFeePercentage; // Platform fee percentage (basis points)
+    address private _platformTreasury; // Platform treasury address
+    FeeDistribution private _feeDistribution;
+
+    // Platform info
+    string private _version;
+    uint256 private _totalProjectsCreated;
+
+    // Reserved storage slots for future upgrades
+    uint256[50] private __gap;
+
+    // ============================================================================
+    // EVENTS
+    // ============================================================================
+
+    // Extension events
+    event ExtensionRegistered(
+        bytes32 indexed extensionKey,
+        address indexed implementation,
+        bytes32 indexed category,
+        string name,
+        string version
+    );
+
+    event ExtensionRemoved(bytes32 indexed extensionKey, address indexed implementation);
+
+    event ExtensionDeactivated(bytes32 indexed extensionKey, address indexed implementation);
+
+    event ExtensionActivated(bytes32 indexed extensionKey, address indexed implementation);
+
+    event ExtensionUpgraded(
+        bytes32 indexed extensionKey,
+        address indexed oldImplementation,
+        address indexed newImplementation,
+        string newVersion
+    );
+
+    // Project events
+    event ProjectCreated(address indexed project, address indexed creator);
+    event ProjectRegistered(address indexed project);
+    event ProjectDeregistered(address indexed project);
+
+    // Fee events
+    event PlatformFeeUpdated(uint256 oldFee, uint256 newFee);
+    event PlatformTreasuryUpdated(address indexed oldTreasury, address indexed newTreasury);
     event FeeDistributionUpdated(uint256 founderPercentage, uint256 treasuryPercentage);
     event FeesDistributed(address indexed project, uint256 totalFee, uint256 founderAmount, uint256 treasuryAmount);
-    event PendingFeesDistributed(uint256 amount, address indexed recipient);
-    event EmergencyDistributionToggled(bool frozen, address indexed emergencyRecipient);
-    event FutureRecipientAdded(bytes32 indexed recipientType, address indexed recipient, uint256 percentage);
-    event FutureRecipientRemoved(bytes32 indexed recipientType);
+
+    // ============================================================================
+    // MODIFIERS
+    // ============================================================================
+
+    modifier onlyActiveExtension(bytes32 extensionKey) {
+        require(_extensions[extensionKey].isActive, "Extension not active");
+        _;
+    }
+
+    modifier validExtensionKey(bytes32 extensionKey) {
+        require(extensionKey != bytes32(0), "Invalid extension key");
+        _;
+    }
+
+    modifier checkExtensionExists(bytes32 extensionKey) {
+        require(_extensions[extensionKey].implementation != address(0), "Extension does not exist");
+        _;
+    }
+
+    // ============================================================================
+    // INITIALIZATION
+    // ============================================================================
 
     /**
      * @dev Initialize the contract
      */
-    function initialize(
-        address owner,
-        uint256 initialPlatformFeePercentage,
-        address initialPlatformTreasury,
-        address projectFactory
-    ) public initializer {
+    function initialize(address owner, uint256 initialPlatformFeePercentage, address initialPlatformTreasury)
+        public
+        initializer
+    {
         require(owner != address(0), "Invalid owner");
         require(initialPlatformTreasury != address(0), "Invalid treasury");
         require(initialPlatformFeePercentage <= 1000, "Fee too high"); // max 10%
@@ -93,7 +172,7 @@ contract PlatformRegistry is
 
         _platformFeePercentage = initialPlatformFeePercentage;
         _platformTreasury = initialPlatformTreasury;
-        _version = "1.0.0";
+        _version = "2.0.0";
 
         // Initialize fee distribution with 50-50 split
         _feeDistribution = FeeDistribution({
@@ -107,12 +186,6 @@ contract PlatformRegistry is
         _grantRole(UPGRADER_ROLE, owner);
         _grantRole(FEE_MANAGER_ROLE, owner);
 
-        // Register initial factory if provided
-        if (projectFactory != address(0)) {
-            _extensions[ExtensionKeys.PROJECT_FACTORY] = projectFactory;
-            emit ExtensionRegistered(ExtensionKeys.PROJECT_FACTORY, projectFactory);
-        }
-
         emit FeeDistributionUpdated(5000, 5000);
     }
 
@@ -122,145 +195,363 @@ contract PlatformRegistry is
 
     /**
      * @dev Register a new extension
-     * @param extensionKey The extension key (use ExtensionKeys library constants)
-     * @param extensionAddress The address of the extension contract
+     * @param extensionKey Unique identifier for the extension
+     * @param implementation Address of the extension contract
+     * @param category Category of the extension
+     * @param name Human-readable name
+     * @param version Extension version
+     * @param description Extension description
+     * @param permissions Required permissions array
      */
-    function registerExtension(bytes32 extensionKey, address extensionAddress) external onlyRole(ADMIN_ROLE) {
-        require(extensionAddress != address(0), "Invalid extension address");
-        require(ExtensionKeys.isValidExtensionKey(extensionKey), "Invalid extension key");
+    function registerExtension(
+        bytes32 extensionKey,
+        address implementation,
+        bytes32 category,
+        string memory name,
+        string memory version,
+        string memory description,
+        bytes32[] memory permissions
+    ) external onlyRole(ADMIN_ROLE) validExtensionKey(extensionKey) {
+        require(implementation != address(0), "Invalid implementation address");
+        require(bytes(name).length > 0, "Name cannot be empty");
+        require(bytes(version).length > 0, "Version cannot be empty");
+        require(!_extensions[extensionKey].isActive, "Extension already exists");
 
-        _extensions[extensionKey] = extensionAddress;
+        // Check if implementation is already used
+        require(_implementationToKey[implementation] == bytes32(0), "Implementation already registered");
 
-        emit ExtensionRegistered(extensionKey, extensionAddress);
+        // Store extension info
+        _extensions[extensionKey] = ExtensionInfo({
+            implementation: implementation,
+            category: category,
+            isActive: true,
+            addedAt: block.timestamp,
+            name: name,
+            version: version,
+            description: description,
+            permissions: permissions
+        });
 
-        // If registering FounderNFT, grant it the platform role
-        if (extensionKey == ExtensionKeys.FOUNDER_NFT) {
-            _grantRole(FEE_MANAGER_ROLE, extensionAddress);
+        // Add to tracking arrays
+        _extensionsByCategory[category].push(extensionKey);
+        _allExtensionKeys.push(extensionKey);
+        _implementationToKey[implementation] = extensionKey;
+
+        // Handle special extensions
+        if (extensionKey == FOUNDER_NFT) {
+            _grantRole(FEE_MANAGER_ROLE, implementation);
         }
+
+        emit ExtensionRegistered(extensionKey, implementation, category, name, version);
     }
 
     /**
-     * @dev Remove an extension
-     * @param extensionKey The extension key to remove
+     * @dev Upgrade an existing extension to a new implementation
      */
-    function removeExtension(bytes32 extensionKey) external onlyRole(ADMIN_ROLE) {
-        require(_extensions[extensionKey] != address(0), "Extension not registered");
+    function upgradeExtension(bytes32 extensionKey, address newImplementation, string memory newVersion)
+        external
+        onlyRole(ADMIN_ROLE)
+        checkExtensionExists(extensionKey)
+    {
+        require(newImplementation != address(0), "Invalid implementation address");
+        require(_implementationToKey[newImplementation] == bytes32(0), "Implementation already registered");
 
-        address extensionAddress = _extensions[extensionKey];
+        ExtensionInfo storage extension = _extensions[extensionKey];
+        address oldImplementation = extension.implementation;
+
+        // Update implementation tracking
+        delete _implementationToKey[oldImplementation];
+        _implementationToKey[newImplementation] = extensionKey;
+
+        // Update extension
+        extension.implementation = newImplementation;
+        extension.version = newVersion;
+
+        // Handle role transfers for special extensions
+        if (extensionKey == FOUNDER_NFT) {
+            _revokeRole(FEE_MANAGER_ROLE, oldImplementation);
+            _grantRole(FEE_MANAGER_ROLE, newImplementation);
+        }
+
+        emit ExtensionUpgraded(extensionKey, oldImplementation, newImplementation, newVersion);
+    }
+
+    /**
+     * @dev Remove an extension completely
+     */
+    function removeExtension(bytes32 extensionKey) external onlyRole(ADMIN_ROLE) checkExtensionExists(extensionKey) {
+        ExtensionInfo memory extension = _extensions[extensionKey];
+
+        // Remove from tracking
+        delete _implementationToKey[extension.implementation];
         delete _extensions[extensionKey];
-
-        emit ExtensionRemoved(extensionKey);
+        _removeFromArray(_allExtensionKeys, extensionKey);
+        _removeFromCategoryArray(extension.category, extensionKey);
 
         // Revoke roles if needed
-        if (extensionKey == ExtensionKeys.FOUNDER_NFT) {
-            _revokeRole(FEE_MANAGER_ROLE, extensionAddress);
+        if (extensionKey == FOUNDER_NFT) {
+            _revokeRole(FEE_MANAGER_ROLE, extension.implementation);
         }
+
+        emit ExtensionRemoved(extensionKey, extension.implementation);
     }
+
+    /**
+     * @dev Deactivate an extension without removing it
+     */
+    function deactivateExtension(bytes32 extensionKey)
+        external
+        onlyRole(ADMIN_ROLE)
+        checkExtensionExists(extensionKey)
+    {
+        ExtensionInfo storage extension = _extensions[extensionKey];
+        require(extension.isActive, "Extension already inactive");
+
+        extension.isActive = false;
+
+        // Revoke roles if needed
+        if (extensionKey == FOUNDER_NFT) {
+            _revokeRole(FEE_MANAGER_ROLE, extension.implementation);
+        }
+
+        emit ExtensionDeactivated(extensionKey, extension.implementation);
+    }
+
+    /**
+     * @dev Reactivate a deactivated extension
+     */
+    function activateExtension(bytes32 extensionKey) external onlyRole(ADMIN_ROLE) checkExtensionExists(extensionKey) {
+        ExtensionInfo storage extension = _extensions[extensionKey];
+        require(!extension.isActive, "Extension already active");
+
+        extension.isActive = true;
+
+        // Grant roles if needed
+        if (extensionKey == FOUNDER_NFT) {
+            _grantRole(FEE_MANAGER_ROLE, extension.implementation);
+        }
+
+        emit ExtensionActivated(extensionKey, extension.implementation);
+    }
+
+    // ============================================================================
+    // EXTENSION QUERIES
+    // ============================================================================
 
     /**
      * @dev Get extension address by key
-     * @param extensionKey The extension key
-     * @return The address of the extension (address(0) if not registered)
      */
     function getExtension(bytes32 extensionKey) external view returns (address) {
+        return _extensions[extensionKey].implementation;
+    }
+
+    /**
+     * @dev Get complete extension information
+     */
+    function getExtensionInfo(bytes32 extensionKey) external view returns (ExtensionInfo memory) {
         return _extensions[extensionKey];
     }
 
     /**
-     * @dev Check if an extension is registered
-     * @param extensionKey The extension key to check
-     * @return True if the extension is registered
+     * @dev Check if an extension is registered and active
      */
     function isExtensionRegistered(bytes32 extensionKey) external view returns (bool) {
-        return _extensions[extensionKey] != address(0);
+        return _extensions[extensionKey].isActive;
     }
 
     /**
+     * @dev Check if an extension exists (regardless of active status)
+     */
+    function extensionExists(bytes32 extensionKey) external view returns (bool) {
+        return _extensions[extensionKey].implementation != address(0);
+    }
+
+    /**
+     * @dev Get all registered extensions
+     */
+    function getAllExtensions() external view returns (bytes32[] memory keys, ExtensionInfo[] memory extensions) {
+        uint256 activeCount = 0;
+
+        // Count active extensions
+        for (uint256 i = 0; i < _allExtensionKeys.length; i++) {
+            if (_extensions[_allExtensionKeys[i]].isActive) {
+                activeCount++;
+            }
+        }
+
+        keys = new bytes32[](activeCount);
+        extensions = new ExtensionInfo[](activeCount);
+
+        uint256 index = 0;
+        for (uint256 i = 0; i < _allExtensionKeys.length; i++) {
+            bytes32 key = _allExtensionKeys[i];
+            if (_extensions[key].isActive) {
+                keys[index] = key;
+                extensions[index] = _extensions[key];
+                index++;
+            }
+        }
+    }
+
+    /**
+     * @dev Get extensions by category
+     */
+    function getExtensionsByCategory(bytes32 category)
+        external
+        view
+        returns (bytes32[] memory keys, address[] memory implementations)
+    {
+        bytes32[] memory categoryKeys = _extensionsByCategory[category];
+        uint256 activeCount = 0;
+
+        // Count active extensions in category
+        for (uint256 i = 0; i < categoryKeys.length; i++) {
+            if (_extensions[categoryKeys[i]].isActive) {
+                activeCount++;
+            }
+        }
+
+        keys = new bytes32[](activeCount);
+        implementations = new address[](activeCount);
+
+        uint256 index = 0;
+        for (uint256 i = 0; i < categoryKeys.length; i++) {
+            bytes32 key = categoryKeys[i];
+            if (_extensions[key].isActive) {
+                keys[index] = key;
+                implementations[index] = _extensions[key].implementation;
+                index++;
+            }
+        }
+    }
+
+    /**
+     * @dev Get extension key by implementation address
+     */
+    function getExtensionKey(address implementation) external view returns (bytes32) {
+        return _implementationToKey[implementation];
+    }
+
+    /**
+     * @dev Get total number of extensions
+     */
+    function getExtensionCount() external view returns (uint256) {
+        uint256 activeCount = 0;
+        for (uint256 i = 0; i < _allExtensionKeys.length; i++) {
+            if (_extensions[_allExtensionKeys[i]].isActive) {
+                activeCount++;
+            }
+        }
+        return activeCount;
+    }
+
+    // ============================================================================
+    // CONVENIENCE GETTERS (for backward compatibility)
+    // ============================================================================
+
+    /**
      * @dev Get the FounderNFT extension address
-     * @return The FounderNFT contract address
      */
     function getFounderNFT() external view returns (address) {
-        return _extensions[ExtensionKeys.FOUNDER_NFT];
+        return _extensions[FOUNDER_NFT].implementation;
     }
 
     /**
      * @dev Get the ProjectFactory extension address
-     * @return The ProjectFactory contract address
      */
     function getProjectFactory() external view returns (address) {
-        return _extensions[ExtensionKeys.PROJECT_FACTORY];
-    }
-
-    /**
-     * @dev Get all registered extension addresses
-     * @return keys Array of extension keys
-     * @return addresses Array of corresponding extension addresses
-     */
-    function getAllExtensions() external view returns (bytes32[] memory keys, address[] memory addresses) {
-        bytes32[] memory allKeys = ExtensionKeys.getAllKeys();
-        address[] memory allAddresses = new address[](allKeys.length);
-
-        for (uint256 i = 0; i < allKeys.length; i++) {
-            allAddresses[i] = _extensions[allKeys[i]];
-        }
-
-        return (allKeys, allAddresses);
+        return _extensions[PROJECT_FACTORY].implementation;
     }
 
     // ============================================================================
-    // FACTORY VALIDATION (for Project initialization)
+    // FACTORY VALIDATION
     // ============================================================================
 
     /**
-     * @dev Check if a factory is registered
-     * @param factory The factory address to check
-     * @return True if the factory is registered
+     * @dev Check if a factory is registered (any factory type)
      */
-    function isFactoryRegistered(address factory) external view returns (bool) {
-        return _extensions[ExtensionKeys.PROJECT_FACTORY] == factory
-            || _extensions[ExtensionKeys.NFT_FACTORY] == factory || _extensions[ExtensionKeys.TOKEN_FACTORY] == factory;
+    function isFactoryRegistered(address factory) public view returns (bool) {
+        bytes32 extensionKey = _implementationToKey[factory];
+        if (extensionKey == bytes32(0)) return false;
+
+        ExtensionInfo memory extension = _extensions[extensionKey];
+        return extension.isActive && extension.category == CATEGORY_FACTORY;
     }
 
     // ============================================================================
-    // PROJECT CREATION
+    // PROJECT MANAGEMENT
     // ============================================================================
 
     /**
-     * @dev Creates a new project through the factory
+     * @dev Register a new project
      */
-    function createProject(
-        address creator,
-        string memory name,
-        string memory description,
-        uint256 fundingGoal,
-        uint256 duration,
-        bool isFlexibleFunding,
-        address[] memory teamMembers
-    ) external whenNotPaused returns (address) {
-        address factory = _extensions[ExtensionKeys.PROJECT_FACTORY];
-        require(factory != address(0), "Project factory not set");
-
-        address project = IProjectFactory(factory).createProject(
-            creator,
-            name,
-            description,
-            fundingGoal,
-            duration,
-            isFlexibleFunding,
-            _platformFeePercentage,
-            _platformTreasury,
-            teamMembers
-        );
+    function registerProject(address project) external {
+        // Check if caller is a registered factory
+        require(isFactoryRegistered(msg.sender), "Only registered factories can register projects");
+        require(project != address(0), "Invalid project address");
+        require(!_registeredProjects[project], "Project already registered");
 
         _registeredProjects[project] = true;
         _allProjects.push(project);
+        _totalProjectsCreated++;
 
-        emit ProjectCreated(project, creator);
-        return project;
+        emit ProjectRegistered(project);
+    }
+
+    /**
+     * @dev Deregister a project (admin only)
+     */
+    function deregisterProject(address project) external onlyRole(ADMIN_ROLE) {
+        require(_registeredProjects[project], "Project not registered");
+
+        _registeredProjects[project] = false;
+        _removeFromProjectArray(project);
+
+        emit ProjectDeregistered(project);
+    }
+
+    /**
+     * @dev Check if a project is registered
+     */
+    function isProjectRegistered(address project) external view returns (bool) {
+        return _registeredProjects[project];
+    }
+
+    /**
+     * @dev Get all registered projects
+     */
+    function getAllProjects() external view returns (address[] memory) {
+        uint256 activeCount = 0;
+
+        // Count active projects
+        for (uint256 i = 0; i < _allProjects.length; i++) {
+            if (_registeredProjects[_allProjects[i]]) {
+                activeCount++;
+            }
+        }
+
+        address[] memory activeProjects = new address[](activeCount);
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < _allProjects.length; i++) {
+            if (_registeredProjects[_allProjects[i]]) {
+                activeProjects[index] = _allProjects[i];
+                index++;
+            }
+        }
+
+        return activeProjects;
+    }
+
+    /**
+     * @dev Get total projects created
+     */
+    function getTotalProjectsCreated() external view returns (uint256) {
+        return _totalProjectsCreated;
     }
 
     // ============================================================================
-    // ADMIN FUNCTIONS
+    // FEE MANAGEMENT
     // ============================================================================
 
     /**
@@ -268,359 +559,167 @@ contract PlatformRegistry is
      */
     function updatePlatformFee(uint256 newFee) external onlyRole(ADMIN_ROLE) {
         require(newFee <= 1000, "Fee too high"); // max 10%
+        uint256 oldFee = _platformFeePercentage;
         _platformFeePercentage = newFee;
-        emit PlatformFeeUpdated(newFee);
+        emit PlatformFeeUpdated(oldFee, newFee);
     }
 
     /**
      * @dev Update platform treasury address
      */
-    function updateTreasury(address newTreasury) external onlyRole(ADMIN_ROLE) {
-        require(newTreasury != address(0), "Invalid treasury");
+    function updatePlatformTreasury(address newTreasury) external onlyRole(ADMIN_ROLE) {
+        require(newTreasury != address(0), "Invalid treasury address");
+        address oldTreasury = _platformTreasury;
         _platformTreasury = newTreasury;
+        emit PlatformTreasuryUpdated(oldTreasury, newTreasury);
     }
 
     /**
-     * @dev Grant project creator role
-     */
-    function grantProjectCreatorRole(address account) external onlyRole(ADMIN_ROLE) {
-        grantRole(PROJECT_CREATOR_ROLE, account);
-    }
-
-    /**
-     * @dev Pause platform
-     */
-    function pausePlatform() external onlyRole(ADMIN_ROLE) {
-        _pause();
-    }
-
-    /**
-     * @dev Unpause platform
-     */
-    function unpausePlatform() external onlyRole(ADMIN_ROLE) {
-        _unpause();
-    }
-
-    // ============================================================================
-    // ENHANCED FEE DISTRIBUTION FUNCTIONS
-    // ============================================================================
-
-    /**
-     * @dev Update fee distribution percentages (must sum to 100%)
+     * @dev Update fee distribution percentages
      */
     function updateFeeDistribution(uint256 founderPercentage, uint256 treasuryPercentage)
         external
-        onlyRole(FEE_MANAGER_ROLE)
+        onlyRole(ADMIN_ROLE)
     {
-        require(founderPercentage + treasuryPercentage == 10000, "Percentages must sum to 10000 (100%)");
-        require(founderPercentage <= 10000, "Founder percentage too high");
-        require(treasuryPercentage <= 10000, "Treasury percentage too high");
+        require(founderPercentage + treasuryPercentage == 10000, "Percentages must sum to 100%");
 
-        _feeDistribution =
-            FeeDistribution({founderNFTPercentage: founderPercentage, treasuryPercentage: treasuryPercentage});
+        _feeDistribution.founderNFTPercentage = founderPercentage;
+        _feeDistribution.treasuryPercentage = treasuryPercentage;
 
         emit FeeDistributionUpdated(founderPercentage, treasuryPercentage);
     }
 
     /**
-     * @dev Distribute platform fees to FounderNFT holders and treasury
+     * @dev Get platform fee percentage
      */
-    function distributePlatformFees(uint256 totalFee) external payable nonReentrant {
-        require(_registeredProjects[msg.sender], "Only registered projects");
-        require(msg.value == totalFee, "Sent ETH must match total fee");
-        require(!_emergencyFreezeDistribution, "Fee distribution frozen");
-        require(totalFee > 0, "Fee must be greater than 0");
-
-        // Calculate distribution amounts
-        uint256 founderAmount = (totalFee * _feeDistribution.founderNFTPercentage) / 10000;
-        uint256 treasuryAmount = totalFee - founderAmount; // Ensures no wei lost to rounding
-
-        // Distribute to FounderNFT holders
-        bool founderSuccess = _distributeFounderFees(founderAmount);
-
-        // Always send treasury portion (critical for platform operations)
-        _distributeTreasuryFees(treasuryAmount);
-
-        // Update tracking
-        _updateFeeTracking(founderAmount, treasuryAmount, founderSuccess);
-
-        emit FeesDistributed(msg.sender, totalFee, founderAmount, treasuryAmount);
-    }
-
-    /**
-     * @dev Relay founder fees from projects
-     */
-    function relayFounderFees(uint256 amount) external payable nonReentrant {
-        require(_registeredProjects[msg.sender], "Only registered projects");
-        require(msg.value == amount, "Sent ETH must match amount");
-
-        address founderNFT = _extensions[ExtensionKeys.FOUNDER_NFT];
-        require(founderNFT != address(0), "FounderNFT not registered");
-
-        (bool success,) = founderNFT.call{value: amount}("");
-        require(success, "Relay failed");
-
-        // Notify FounderNFT about fees
-        try IFounderNFT(founderNFT).addPlatformFees(amount) {
-            _totalFeesReceived[founderNFT] += amount;
-        } catch {
-            // ETH was sent successfully even if notification failed
-            _totalFeesReceived[founderNFT] += amount;
-        }
-    }
-
-    /**
-     * @dev Internal function to distribute fees to FounderNFT stakers
-     */
-    function _distributeFounderFees(uint256 amount) private returns (bool success) {
-        if (amount == 0) return true;
-
-        address founderNFTAddress = _extensions[ExtensionKeys.FOUNDER_NFT];
-        if (founderNFTAddress == address(0)) {
-            _pendingFounderFees += amount;
-            return false;
-        }
-
-        // Check if there are staked tokens
-        try IFounderNFT(founderNFTAddress).getTotalStakedTokens() returns (uint256 stakedTokens) {
-            if (stakedTokens > 0) {
-                // Send ETH to FounderNFT contract
-                (bool transferSuccess,) = founderNFTAddress.call{value: amount}("");
-                if (transferSuccess) {
-                    // Notify FounderNFT contract about the new fees
-                    try IFounderNFT(founderNFTAddress).addPlatformFees(amount) {
-                        _totalFeesReceived[founderNFTAddress] += amount;
-                        return true;
-                    } catch {
-                        // ETH was sent successfully, but notification failed
-                        // This is acceptable as FounderNFT will handle the ETH
-                        _totalFeesReceived[founderNFTAddress] += amount;
-                        return true;
-                    }
-                } else {
-                    _pendingFounderFees += amount;
-                    return false;
-                }
-            } else {
-                // No stakers, accumulate for future distribution
-                _pendingFounderFees += amount;
-                return false;
-            }
-        } catch {
-            _pendingFounderFees += amount;
-            return false;
-        }
-    }
-
-    /**
-     * @dev Internal function to distribute fees to treasury
-     */
-    function _distributeTreasuryFees(uint256 amount) private {
-        if (amount == 0) return;
-
-        (bool success,) = _platformTreasury.call{value: amount}("");
-        require(success, "Treasury transfer failed");
-        _totalFeesReceived[_platformTreasury] += amount;
-    }
-
-    /**
-     * @dev Update fee tracking for transparency
-     */
-    function _updateFeeTracking(uint256 founderAmount, uint256 treasuryAmount, bool founderSuccess) private {
-        if (founderSuccess) {
-            _lastFeeDistribution[_extensions[ExtensionKeys.FOUNDER_NFT]] = founderAmount;
-        }
-        _lastFeeDistribution[_platformTreasury] = treasuryAmount;
-    }
-
-    // ============================================================================
-    // PENDING FEES MANAGEMENT
-    // ============================================================================
-
-    /**
-     * @dev Distribute accumulated pending FounderNFT fees
-     */
-    function distributePendingFounderFees() external onlyRole(ADMIN_ROLE) nonReentrant {
-        require(_pendingFounderFees > 0, "No pending founder fees");
-
-        uint256 amount = _pendingFounderFees;
-        _pendingFounderFees = 0;
-
-        bool success = _distributeFounderFees(amount);
-        if (success) {
-            emit PendingFeesDistributed(amount, _extensions[ExtensionKeys.FOUNDER_NFT]);
-        } else {
-            _pendingFounderFees = amount;
-            revert("Pending fee distribution failed");
-        }
-    }
-
-    /**
-     * @dev Emergency withdrawal of pending fees to treasury
-     */
-    function emergencyWithdrawPendingFees() external onlyRole(ADMIN_ROLE) nonReentrant {
-        require(_pendingFounderFees > 0, "No pending fees");
-
-        uint256 amount = _pendingFounderFees;
-        _pendingFounderFees = 0;
-
-        (bool success,) = _platformTreasury.call{value: amount}("");
-        require(success, "Emergency withdrawal failed");
-
-        emit PendingFeesDistributed(amount, _platformTreasury);
-    }
-
-    // ============================================================================
-    // EMERGENCY CONTROLS
-    // ============================================================================
-
-    /**
-     * @dev Emergency freeze/unfreeze fee distribution
-     */
-    function toggleEmergencyFreeze(bool freeze, address emergencyRecipient) external onlyRole(ADMIN_ROLE) {
-        if (freeze) {
-            require(emergencyRecipient != address(0), "Emergency recipient required");
-            _emergencyFeeRecipient = emergencyRecipient;
-        }
-        _emergencyFreezeDistribution = freeze;
-        emit EmergencyDistributionToggled(freeze, emergencyRecipient);
-    }
-
-    // ============================================================================
-    // FUTURE EXPANSION FUNCTIONS
-    // ============================================================================
-
-    /**
-     * @dev Add future recipient for system expansion
-     */
-    function addFutureRecipient(bytes32 recipientType, address recipient, uint256 percentage)
-        external
-        onlyRole(ADMIN_ROLE)
-    {
-        require(recipient != address(0), "Invalid recipient");
-        require(percentage <= 10000, "Percentage too high");
-        require(_futureRecipients[recipientType] == address(0), "Recipient exists");
-
-        _futureRecipients[recipientType] = recipient;
-        _futureRecipientPercentages[recipientType] = percentage;
-
-        emit FutureRecipientAdded(recipientType, recipient, percentage);
-    }
-
-    /**
-     * @dev Remove future recipient
-     */
-    function removeFutureRecipient(bytes32 recipientType) external onlyRole(ADMIN_ROLE) {
-        require(_futureRecipients[recipientType] != address(0), "Recipient does not exist");
-
-        delete _futureRecipients[recipientType];
-        delete _futureRecipientPercentages[recipientType];
-
-        emit FutureRecipientRemoved(recipientType);
-    }
-
-    // ============================================================================
-    // VIEW FUNCTIONS
-    // ============================================================================
-
-    /**
-     * @dev Get current fee distribution percentages
-     */
-    function getFeeDistribution() external view returns (uint256 founderPercentage, uint256 treasuryPercentage) {
-        return (_feeDistribution.founderNFTPercentage, _feeDistribution.treasuryPercentage);
-    }
-
-    /**
-     * @dev Get total fees received by recipient
-     */
-    function getTotalFeesReceived(address recipient) external view returns (uint256) {
-        return _totalFeesReceived[recipient];
-    }
-
-    /**
-     * @dev Get pending FounderNFT fees
-     */
-    function getPendingFounderFees() external view returns (uint256) {
-        return _pendingFounderFees;
-    }
-
-    /**
-     * @dev Get last fee distribution for recipient
-     */
-    function getLastFeeDistribution(address recipient) external view returns (uint256) {
-        return _lastFeeDistribution[recipient];
-    }
-
-    /**
-     * @dev Get fee recipients
-     */
-    function getFeeRecipients() external view returns (address founderNFT, address treasury) {
-        return (_extensions[ExtensionKeys.FOUNDER_NFT], _platformTreasury);
-    }
-
-    /**
-     * @dev Get emergency freeze status
-     */
-    function getEmergencyStatus() external view returns (bool frozen, address emergencyRecipient) {
-        return (_emergencyFreezeDistribution, _emergencyFeeRecipient);
-    }
-
-    /**
-     * @dev Get comprehensive fee stats
-     */
-    function getFeeStats()
-        external
-        view
-        returns (
-            uint256 founderPercentage,
-            uint256 treasuryPercentage,
-            uint256 totalFounderFees,
-            uint256 totalTreasuryFees,
-            uint256 pendingFounderFees
-        )
-    {
-        return (
-            _feeDistribution.founderNFTPercentage,
-            _feeDistribution.treasuryPercentage,
-            _totalFeesReceived[_extensions[ExtensionKeys.FOUNDER_NFT]],
-            _totalFeesReceived[_platformTreasury],
-            _pendingFounderFees
-        );
-    }
-
-    /**
-     * @dev Standard view functions
-     */
-    function platformFeePercentage() external view returns (uint256) {
+    function getPlatformFeePercentage() external view returns (uint256) {
         return _platformFeePercentage;
     }
 
-    function platformTreasury() external view returns (address) {
+    /**
+     * @dev Get platform treasury address
+     */
+    function getPlatformTreasury() external view returns (address) {
         return _platformTreasury;
     }
 
-    function isProjectRegistered(address project) external view returns (bool) {
-        return _registeredProjects[project];
-    }
-
-    function getAllProjects() external view returns (address[] memory) {
-        return _allProjects;
-    }
-
-    function getProjectCount() external view returns (uint256) {
-        return _allProjects.length;
+    /**
+     * @dev Get fee distribution info
+     */
+    function getFeeDistribution() external view returns (FeeDistribution memory) {
+        return _feeDistribution;
     }
 
     // ============================================================================
-    // UPGRADE FUNCTIONS
+    // PLATFORM INFO
     // ============================================================================
-
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     /**
-     * @dev Get implementation version
+     * @dev Get platform version
      */
-    function version() external view returns (string memory) {
+    function getVersion() external view returns (string memory) {
         return _version;
+    }
+
+    /**
+     * @dev Update platform version (admin only)
+     */
+    function updateVersion(string memory newVersion) external onlyRole(ADMIN_ROLE) {
+        _version = newVersion;
+    }
+
+    // ============================================================================
+    // EMERGENCY FUNCTIONS
+    // ============================================================================
+
+    /**
+     * @dev Pause the contract (admin only)
+     */
+    function pause() external onlyRole(ADMIN_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @dev Unpause the contract (admin only)
+     */
+    function unpause() external onlyRole(ADMIN_ROLE) {
+        _unpause();
+    }
+
+    // ============================================================================
+    // INTERNAL HELPER FUNCTIONS
+    // ============================================================================
+
+    /**
+     * @dev Remove an element from an array
+     */
+    function _removeFromArray(bytes32[] storage array, bytes32 element) internal {
+        for (uint256 i = 0; i < array.length; i++) {
+            if (array[i] == element) {
+                array[i] = array[array.length - 1];
+                array.pop();
+                break;
+            }
+        }
+    }
+
+    /**
+     * @dev Remove an extension from category array
+     */
+    function _removeFromCategoryArray(bytes32 category, bytes32 extensionKey) internal {
+        bytes32[] storage categoryArray = _extensionsByCategory[category];
+        for (uint256 i = 0; i < categoryArray.length; i++) {
+            if (categoryArray[i] == extensionKey) {
+                categoryArray[i] = categoryArray[categoryArray.length - 1];
+                categoryArray.pop();
+                break;
+            }
+        }
+    }
+
+    /**
+     * @dev Remove a project from the projects array
+     */
+    function _removeFromProjectArray(address project) internal {
+        for (uint256 i = 0; i < _allProjects.length; i++) {
+            if (_allProjects[i] == project) {
+                _allProjects[i] = _allProjects[_allProjects.length - 1];
+                _allProjects.pop();
+                break;
+            }
+        }
+    }
+
+    // ============================================================================
+    // UPGRADE AUTHORIZATION
+    // ============================================================================
+
+    /**
+     * @dev Authorize contract upgrades (UUPS pattern)
+     */
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+    // ============================================================================
+    // UTILITY FUNCTIONS
+    // ============================================================================
+
+    /**
+     * @dev Generate extension key from string
+     */
+    function generateExtensionKey(string memory name) external pure returns (bytes32) {
+        return keccak256(abi.encodePacked(name));
+    }
+
+    /**
+     * @dev Check if extension has specific permission
+     */
+    function extensionHasPermission(bytes32 extensionKey, bytes32 permission) external view returns (bool) {
+        bytes32[] memory permissions = _extensions[extensionKey].permissions;
+        for (uint256 i = 0; i < permissions.length; i++) {
+            if (permissions[i] == permission) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -1,64 +1,216 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import {ProjectStorage} from "./ProjectStorage.sol";
-import {ExtensionKeys} from "./ExtensionKeys.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+
+/**
+ * @title IPlatformRegistry
+ * @dev Interface for the Platform Registry with dynamic extension support
+ */
+interface IPlatformRegistry {
+    function isFactoryRegistered(address factory) external view returns (bool);
+    function isExtensionRegistered(bytes32 extensionKey) external view returns (bool);
+    function getExtension(bytes32 extensionKey) external view returns (address);
+    function isProjectRegistered(address project) external view returns (bool);
+    function getEmergencyStatus() external view returns (bool frozen, address emergencyRecipient);
+    function relayFounderFees(uint256 amount) external payable;
+}
 
 /**
  * @title IFounderNFT
- * @dev Interface for the FounderNFT contract
+ * @dev Interface for FounderNFT extension
  */
 interface IFounderNFT {
-    function getPlatformFeeDistributionPercentage() external view returns (uint256);
     function getTotalStakedTokens() external view returns (uint256);
+    function getPlatformFeeDistributionPercentage() external view returns (uint256);
     function addPlatformFees(uint256 amount) external;
 }
 
 /**
- * @title IPlatformRegistry
- * @dev Interface for the PlatformRegistry with extension registry and relay functionality
+ * @title IOracle
+ * @dev Interface for Oracle extension
  */
-interface IPlatformRegistry {
-    function getExtension(bytes32 extensionType) external view returns (address);
-    function relayFounderFees(uint256 amount) external payable;
-    function isProjectRegistered(address project) external view returns (bool);
-    function getEmergencyStatus() external view returns (bool frozen, address emergencyRecipient);
-    function isFactoryRegistered(address factory) external view returns (bool);
+interface IOracle {
+    function requestPriceData(address asset) external returns (bytes32 requestId);
+    function getLatestPrice(address asset) external view returns (uint256 price, uint256 timestamp);
+}
+
+/**
+ * @title IValidator
+ * @dev Interface for Validator extension
+ */
+interface IValidator {
+    function validateMilestone(address project, uint256 milestoneId, bytes calldata evidence)
+        external
+        returns (bool approved);
+    function isMilestoneValidated(address project, uint256 milestoneId) external view returns (bool);
 }
 
 /**
  * @title Project
- * @dev Upgradeable project contract for fundraising with standardized extension integration
+ * @dev Individual crowdfunding project with milestone-based funding and dynamic extension support
+ * @notice This contract represents a single crowdfunding project with enhanced modularity
  */
 contract Project is
     Initializable,
-    ProjectStorage,
-    OwnableUpgradeable,
+    UUPSUpgradeable,
     AccessControlUpgradeable,
+    OwnableUpgradeable,
     ReentrancyGuardUpgradeable,
-    UUPSUpgradeable
+    PausableUpgradeable
 {
-    // Access control roles
+    // ============================================================================
+    // CONSTANTS & EXTENSION CATEGORIES
+    // ============================================================================
+
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant TEAM_MEMBER_ROLE = keccak256("TEAM_MEMBER_ROLE");
 
-    // Events
-    event FundingReceived(address indexed investor, uint256 amount);
-    event MilestoneCreated(uint256 indexed milestoneId, string description, uint256 fundingPercentage);
-    event MilestoneCompleted(uint256 indexed milestoneId);
-    event MilestoneVoteReceived(uint256 indexed milestoneId, address indexed investor);
-    event FundsWithdrawn(uint256 amount, address recipient);
-    event ProjectStateChanged(State newState);
+    // Extension categories for common use cases
+    bytes32 public constant CATEGORY_FACTORY = keccak256("FACTORY");
+    bytes32 public constant CATEGORY_ORACLE = keccak256("ORACLE");
+    bytes32 public constant CATEGORY_GOVERNANCE = keccak256("GOVERNANCE");
+    bytes32 public constant CATEGORY_TREASURY = keccak256("TREASURY");
+    bytes32 public constant CATEGORY_VALIDATOR = keccak256("VALIDATOR");
+    bytes32 public constant CATEGORY_TOKEN = keccak256("TOKEN");
+    bytes32 public constant CATEGORY_NFT = keccak256("NFT");
+    bytes32 public constant CATEGORY_UTILITY = keccak256("UTILITY");
+
+    // ============================================================================
+    // ENUMS & STRUCTS
+    // ============================================================================
+
+    enum State {
+        Active,
+        Successful,
+        Failed,
+        Cancelled
+    }
+
+    struct Milestone {
+        string title;
+        string description;
+        uint256 fundingAmount;
+        uint256 deadline;
+        bool isCompleted;
+        bool fundsReleased;
+        bytes32 validationRequirement; // Extension key for validation
+        bytes validationData;
+    }
+
+    struct Investment {
+        uint256 amount;
+        uint256 timestamp;
+        bool isRefunded;
+    }
+
+    // ============================================================================
+    // STATE VARIABLES
+    // ============================================================================
+
+    // Basic project info
+    string private _name;
+    string private _description;
+    address private _creator;
+    uint256 private _fundingGoal;
+    uint256 private _deadline;
+    bool private _isFlexibleFunding;
+    State private _state;
+
+    // Platform integration
+    address private _platformRegistry;
+    uint256 private _platformFeePercentage;
+    address private _platformTreasury;
+
+    // Financial tracking
+    uint256 private _totalRaised;
+    uint256 private _totalWithdrawn;
+    mapping(address => Investment) private _investments;
+    address[] private _investors;
+
+    // Milestone system
+    Milestone[] private _milestones;
+    uint256 private _nextMilestoneToFund;
+
+    // Team management
+    mapping(address => bool) private _teamMembers;
+    address[] private _teamMembersList;
+
+    // Extension integration
+    mapping(bytes32 => bool) private _enabledExtensions;
+    mapping(bytes32 => bytes) private _extensionConfig;
+
+    // Reserved storage slots for future upgrades
+    uint256[50] private __gap;
+
+    // ============================================================================
+    // EVENTS
+    // ============================================================================
+
+    event ProjectCreated(address indexed creator, string name, uint256 fundingGoal, uint256 deadline);
+
+    event InvestmentMade(address indexed investor, uint256 amount, uint256 totalRaised);
+
+    event MilestoneAdded(
+        uint256 indexed milestoneId, string title, uint256 fundingAmount, bytes32 validationRequirement
+    );
+
+    event MilestoneCompleted(uint256 indexed milestoneId, address indexed completedBy);
+
+    event MilestoneFundsReleased(uint256 indexed milestoneId, uint256 amount, address indexed recipient);
+
+    event FundsWithdrawn(address indexed recipient, uint256 amount, uint256 platformFee);
+
     event RefundIssued(address indexed investor, uint256 amount);
+
+    event ProjectStateChanged(State indexed oldState, State indexed newState);
+
     event TeamMemberAdded(address indexed member);
     event TeamMemberRemoved(address indexed member);
+
+    event ExtensionEnabled(bytes32 indexed extensionKey, address indexed extensionAddress);
+
+    event ExtensionDisabled(bytes32 indexed extensionKey);
+
+    event ExtensionConfigured(bytes32 indexed extensionKey, bytes configData);
+
+    // ============================================================================
+    // MODIFIERS
+    // ============================================================================
+
+    modifier onlyActiveFunding() {
+        require(_state == State.Active, "Project not active");
+        require(block.timestamp < _deadline, "Funding period ended");
+        _;
+    }
+
+    modifier onlyTeamMember() {
+        require(_teamMembers[msg.sender], "Not a team member");
+        _;
+    }
+
+    modifier extensionEnabled(bytes32 extensionKey) {
+        require(_enabledExtensions[extensionKey], "Extension not enabled");
+        _;
+    }
+
+    modifier validExtension(bytes32 extensionKey) {
+        require(
+            IPlatformRegistry(_platformRegistry).isExtensionRegistered(extensionKey),
+            "Extension not registered in platform"
+        );
+        _;
+    }
+
+    // ============================================================================
+    // INITIALIZATION
+    // ============================================================================
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -66,7 +218,7 @@ contract Project is
     }
 
     /**
-     * @dev Initializes the project
+     * @dev Initializes the project with dynamic extension support
      */
     function initialize(
         address creator,
@@ -78,18 +230,27 @@ contract Project is
         uint256 platformFeePercentage,
         address platformTreasury,
         address platformRegistry,
-        address[] memory teamMembers
+        address[] memory teamMembers,
+        bytes32[] memory enabledExtensions,
+        bytes[] memory extensionConfigs
     ) external initializer {
-        // Validate factory using standardized check
+        // Validate factory using dynamic registry check
         require(
             IPlatformRegistry(platformRegistry).isFactoryRegistered(msg.sender),
             "Only registered factories can initialize projects"
         );
 
+        require(creator != address(0), "Invalid creator");
+        require(bytes(name).length > 0, "Name cannot be empty");
+        require(fundingGoal > 0, "Funding goal must be positive");
+        require(duration > 0, "Duration must be positive");
+        require(platformFeePercentage <= 1000, "Platform fee too high"); // max 10%
+
         __Ownable_init(creator);
         __AccessControl_init();
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
+        __Pausable_init();
 
         _name = name;
         _description = description;
@@ -110,344 +271,421 @@ contract Project is
 
         // Add creator as team member
         _teamMembers[creator] = true;
+        _teamMembersList.push(creator);
 
         // Add additional team members
         for (uint256 i = 0; i < teamMembers.length; i++) {
-            if (teamMembers[i] != creator) {
-                _teamMembers[teamMembers[i]] = true;
-                _grantRole(TEAM_MEMBER_ROLE, teamMembers[i]);
-                emit TeamMemberAdded(teamMembers[i]);
+            if (teamMembers[i] != creator && teamMembers[i] != address(0)) {
+                _addTeamMember(teamMembers[i]);
             }
         }
+
+        // Initialize extensions
+        require(enabledExtensions.length == extensionConfigs.length, "Extension arrays length mismatch");
+
+        for (uint256 i = 0; i < enabledExtensions.length; i++) {
+            _enableExtension(enabledExtensions[i], extensionConfigs[i]);
+        }
+
+        emit ProjectCreated(creator, name, fundingGoal, _deadline);
     }
 
     // ============================================================================
-    // MODIFIERS
+    // EXTENSION MANAGEMENT
     // ============================================================================
 
     /**
-     * @dev Modifier for active funding state
+     * @dev Enable an extension for this project
      */
-    modifier onlyActiveFunding() {
-        require(_state == State.Active, "Project not active");
-        require(block.timestamp < _deadline, "Funding period ended");
-        _;
+    function enableExtension(bytes32 extensionKey, bytes memory configData)
+        external
+        onlyRole(ADMIN_ROLE)
+        validExtension(extensionKey)
+    {
+        _enableExtension(extensionKey, configData);
     }
 
     /**
-     * @dev Modifier for after deadline
+     * @dev Disable an extension for this project
      */
-    modifier onlyAfterDeadline() {
-        require(block.timestamp >= _deadline, "Funding period not ended");
-        _;
+    function disableExtension(bytes32 extensionKey) external onlyRole(ADMIN_ROLE) {
+        require(_enabledExtensions[extensionKey], "Extension not enabled");
+
+        _enabledExtensions[extensionKey] = false;
+        delete _extensionConfig[extensionKey];
+
+        emit ExtensionDisabled(extensionKey);
     }
 
     /**
-     * @dev Modifier for investors
+     * @dev Update extension configuration
      */
-    modifier onlyInvestor() {
-        require(_investments[msg.sender] > 0, "Not an investor");
-        _;
+    function configureExtension(bytes32 extensionKey, bytes memory configData)
+        external
+        onlyRole(ADMIN_ROLE)
+        extensionEnabled(extensionKey)
+    {
+        _extensionConfig[extensionKey] = configData;
+        emit ExtensionConfigured(extensionKey, configData);
+    }
+
+    /**
+     * @dev Internal function to enable an extension
+     */
+    function _enableExtension(bytes32 extensionKey, bytes memory configData) internal {
+        require(IPlatformRegistry(_platformRegistry).isExtensionRegistered(extensionKey), "Extension not registered");
+
+        _enabledExtensions[extensionKey] = true;
+        _extensionConfig[extensionKey] = configData;
+
+        address extensionAddress = IPlatformRegistry(_platformRegistry).getExtension(extensionKey);
+        emit ExtensionEnabled(extensionKey, extensionAddress);
+        emit ExtensionConfigured(extensionKey, configData);
     }
 
     // ============================================================================
-    // FUNDING FUNCTIONS
+    // INVESTMENT FUNCTIONS
     // ============================================================================
 
     /**
-     * @dev Invest in project with native token (ETH)
+     * @dev Invest in the project
      */
     function invest() external payable onlyActiveFunding nonReentrant {
-        require(msg.value > 0, "Investment must be greater than 0");
+        require(msg.value > 0, "Investment must be positive");
+        require(msg.sender != _creator, "Creator cannot invest");
 
-        // Update investment records
-        if (_investments[msg.sender] == 0) {
+        // Check emergency status
+        (bool frozen,) = IPlatformRegistry(_platformRegistry).getEmergencyStatus();
+        require(!frozen, "Platform emergency mode active");
+
+        // Record investment
+        if (_investments[msg.sender].amount == 0) {
             _investors.push(msg.sender);
-            _totalInvestors++;
         }
 
-        _investments[msg.sender] += msg.value;
-        _totalFundsRaised += msg.value;
+        _investments[msg.sender].amount += msg.value;
+        _investments[msg.sender].timestamp = block.timestamp;
+        _totalRaised += msg.value;
 
-        emit FundingReceived(msg.sender, msg.value);
+        emit InvestmentMade(msg.sender, msg.value, _totalRaised);
+
+        // Check if funding goal is reached
+        if (_totalRaised >= _fundingGoal) {
+            _changeState(State.Successful);
+        }
     }
 
     /**
-     * @dev Check and update project state
+     * @dev Request refund (for failed or cancelled projects)
      */
-    function checkAndUpdateState() public onlyAfterDeadline returns (State) {
-        if (_state != State.Active) {
-            return _state;
-        }
+    function requestRefund() external nonReentrant {
+        require(
+            _state == State.Failed || _state == State.Cancelled
+                || (!_isFlexibleFunding && _state == State.Active && block.timestamp >= _deadline),
+            "Refunds not available"
+        );
 
-        if (_totalFundsRaised >= _fundingGoal) {
-            _state = State.Successful;
-        } else {
-            if (_isFlexibleFunding) {
-                _state = State.Successful; // Flexible funding allows any amount
-            } else {
-                _state = State.Failed; // All-or-nothing requires meeting goal
-            }
-        }
+        Investment storage investment = _investments[msg.sender];
+        require(investment.amount > 0, "No investment found");
+        require(!investment.isRefunded, "Already refunded");
 
-        emit ProjectStateChanged(_state);
-        return _state;
-    }
+        uint256 refundAmount = investment.amount;
+        investment.isRefunded = true;
 
-    /**
-     * @dev Claim refund if project failed
-     */
-    function claimRefund() external onlyInvestor nonReentrant {
-        require(_state == State.Failed || _state == State.Cancelled, "Refunds not available");
-        if (_state == State.Failed) {
-            require(!_isFlexibleFunding, "No refunds for flexible funding");
-        }
-
-        uint256 refundAmount = _investments[msg.sender];
-        require(refundAmount > 0, "No funds to refund");
-
-        // Reset investor's contribution
-        _investments[msg.sender] = 0;
-
-        // Send refund
-        (bool success,) = msg.sender.call{value: refundAmount}("");
-        require(success, "Refund failed");
+        (bool success,) = payable(msg.sender).call{value: refundAmount}("");
+        require(success, "Refund transfer failed");
 
         emit RefundIssued(msg.sender, refundAmount);
     }
 
     // ============================================================================
-    // MILESTONE FUNCTIONS
+    // MILESTONE MANAGEMENT
     // ============================================================================
 
     /**
-     * @dev Create a new milestone
+     * @dev Add a new milestone with optional validation requirement
      */
-    function createMilestone(string memory description, uint256 fundingPercentage)
-        external
-        onlyRole(TEAM_MEMBER_ROLE)
-    {
-        require(fundingPercentage > 0 && fundingPercentage <= 10000, "Invalid percentage");
+    function addMilestone(
+        string memory title,
+        string memory description,
+        uint256 fundingAmount,
+        uint256 deadline,
+        bytes32 validationRequirement,
+        bytes memory validationData
+    ) external onlyRole(ADMIN_ROLE) {
+        require(bytes(title).length > 0, "Title cannot be empty");
+        require(fundingAmount > 0, "Funding amount must be positive");
+        require(deadline > block.timestamp, "Deadline must be in future");
 
-        uint256 milestoneId = _milestoneCount;
-        Milestone storage newMilestone = _milestones[milestoneId];
+        // If validation is required, ensure the extension is available
+        if (validationRequirement != bytes32(0)) {
+            require(
+                IPlatformRegistry(_platformRegistry).isExtensionRegistered(validationRequirement),
+                "Validation extension not available"
+            );
+        }
 
-        newMilestone.description = description;
-        newMilestone.fundingPercentage = fundingPercentage;
-        newMilestone.completed = false;
-        newMilestone.fundsReleased = false;
-        // Require 51% of investors by investment amount to approve
-        newMilestone.votesNeeded = (_totalInvestors * 51) / 100;
+        _milestones.push(
+            Milestone({
+                title: title,
+                description: description,
+                fundingAmount: fundingAmount,
+                deadline: deadline,
+                isCompleted: false,
+                fundsReleased: false,
+                validationRequirement: validationRequirement,
+                validationData: validationData
+            })
+        );
 
-        _milestoneCount++;
-
-        emit MilestoneCreated(milestoneId, description, fundingPercentage);
+        uint256 milestoneId = _milestones.length - 1;
+        emit MilestoneAdded(milestoneId, title, fundingAmount, validationRequirement);
     }
 
     /**
-     * @dev Submit milestone completion for verification
+     * @dev Complete a milestone
      */
-    function submitMilestoneCompletion(uint256 milestoneId) external onlyRole(TEAM_MEMBER_ROLE) {
-        require(milestoneId < _milestoneCount, "Invalid milestone");
-        require(!_milestones[milestoneId].completed, "Already completed");
+    function completeMilestone(uint256 milestoneId, bytes memory evidence) external onlyTeamMember {
+        require(milestoneId < _milestones.length, "Invalid milestone ID");
+
+        Milestone storage milestone = _milestones[milestoneId];
+        require(!milestone.isCompleted, "Milestone already completed");
+        require(block.timestamp <= milestone.deadline, "Milestone deadline passed");
+
+        // Handle validation if required
+        if (milestone.validationRequirement != bytes32(0)) {
+            require(_enabledExtensions[milestone.validationRequirement], "Required validation extension not enabled");
+
+            address validatorAddress =
+                IPlatformRegistry(_platformRegistry).getExtension(milestone.validationRequirement);
+
+            bool approved = IValidator(validatorAddress).validateMilestone(address(this), milestoneId, evidence);
+
+            require(approved, "Milestone validation failed");
+        }
+
+        milestone.isCompleted = true;
+        emit MilestoneCompleted(milestoneId, msg.sender);
+    }
+
+    /**
+     * @dev Release funds for a completed milestone
+     */
+    function releaseMilestoneFunds(uint256 milestoneId) external onlyTeamMember nonReentrant {
+        require(milestoneId < _milestones.length, "Invalid milestone ID");
+        require(milestoneId == _nextMilestoneToFund, "Must release milestones in order");
+
+        Milestone storage milestone = _milestones[milestoneId];
+        require(milestone.isCompleted, "Milestone not completed");
+        require(!milestone.fundsReleased, "Funds already released");
         require(_state == State.Successful, "Project not successful");
 
-        _milestones[milestoneId].completed = true;
-
-        emit MilestoneCompleted(milestoneId);
-    }
-
-    /**
-     * @dev Vote for milestone completion
-     */
-    function voteMilestone(uint256 milestoneId) external onlyInvestor {
-        require(milestoneId < _milestoneCount, "Invalid milestone");
-        require(_milestones[milestoneId].completed, "Milestone not completed");
-        require(!_milestones[milestoneId].investorVoted[msg.sender], "Already voted");
-
-        _milestones[milestoneId].investorVoted[msg.sender] = true;
-        _milestones[milestoneId].votesReceived++;
-
-        emit MilestoneVoteReceived(milestoneId, msg.sender);
-    }
-
-    /**
-     * @dev Release funds for completed milestone with enhanced fee distribution
-     */
-    function releaseMilestoneFunds(uint256 milestoneId) external onlyRole(TEAM_MEMBER_ROLE) nonReentrant {
-        require(milestoneId < _milestoneCount, "Invalid milestone");
-        require(_milestones[milestoneId].completed, "Milestone not completed");
-        require(!_milestones[milestoneId].fundsReleased, "Funds already released");
-        require(_state == State.Successful, "Project not successful");
-        require(_milestones[milestoneId].votesReceived >= _milestones[milestoneId].votesNeeded, "Not enough votes");
-
-        // CHECK 1: Emergency freeze validation
+        // Check emergency status
         (bool frozen,) = IPlatformRegistry(_platformRegistry).getEmergencyStatus();
-        require(!frozen, "Fee distribution frozen");
+        require(!frozen, "Platform emergency mode active");
 
-        _milestones[milestoneId].fundsReleased = true;
+        uint256 availableFunds = address(this).balance;
+        uint256 releaseAmount = milestone.fundingAmount;
 
-        // Calculate funds to release based on percentage
-        uint256 releaseAmount = (_totalFundsRaised * _milestones[milestoneId].fundingPercentage) / 10000;
+        if (releaseAmount > availableFunds) {
+            releaseAmount = availableFunds;
+        }
+
+        require(releaseAmount > 0, "No funds available");
+
+        // Calculate platform fee
         uint256 platformFee = (releaseAmount * _platformFeePercentage) / 10000;
+        uint256 projectAmount = releaseAmount - platformFee;
 
-        // CHECK 2: Get FounderNFT extension using standardized key
-        address foundersNFTAddress = IPlatformRegistry(_platformRegistry).getExtension(ExtensionKeys.FOUNDER_NFT);
+        milestone.fundsReleased = true;
+        _totalWithdrawn += releaseAmount;
+        _nextMilestoneToFund++;
 
-        uint256 founderShare = 0;
-        uint256 treasuryAmount = platformFee;
+        // Distribute platform fee using dynamic extension system
+        if (platformFee > 0) {
+            _distributePlatformFee(platformFee);
+        }
 
-        // Enhanced fee distribution logic
-        if (foundersNFTAddress != address(0)) {
-            // FounderNFT is registered, attempt to distribute fees
-            try IFounderNFT(foundersNFTAddress).getPlatformFeeDistributionPercentage() returns (
-                uint256 founderPercentage
-            ) {
-                // Calculate founder share
-                founderShare = (platformFee * founderPercentage) / 10000;
+        // Send project funds to creator
+        if (projectAmount > 0) {
+            (bool success,) = payable(_creator).call{value: projectAmount}("");
+            require(success, "Project funds transfer failed");
+        }
 
-                if (founderShare > 0) {
-                    // Check if there are staked tokens
-                    try IFounderNFT(foundersNFTAddress).getTotalStakedTokens() returns (uint256 stakedTokens) {
-                        if (stakedTokens > 0) {
-                            // Use the registry's relay function to send fees to FounderNFT
-                            treasuryAmount = platformFee - founderShare;
+        emit MilestoneFundsReleased(milestoneId, projectAmount, _creator);
+        emit FundsWithdrawn(_creator, projectAmount, platformFee);
+    }
 
-                            try IPlatformRegistry(_platformRegistry).relayFounderFees{value: founderShare}(founderShare)
-                            {
-                                // Successfully relayed fees through the registry
-                            } catch {
-                                // If relay fails, send all fees to treasury
-                                treasuryAmount = platformFee;
-                                founderShare = 0;
+    /**
+     * @dev Distribute platform fee using dynamic extension system
+     */
+    function _distributePlatformFee(uint256 platformFee) internal {
+        // Get the FounderNFT extension key dynamically
+        bytes32 founderNFTKey = keccak256("FOUNDER_NFT");
+
+        // Check if FounderNFT extension is enabled and has stakers
+        if (_enabledExtensions[founderNFTKey]) {
+            address founderNFTAddress = IPlatformRegistry(_platformRegistry).getExtension(founderNFTKey);
+
+            if (founderNFTAddress != address(0)) {
+                try IFounderNFT(founderNFTAddress).getTotalStakedTokens() returns (uint256 stakedTokens) {
+                    if (stakedTokens > 0) {
+                        try IFounderNFT(founderNFTAddress).getPlatformFeeDistributionPercentage() returns (
+                            uint256 founderPercentage
+                        ) {
+                            uint256 founderAmount = (platformFee * founderPercentage) / 10000;
+                            uint256 treasuryAmount = platformFee - founderAmount;
+
+                            // Send founder portion
+                            if (founderAmount > 0) {
+                                IPlatformRegistry(_platformRegistry).relayFounderFees{value: founderAmount}(
+                                    founderAmount
+                                );
                             }
-                        }
-                    } catch {
-                        // If call fails, send all fees to treasury
-                        treasuryAmount = platformFee;
-                        founderShare = 0;
+
+                            // Send treasury portion
+                            if (treasuryAmount > 0) {
+                                (bool treasurySuccess,) = _platformTreasury.call{value: treasuryAmount}("");
+                                require(treasurySuccess, "Treasury transfer failed");
+                            }
+
+                            return;
+                        } catch {}
                     }
-                }
-            } catch {
-                // If call fails, send all fees to treasury
-                treasuryAmount = platformFee;
-                founderShare = 0;
+                } catch {}
             }
         }
 
-        // Update withdrawn funds
-        _totalFundsWithdrawn += releaseAmount;
-
-        // Send platform fee to treasury (minus founder share if applicable)
-        (bool feeSuccess,) = _platformTreasury.call{value: treasuryAmount}("");
-        require(feeSuccess, "Fee transfer failed");
-
-        // Send funds to creator
-        uint256 creatorAmount = releaseAmount - platformFee;
-        (bool success,) = _creator.call{value: creatorAmount}("");
-        require(success, "Transfer failed");
-
-        emit FundsWithdrawn(releaseAmount, _creator);
+        // Fallback: send all to treasury
+        (bool fallbackSuccess,) = _platformTreasury.call{value: platformFee}("");
+        require(fallbackSuccess, "Platform fee transfer failed");
     }
 
     // ============================================================================
-    // PROJECT CONFIGURATION FUNCTIONS
+    // PROJECT MANAGEMENT
     // ============================================================================
 
     /**
-     * @dev Set the project's NFT contract address (uses extension validation)
+     * @dev Withdraw remaining funds (only after project completion or failure)
      */
-    function setProjectNFTContract(address nftContract) external onlyRole(ADMIN_ROLE) {
-        require(_projectNFTContract == address(0), "NFT contract already set");
+    function withdrawRemainingFunds() external onlyRole(ADMIN_ROLE) nonReentrant {
+        require(
+            _state == State.Successful || _state == State.Failed || _state == State.Cancelled,
+            "Cannot withdraw during active funding"
+        );
 
-        // Optional: Validate that the NFT contract is from a registered factory
-        address nftFactory = IPlatformRegistry(_platformRegistry).getExtension(ExtensionKeys.NFT_FACTORY);
-        if (nftFactory != address(0)) {
-            // Could add validation logic here if needed
+        // For successful projects, ensure all milestones are funded
+        if (_state == State.Successful) {
+            require(_nextMilestoneToFund >= _milestones.length, "Complete milestones first");
         }
 
-        _projectNFTContract = nftContract;
-    }
+        uint256 remainingBalance = address(this).balance;
+        require(remainingBalance > 0, "No funds to withdraw");
 
-    /**
-     * @dev Set the project's token contract address (uses extension validation)
-     */
-    function setProjectTokenContract(address tokenContract) external onlyRole(ADMIN_ROLE) {
-        require(_projectTokenContract == address(0), "Token contract already set");
+        if (_state == State.Successful) {
+            // Calculate platform fee on remaining funds
+            uint256 platformFee = (remainingBalance * _platformFeePercentage) / 10000;
+            uint256 projectAmount = remainingBalance - platformFee;
 
-        // Optional: Validate that the token contract is from a registered factory
-        address tokenFactory = IPlatformRegistry(_platformRegistry).getExtension(ExtensionKeys.TOKEN_FACTORY);
-        if (tokenFactory != address(0)) {
-            // Could add validation logic here if needed
+            _totalWithdrawn += remainingBalance;
+
+            // Distribute platform fee
+            if (platformFee > 0) {
+                _distributePlatformFee(platformFee);
+            }
+
+            // Send remaining funds to creator
+            if (projectAmount > 0) {
+                (bool success,) = payable(_creator).call{value: projectAmount}("");
+                require(success, "Withdrawal failed");
+            }
+
+            emit FundsWithdrawn(_creator, projectAmount, platformFee);
+        } else {
+            // For failed/cancelled projects, funds should be available for refunds
+            revert("Failed/cancelled projects should process refunds");
         }
-
-        _projectTokenContract = tokenContract;
     }
 
     /**
-     * @dev Get the project's NFT contract address
+     * @dev Cancel the project (admin only)
      */
-    function getProjectNFTContract() external view returns (address) {
-        return _projectNFTContract;
+    function cancelProject() external onlyRole(ADMIN_ROLE) {
+        require(_state == State.Active, "Cannot cancel non-active project");
+        _changeState(State.Cancelled);
     }
 
     /**
-     * @dev Get the project's token contract address
+     * @dev Internal function to change project state
      */
-    function getProjectTokenContract() external view returns (address) {
-        return _projectTokenContract;
+    function _changeState(State newState) internal {
+        State oldState = _state;
+        _state = newState;
+        emit ProjectStateChanged(oldState, newState);
+
+        // Handle state transitions
+        if (newState == State.Failed || newState == State.Cancelled) {
+            _pause(); // Pause to prevent new investments
+        }
+    }
+
+    /**
+     * @dev Check and update project state based on deadline
+     */
+    function updateProjectState() external {
+        if (_state == State.Active && block.timestamp >= _deadline) {
+            if (_totalRaised >= _fundingGoal || _isFlexibleFunding) {
+                _changeState(State.Successful);
+            } else {
+                _changeState(State.Failed);
+            }
+        }
     }
 
     // ============================================================================
-    // TEAM MANAGEMENT FUNCTIONS
+    // TEAM MANAGEMENT
     // ============================================================================
 
     /**
      * @dev Add team member
      */
     function addTeamMember(address member) external onlyRole(ADMIN_ROLE) {
-        require(member != address(0), "Invalid address");
+        require(member != address(0), "Invalid member address");
         require(!_teamMembers[member], "Already a team member");
 
-        _teamMembers[member] = true;
-        _grantRole(TEAM_MEMBER_ROLE, member);
-
-        emit TeamMemberAdded(member);
+        _addTeamMember(member);
     }
 
     /**
      * @dev Remove team member
      */
     function removeTeamMember(address member) external onlyRole(ADMIN_ROLE) {
-        require(member != _creator, "Cannot remove creator");
-        require(member != owner(), "Cannot remove owner");
         require(_teamMembers[member], "Not a team member");
+        require(member != _creator, "Cannot remove creator");
 
         _teamMembers[member] = false;
         _revokeRole(TEAM_MEMBER_ROLE, member);
+
+        // Remove from array
+        for (uint256 i = 0; i < _teamMembersList.length; i++) {
+            if (_teamMembersList[i] == member) {
+                _teamMembersList[i] = _teamMembersList[_teamMembersList.length - 1];
+                _teamMembersList.pop();
+                break;
+            }
+        }
 
         emit TeamMemberRemoved(member);
     }
 
     /**
-     * @dev Check if address is team member
+     * @dev Internal function to add team member
      */
-    function isTeamMember(address member) external view returns (bool) {
-        return _teamMembers[member];
-    }
-
-    // ============================================================================
-    // PROJECT ADMINISTRATION FUNCTIONS
-    // ============================================================================
-
-    /**
-     * @dev Cancel project (only possible before deadline)
-     */
-    function cancelProject() external onlyRole(ADMIN_ROLE) {
-        require(_state == State.Active, "Cannot cancel non-active project");
-
-        _state = State.Cancelled;
-        emit ProjectStateChanged(State.Cancelled);
+    function _addTeamMember(address member) internal {
+        _teamMembers[member] = true;
+        _teamMembersList.push(member);
+        _grantRole(TEAM_MEMBER_ROLE, member);
+        emit TeamMemberAdded(member);
     }
 
     // ============================================================================
@@ -455,9 +693,9 @@ contract Project is
     // ============================================================================
 
     /**
-     * @dev Get project details
+     * @dev Get basic project info
      */
-    function getProjectDetails()
+    function getProjectInfo()
         external
         view
         returns (
@@ -466,83 +704,98 @@ contract Project is
             address creator,
             uint256 fundingGoal,
             uint256 deadline,
-            uint256 totalFundsRaised,
-            State state,
-            bool isFlexibleFunding
+            bool isFlexibleFunding,
+            State state
         )
     {
-        return (_name, _description, _creator, _fundingGoal, _deadline, _totalFundsRaised, _state, _isFlexibleFunding);
+        return (_name, _description, _creator, _fundingGoal, _deadline, _isFlexibleFunding, _state);
     }
 
     /**
-     * @dev Get project state
+     * @dev Get financial info
      */
-    function getProjectState() external view returns (State state) {
-        return (_state);
-    }
-
-    /**
-     * @dev Get project isFlexibleFunding state
-     */
-    function getIsFlexibleFunding() external view returns (bool isFlexibleFunding) {
-        return (_isFlexibleFunding);
-    }
-
-    /**
-     * @dev Get milestone details
-     */
-    function getMilestoneDetails(uint256 milestoneId)
+    function getFinancialInfo()
         external
         view
         returns (
-            string memory description,
-            uint256 fundingPercentage,
-            bool completed,
-            bool fundsReleased,
-            uint256 votesNeeded,
-            uint256 votesReceived
+            uint256 totalRaised,
+            uint256 totalWithdrawn,
+            uint256 currentBalance,
+            uint256 platformFeePercentage,
+            uint256 investorCount
         )
     {
-        require(milestoneId < _milestoneCount, "Invalid milestone ID");
+        return (_totalRaised, _totalWithdrawn, address(this).balance, _platformFeePercentage, _investors.length);
+    }
 
-        Milestone storage milestone = _milestones[milestoneId];
+    /**
+     * @dev Get investment info for an address
+     */
+    function getInvestment(address investor)
+        external
+        view
+        returns (uint256 amount, uint256 timestamp, bool isRefunded)
+    {
+        Investment memory investment = _investments[investor];
+        return (investment.amount, investment.timestamp, investment.isRefunded);
+    }
+
+    /**
+     * @dev Get milestone info
+     */
+    function getMilestone(uint256 milestoneId)
+        external
+        view
+        returns (
+            string memory title,
+            string memory description,
+            uint256 fundingAmount,
+            uint256 deadline,
+            bool isCompleted,
+            bool fundsReleased,
+            bytes32 validationRequirement
+        )
+    {
+        require(milestoneId < _milestones.length, "Invalid milestone ID");
+
+        Milestone memory milestone = _milestones[milestoneId];
         return (
+            milestone.title,
             milestone.description,
-            milestone.fundingPercentage,
-            milestone.completed,
+            milestone.fundingAmount,
+            milestone.deadline,
+            milestone.isCompleted,
             milestone.fundsReleased,
-            milestone.votesNeeded,
-            milestone.votesReceived
+            milestone.validationRequirement
         );
-    }
-
-    /**
-     * @dev Get investor details
-     */
-    function getInvestmentAmount(address investor) external view returns (uint256) {
-        return _investments[investor];
-    }
-
-    /**
-     * @dev Get investor count
-     */
-    function getInvestorCount() external view returns (uint256) {
-        return _totalInvestors;
     }
 
     /**
      * @dev Get milestone count
      */
     function getMilestoneCount() external view returns (uint256) {
-        return _milestoneCount;
+        return _milestones.length;
     }
 
     /**
-     * @dev Check if investor has voted on milestone
+     * @dev Get next milestone to fund
      */
-    function hasInvestorVoted(uint256 milestoneId, address investor) external view returns (bool) {
-        require(milestoneId < _milestoneCount, "Invalid milestone ID");
-        return _milestones[milestoneId].investorVoted[investor];
+    function getNextMilestoneToFund() external view returns (uint256) {
+        return _nextMilestoneToFund;
+    }
+
+    /**
+     * @dev Get all team members
+     */
+    function getTeamMembers() external view returns (address[] memory) {
+        return _teamMembersList;
+    }
+
+    /**
+     * @dev Check if address is team member
+     */
+    function isTeamMember(address account) external view returns (bool) {
+        return _teamMembers[account];
     }
 
     /**
@@ -553,52 +806,51 @@ contract Project is
     }
 
     /**
-     * @dev Get project creator
+     * @dev Check if extension is enabled
      */
-    function getCreator() external view returns (address) {
-        return _creator;
+    function isExtensionEnabled(bytes32 extensionKey) external view returns (bool) {
+        return _enabledExtensions[extensionKey];
     }
 
     /**
-     * @dev Get funding goal
+     * @dev Get extension configuration
      */
-    function getFundingGoal() external view returns (uint256) {
-        return _fundingGoal;
+    function getExtensionConfig(bytes32 extensionKey) external view returns (bytes memory) {
+        return _extensionConfig[extensionKey];
     }
 
     /**
-     * @dev Get total funds raised
+     * @dev Get enabled extensions (dynamically generated)
      */
-    function getTotalFundsRaised() external view returns (uint256) {
-        return _totalFundsRaised;
-    }
+    function getEnabledExtensions() external view returns (bytes32[] memory enabledKeys) {
+        // Common extension keys to check
+        bytes32[] memory commonKeys = new bytes32[](8);
+        commonKeys[0] = keccak256("FOUNDER_NFT");
+        commonKeys[1] = keccak256("ORACLE");
+        commonKeys[2] = keccak256("VALIDATOR");
+        commonKeys[3] = keccak256("TREASURY");
+        commonKeys[4] = keccak256("PROJECT_FACTORY");
+        commonKeys[5] = keccak256("NFT_FACTORY");
+        commonKeys[6] = keccak256("TOKEN_FACTORY");
+        commonKeys[7] = keccak256("GOVERNANCE");
 
-    /**
-     * @dev Get total funds withdrawn
-     */
-    function getTotalFundsWithdrawn() external view returns (uint256) {
-        return _totalFundsWithdrawn;
-    }
+        // Count enabled extensions
+        uint256 count = 0;
+        for (uint256 i = 0; i < commonKeys.length; i++) {
+            if (_enabledExtensions[commonKeys[i]]) {
+                count++;
+            }
+        }
 
-    /**
-     * @dev Get project deadline
-     */
-    function getDeadline() external view returns (uint256) {
-        return _deadline;
-    }
-
-    /**
-     * @dev Get platform fee percentage
-     */
-    function getPlatformFeePercentage() external view returns (uint256) {
-        return _platformFeePercentage;
-    }
-
-    /**
-     * @dev Get platform treasury address
-     */
-    function getPlatformTreasury() external view returns (address) {
-        return _platformTreasury;
+        // Build result array
+        enabledKeys = new bytes32[](count);
+        uint256 index = 0;
+        for (uint256 i = 0; i < commonKeys.length; i++) {
+            if (_enabledExtensions[commonKeys[i]]) {
+                enabledKeys[index] = commonKeys[i];
+                index++;
+            }
+        }
     }
 
     /**
@@ -608,52 +860,432 @@ contract Project is
         return _platformRegistry;
     }
 
-    /**
-     * @dev Get project name
-     */
-    function getName() external view returns (string memory) {
-        return _name;
-    }
-
-    /**
-     * @dev Get project description
-     */
-    function getDescription() external view returns (string memory) {
-        return _description;
-    }
-
     // ============================================================================
-    // RECEIVE FUNCTION
+    // ADMIN FUNCTIONS
     // ============================================================================
 
     /**
-     * @dev Receive function to accept ETH
+     * @dev Pause the project (admin only)
+     */
+    function pauseProject() external onlyRole(ADMIN_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @dev Unpause the project (admin only)
+     */
+    function unpauseProject() external onlyRole(ADMIN_ROLE) {
+        _unpause();
+    }
+
+    /**
+     * @dev Emergency withdrawal (admin only)
+     */
+    function emergencyWithdraw() external onlyRole(ADMIN_ROLE) {
+        (bool frozen, address emergencyRecipient) = IPlatformRegistry(_platformRegistry).getEmergencyStatus();
+        require(frozen, "No emergency declared");
+        require(emergencyRecipient != address(0), "No emergency recipient set");
+
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No funds to withdraw");
+
+        (bool success,) = payable(emergencyRecipient).call{value: balance}("");
+        require(success, "Emergency withdrawal failed");
+    }
+
+    // ============================================================================
+    // UPGRADE AUTHORIZATION
+    // ============================================================================
+
+    /**
+     * @dev Authorize contract upgrades (UUPS pattern)
+     */
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+    // ============================================================================
+    // RECEIVE & FALLBACK
+    // ============================================================================
+
+    /**
+     * @dev Accept ETH deposits
      */
     receive() external payable {
-        // Only allow direct ETH transfers during active funding
-        require(_state == State.Active, "Project not active");
-        require(block.timestamp < _deadline, "Funding period ended");
+        // Allow ETH deposits even when paused (for refunds, etc.)
+        if (_state == State.Active && !paused()) {
+            // Treat as investment if project is active and not paused
+            require(msg.sender != _creator, "Creator cannot invest via receive");
+            require(block.timestamp < _deadline, "Funding period ended");
 
-        // Process as investment
-        if (_investments[msg.sender] == 0) {
-            _investors.push(msg.sender);
-            _totalInvestors++;
+            // Record investment
+            if (_investments[msg.sender].amount == 0) {
+                _investors.push(msg.sender);
+            }
+
+            _investments[msg.sender].amount += msg.value;
+            _investments[msg.sender].timestamp = block.timestamp;
+            _totalRaised += msg.value;
+
+            emit InvestmentMade(msg.sender, msg.value, _totalRaised);
+
+            // Check if funding goal is reached
+            if (_totalRaised >= _fundingGoal) {
+                _changeState(State.Successful);
+            }
         }
+        // Otherwise just accept the ETH (for platform fee distributions, etc.)
+    }
 
-        _investments[msg.sender] += msg.value;
-        _totalFundsRaised += msg.value;
-
-        emit FundingReceived(msg.sender, msg.value);
+    /**
+     * @dev Fallback function
+     */
+    fallback() external payable {
+        revert("Function not found");
     }
 
     // ============================================================================
-    // UPGRADE FUNCTIONS
+    // EXTENSION INTEGRATION HELPERS
     // ============================================================================
 
     /**
-     * @dev Authorization for upgrades
+     * @dev Call extension function with data
      */
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {
-        // Additional upgrade logic if needed
+    function callExtension(bytes32 extensionKey, bytes memory data)
+        external
+        onlyRole(ADMIN_ROLE)
+        extensionEnabled(extensionKey)
+        returns (bytes memory)
+    {
+        address extensionAddress = IPlatformRegistry(_platformRegistry).getExtension(extensionKey);
+        require(extensionAddress != address(0), "Extension address not found");
+
+        (bool success, bytes memory result) = extensionAddress.call(data);
+        require(success, "Extension call failed");
+
+        return result;
+    }
+
+    /**
+     * @dev Check if project can use a specific extension
+     */
+    function canUseExtension(bytes32 extensionKey) external view returns (bool) {
+        return
+            _enabledExtensions[extensionKey] && IPlatformRegistry(_platformRegistry).isExtensionRegistered(extensionKey);
+    }
+
+    /**
+     * @dev Get extension address if enabled
+     */
+    function getEnabledExtensionAddress(bytes32 extensionKey) external view returns (address) {
+        if (!_enabledExtensions[extensionKey]) {
+            return address(0);
+        }
+        return IPlatformRegistry(_platformRegistry).getExtension(extensionKey);
+    }
+
+    // ============================================================================
+    // ORACLE INTEGRATION (Example Extension Usage)
+    // ============================================================================
+
+    /**
+     * @dev Request price data from Oracle extension (if enabled)
+     */
+    function requestPriceData(address asset) external onlyTeamMember returns (bytes32) {
+        bytes32 oracleKey = keccak256("ORACLE");
+        require(_enabledExtensions[oracleKey], "Oracle extension not enabled");
+
+        address oracleAddress = IPlatformRegistry(_platformRegistry).getExtension(oracleKey);
+        return IOracle(oracleAddress).requestPriceData(asset);
+    }
+
+    /**
+     * @dev Get latest price from Oracle extension (if enabled)
+     */
+    function getLatestPrice(address asset) external view returns (uint256 price, uint256 timestamp) {
+        bytes32 oracleKey = keccak256("ORACLE");
+        require(_enabledExtensions[oracleKey], "Oracle extension not enabled");
+
+        address oracleAddress = IPlatformRegistry(_platformRegistry).getExtension(oracleKey);
+        return IOracle(oracleAddress).getLatestPrice(asset);
+    }
+
+    // ============================================================================
+    // VALIDATION INTEGRATION (Example Extension Usage)
+    // ============================================================================
+
+    /**
+     * @dev Check if milestone is validated by external validator
+     */
+    function isMilestoneValidated(uint256 milestoneId) external view returns (bool) {
+        require(milestoneId < _milestones.length, "Invalid milestone ID");
+
+        Milestone memory milestone = _milestones[milestoneId];
+        if (milestone.validationRequirement == bytes32(0)) {
+            return milestone.isCompleted; // No external validation required
+        }
+
+        if (!_enabledExtensions[milestone.validationRequirement]) {
+            return false; // Required validation extension not enabled
+        }
+
+        address validatorAddress = IPlatformRegistry(_platformRegistry).getExtension(milestone.validationRequirement);
+        if (validatorAddress == address(0)) {
+            return false; // Validator not found
+        }
+
+        return IValidator(validatorAddress).isMilestoneValidated(address(this), milestoneId);
+    }
+
+    // ============================================================================
+    // BATCH OPERATIONS
+    // ============================================================================
+
+    /**
+     * @dev Process multiple refunds in batch (gas efficient)
+     */
+    function batchRefund(address[] memory investors) external onlyRole(ADMIN_ROLE) nonReentrant {
+        require(_state == State.Failed || _state == State.Cancelled, "Refunds not available");
+
+        for (uint256 i = 0; i < investors.length; i++) {
+            address investor = investors[i];
+            Investment storage investment = _investments[investor];
+
+            if (investment.amount > 0 && !investment.isRefunded) {
+                uint256 refundAmount = investment.amount;
+                investment.isRefunded = true;
+
+                (bool success,) = payable(investor).call{value: refundAmount}("");
+                if (success) {
+                    emit RefundIssued(investor, refundAmount);
+                } else {
+                    // Revert the refund status if transfer failed
+                    investment.isRefunded = false;
+                }
+            }
+        }
+    }
+
+    /**
+     * @dev Enable multiple extensions in batch
+     */
+    function batchEnableExtensions(bytes32[] memory extensionKeys, bytes[] memory configData)
+        external
+        onlyRole(ADMIN_ROLE)
+    {
+        require(extensionKeys.length == configData.length, "Array length mismatch");
+
+        for (uint256 i = 0; i < extensionKeys.length; i++) {
+            if (IPlatformRegistry(_platformRegistry).isExtensionRegistered(extensionKeys[i])) {
+                _enableExtension(extensionKeys[i], configData[i]);
+            }
+        }
+    }
+
+    // ============================================================================
+    // ANALYTICS & REPORTING
+    // ============================================================================
+
+    /**
+     * @dev Get comprehensive project analytics
+     */
+    function getProjectAnalytics()
+        external
+        view
+        returns (
+            uint256 totalRaised,
+            uint256 totalWithdrawn,
+            uint256 currentBalance,
+            uint256 investorCount,
+            uint256 milestoneCount,
+            uint256 completedMilestones,
+            uint256 fundedMilestones,
+            uint256 daysRemaining,
+            uint256 fundingProgress // percentage in basis points
+        )
+    {
+        // Calculate completed and funded milestones
+        uint256 completed = 0;
+        uint256 funded = 0;
+        for (uint256 i = 0; i < _milestones.length; i++) {
+            if (_milestones[i].isCompleted) completed++;
+            if (_milestones[i].fundsReleased) funded++;
+        }
+
+        // Calculate days remaining
+        uint256 remaining = 0;
+        if (block.timestamp < _deadline) {
+            remaining = (_deadline - block.timestamp) / 86400; // Convert to days
+        }
+
+        // Calculate funding progress (in basis points for precision)
+        uint256 progress = 0;
+        if (_fundingGoal > 0) {
+            progress = (_totalRaised * 10000) / _fundingGoal;
+            if (progress > 10000) progress = 10000; // Cap at 100%
+        }
+
+        return (
+            _totalRaised,
+            _totalWithdrawn,
+            address(this).balance,
+            _investors.length,
+            _milestones.length,
+            completed,
+            funded,
+            remaining,
+            progress
+        );
+    }
+
+    /**
+     * @dev Get milestone funding summary
+     */
+    function getMilestoneFundingSummary()
+        external
+        view
+        returns (
+            uint256 totalMilestoneAmount,
+            uint256 completedMilestoneAmount,
+            uint256 releasedMilestoneAmount,
+            uint256 pendingMilestoneAmount
+        )
+    {
+        for (uint256 i = 0; i < _milestones.length; i++) {
+            Milestone memory milestone = _milestones[i];
+            totalMilestoneAmount += milestone.fundingAmount;
+
+            if (milestone.isCompleted) {
+                completedMilestoneAmount += milestone.fundingAmount;
+            }
+
+            if (milestone.fundsReleased) {
+                releasedMilestoneAmount += milestone.fundingAmount;
+            } else if (milestone.isCompleted) {
+                pendingMilestoneAmount += milestone.fundingAmount;
+            }
+        }
+    }
+
+    // ============================================================================
+    // UTILITY FUNCTIONS
+    // ============================================================================
+
+    /**
+     * @dev Calculate platform fee for a given amount
+     */
+    function calculatePlatformFee(uint256 amount) external view returns (uint256) {
+        return (amount * _platformFeePercentage) / 10000;
+    }
+
+    /**
+     * @dev Check if project funding period is active
+     */
+    function isFundingActive() external view returns (bool) {
+        return _state == State.Active && block.timestamp < _deadline && !paused();
+    }
+
+    /**
+     * @dev Check if project is successful
+     */
+    function isSuccessful() external view returns (bool) {
+        return _state == State.Successful || (_state == State.Active && _totalRaised >= _fundingGoal);
+    }
+
+    /**
+     * @dev Get time until deadline
+     */
+    function getTimeUntilDeadline() external view returns (uint256) {
+        if (block.timestamp >= _deadline) {
+            return 0;
+        }
+        return _deadline - block.timestamp;
+    }
+
+    /**
+     * @dev Get funding progress percentage (in basis points)
+     */
+    function getFundingProgress() external view returns (uint256) {
+        if (_fundingGoal == 0) return 0;
+        uint256 progress = (_totalRaised * 10000) / _fundingGoal;
+        return progress > 10000 ? 10000 : progress;
+    }
+
+    /**
+     * @dev Check if refunds are available
+     */
+    function areRefundsAvailable() external view returns (bool) {
+        return _state == State.Failed || _state == State.Cancelled
+            || (!_isFlexibleFunding && _state == State.Active && block.timestamp >= _deadline);
+    }
+
+    // ============================================================================
+    // EVENTS FOR EXTENSION INTEGRATION
+    // ============================================================================
+
+    /**
+     * @dev Emit custom event for extension tracking
+     */
+    function emitExtensionEvent(bytes32 eventType, bytes memory eventData) external onlyRole(ADMIN_ROLE) {
+        // Custom event emission for extension integration
+        // Extensions can listen to these events for their own logic
+        emit ExtensionConfigured(eventType, eventData);
+    }
+
+    // ============================================================================
+    // HELPER FUNCTIONS FOR DYNAMIC EXTENSION KEYS
+    // ============================================================================
+
+    /**
+     * @dev Generate extension key from string (utility function)
+     */
+    function generateExtensionKey(string memory extensionName) external pure returns (bytes32) {
+        return keccak256(abi.encodePacked(extensionName));
+    }
+
+    /**
+     * @dev Check if extension exists in platform registry
+     */
+    function extensionExistsInRegistry(bytes32 extensionKey) external view returns (bool) {
+        return IPlatformRegistry(_platformRegistry).isExtensionRegistered(extensionKey);
+    }
+
+    /**
+     * @dev Get extension address from platform registry
+     */
+    function getExtensionFromRegistry(bytes32 extensionKey) external view returns (address) {
+        return IPlatformRegistry(_platformRegistry).getExtension(extensionKey);
+    }
+
+    // ============================================================================
+    // VERSIONING & METADATA
+    // ============================================================================
+
+    /**
+     * @dev Get contract version
+     */
+    function version() external pure returns (string memory) {
+        return "2.0.0-dynamic";
+    }
+
+    /**
+     * @dev Get contract type identifier
+     */
+    function contractType() external pure returns (bytes32) {
+        return keccak256("PROJECT_CONTRACT");
+    }
+
+    /**
+     * @dev Get supported extension categories
+     */
+    function getSupportedExtensionCategories() external pure returns (bytes32[] memory) {
+        bytes32[] memory categories = new bytes32[](8);
+        categories[0] = CATEGORY_FACTORY;
+        categories[1] = CATEGORY_ORACLE;
+        categories[2] = CATEGORY_GOVERNANCE;
+        categories[3] = CATEGORY_TREASURY;
+        categories[4] = CATEGORY_VALIDATOR;
+        categories[5] = CATEGORY_TOKEN;
+        categories[6] = CATEGORY_NFT;
+        categories[7] = CATEGORY_UTILITY;
+        return categories;
     }
 }

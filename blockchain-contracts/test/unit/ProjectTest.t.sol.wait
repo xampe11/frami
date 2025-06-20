@@ -4,7 +4,6 @@ pragma solidity 0.8.28;
 import "forge-std/Test.sol";
 import {ERC1967Proxy} from "../../src/proxy/ERC1967Proxy.sol";
 import {Project} from "../../src/Project.sol";
-import {ExtensionKeys} from "../../src/ExtensionKeys.sol";
 
 contract MockRegistry {
     mapping(address => bool) public registeredFactories;
