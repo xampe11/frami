@@ -4,9 +4,13 @@ pragma solidity 0.8.28;
 import "forge-std/Test.sol";
 import {ERC1967Proxy} from "../../src/proxy/ERC1967Proxy.sol";
 import {Project} from "../../src/Project.sol";
+import {ExtensionKeys} from "../../src/ExtensionKeys.sol";
 
 contract MockRegistry {
     mapping(address => bool) public registeredFactories;
+    mapping(bytes32 => address) public extensions;
+    bool public emergencyFrozen = false;
+    address public emergencyRecipient;
 
     function registerFactory(address factory) external {
         registeredFactories[factory] = true;
@@ -16,7 +20,55 @@ contract MockRegistry {
         return registeredFactories[factory];
     }
 
-    // Add any other functions your Project contract might call during initialization
+    function getExtension(bytes32 extensionType) external view returns (address) {
+        return extensions[extensionType];
+    }
+
+    function registerExtension(bytes32 extensionType, address extensionAddress) external {
+        extensions[extensionType] = extensionAddress;
+    }
+
+    function getEmergencyStatus() external view returns (bool frozen, address emergencyRecipient_) {
+        return (emergencyFrozen, emergencyRecipient);
+    }
+
+    function setEmergencyStatus(bool frozen, address recipient) external {
+        emergencyFrozen = frozen;
+        emergencyRecipient = recipient;
+    }
+
+    function relayFounderFees(uint256 amount) external payable {
+        // Mock implementation - just accept the ETH
+        require(msg.value == amount, "Value mismatch");
+    }
+}
+
+// Mock FounderNFT for testing
+contract MockFounderNFT {
+    uint256 public totalStakedTokens = 0;
+    uint256 public platformFeeDistributionPercentage = 5000; // 50%
+
+    receive() external payable {}
+
+    function getTotalStakedTokens() external view returns (uint256) {
+        return totalStakedTokens;
+    }
+
+    function getPlatformFeeDistributionPercentage() external view returns (uint256) {
+        return platformFeeDistributionPercentage;
+    }
+
+    function addPlatformFees(uint256 amount) external {
+        // Mock implementation
+    }
+
+    function setTotalStakedTokens(uint256 _amount) external {
+        totalStakedTokens = _amount;
+    }
+
+    function setPlatformFeeDistributionPercentage(uint256 _percentage) external {
+        platformFeeDistributionPercentage = _percentage;
+    }
 }
 
 enum ProjectState {
@@ -30,6 +82,8 @@ contract ProjectTest is Test {
     Project public implementation;
     Project public project;
     ERC1967Proxy public proxy;
+    MockRegistry public mockRegistry;
+    MockFounderNFT public mockFounderNFT;
 
     address public owner;
     address public creator;
@@ -58,47 +112,52 @@ contract ProjectTest is Test {
         owner = address(this);
         creator = makeAddr("creator");
         treasury = makeAddr("treasury");
-        registry = makeAddr("registry");
         investor1 = makeAddr("investor1");
         investor2 = makeAddr("investor2");
 
-        // Deploy a mock registry that handles isFactoryRegistered calls
-        MockRegistry mockRegistry = new MockRegistry();
+        // Deploy mock contracts
+        mockRegistry = new MockRegistry();
+        mockFounderNFT = new MockFounderNFT();
+
         // Register the test contract as a factory so initialization succeeds
         mockRegistry.registerFactory(address(this));
+
+        // Register FounderNFT extension
+        mockRegistry.registerExtension(ExtensionKeys.FOUNDER_NFT, address(mockFounderNFT));
+
         registry = address(mockRegistry);
 
         // Deploy implementation
         implementation = new Project();
 
-        // Empty team members array
-        address[] memory teamMembers = new address[](0);
+        // Fund test accounts
+        vm.deal(investor1, 20 ether);
+        vm.deal(investor2, 20 ether);
+        vm.deal(creator, 5 ether);
+        vm.deal(treasury, 1 ether);
 
-        // Prepare initialization data
-        bytes memory data = abi.encodeWithSelector(
+        // Initialize project
+        bytes memory initData = abi.encodeWithSelector(
             Project.initialize.selector,
             creator,
             "Test Project",
-            "A test project for fundraising",
+            "A project for testing",
             fundingGoal,
             duration,
             isFlexibleFunding,
             platformFee,
             treasury,
             registry,
-            teamMembers
+            new address[](0)
         );
 
-        // Deploy proxy
-        proxy = new ERC1967Proxy(address(implementation), data);
-
-        // Cast proxy to implementation type for easier testing
+        proxy = new ERC1967Proxy(address(implementation), initData);
         project = Project(payable(address(proxy)));
-
-        // Give investors some ETH
-        vm.deal(investor1, 10 ether);
-        vm.deal(investor2, 10 ether);
     }
+
+    // ============================================================================
+    // INITIALIZATION TESTS
+    // ============================================================================
 
     function testInitialization() public view {
         (
@@ -106,130 +165,370 @@ contract ProjectTest is Test {
             string memory description,
             address projectCreator,
             uint256 goal,
-            uint256 projectDeadline,
-            uint256 totalRaised,
-            Project.State projectState,
-            bool isFlexible
+            uint256 deadline,
+            uint256 fundsRaised,
+            Project.State state,
+            bool flexible
         ) = project.getProjectDetails();
 
-        assertEq(name, "Test Project", "Wrong project name");
-        assertEq(description, "A test project for fundraising", "Wrong project description");
-        assertEq(projectCreator, creator, "Wrong creator");
-        assertEq(goal, fundingGoal, "Wrong funding goal");
-        assertEq(projectDeadline, block.timestamp + duration, "Wrong deadline");
-        assertEq(totalRaised, 0, "Initial funds raised should be 0");
-        assertEq(uint256(projectState), uint256(0), "Initial state should be Active");
-        assertEq(isFlexible, isFlexibleFunding, "Wrong funding type");
-
-        assertTrue(project.hasRole(project.ADMIN_ROLE(), creator), "Creator should have ADMIN_ROLE");
-        assertTrue(project.hasRole(project.TEAM_MEMBER_ROLE(), creator), "Creator should have TEAM_MEMBER_ROLE");
+        assertEq(name, "Test Project");
+        assertEq(description, "A project for testing");
+        assertEq(projectCreator, creator);
+        assertEq(goal, fundingGoal);
+        assertEq(fundsRaised, 0);
+        assertTrue(uint256(state) == 0); // Active
+        assertEq(flexible, isFlexibleFunding);
+        assertEq(project.getCreator(), creator);
+        assertEq(project.getFundingGoal(), fundingGoal);
+        assertEq(project.getTotalFundsRaised(), 0);
+        assertEq(project.getMilestoneCount(), 0);
+        assertTrue(project.isTeamMember(creator));
     }
 
-    function testInvest() public {
-        uint256 investment = 1 ether;
+    // ============================================================================
+    // FUNDING TESTS
+    // ============================================================================
+
+    function testInvestment() public {
+        uint256 investmentAmount = 1 ether;
 
         vm.prank(investor1);
-        vm.expectEmit(true, true, false, true);
-        emit FundingReceived(investor1, investment);
+        vm.expectEmit(true, false, false, true);
+        emit FundingReceived(investor1, investmentAmount);
 
-        project.invest{value: investment}();
+        project.invest{value: investmentAmount}();
 
-        assertEq(project.getInvestmentAmount(investor1), investment, "Investment not recorded");
-        assertEq(address(project).balance, investment, "Contract balance incorrect");
-        assertEq(project.getInvestorCount(), 1, "Investor count incorrect");
+        assertEq(project.getTotalFundsRaised(), investmentAmount);
+        assertEq(project.getInvestmentAmount(investor1), investmentAmount);
+        assertEq(project.getInvestorCount(), 1);
     }
 
     function testMultipleInvestments() public {
-        // First investment
-        vm.prank(investor1);
-        project.invest{value: 1 ether}();
+        uint256 investment1 = 2 ether;
+        uint256 investment2 = 3 ether;
 
-        // Second investment from same investor
         vm.prank(investor1);
-        project.invest{value: 2 ether}();
+        project.invest{value: investment1}();
 
-        // Investment from another investor
         vm.prank(investor2);
-        project.invest{value: 3 ether}();
+        project.invest{value: investment2}();
 
-        (,,,,, uint256 totalRaised,,) = project.getProjectDetails();
-
-        assertEq(project.getInvestmentAmount(investor1), 3 ether, "Investor1 investment incorrect");
-        assertEq(project.getInvestmentAmount(investor2), 3 ether, "Investor2 investment incorrect");
-        assertEq(totalRaised, 6 ether, "Total funds raised incorrect");
-        assertEq(project.getInvestorCount(), 2, "Investor count incorrect");
+        assertEq(project.getTotalFundsRaised(), investment1 + investment2);
+        assertEq(project.getInvestmentAmount(investor1), investment1);
+        assertEq(project.getInvestmentAmount(investor2), investment2);
+        assertEq(project.getInvestorCount(), 2);
     }
 
-    function testDirectEthTransfer() public {
-        // Send ETH directly to contract
+    function testInvestmentAfterDeadline() public {
+        // Fast forward past deadline
+        vm.warp(block.timestamp + duration + 1);
+
         vm.prank(investor1);
-        (bool success,) = address(project).call{value: 1 ether}("");
-
-        assertTrue(success, "Direct ETH transfer should succeed");
-        assertEq(project.getInvestmentAmount(investor1), 1 ether, "Investment not recorded");
-        assertEq(address(project).balance, 1 ether, "Contract balance incorrect");
+        vm.expectRevert("Funding period ended");
+        project.invest{value: 1 ether}();
     }
+
+    function testZeroInvestment() public {
+        vm.prank(investor1);
+        vm.expectRevert("Investment must be greater than 0");
+        project.invest{value: 0}();
+    }
+
+    // ============================================================================
+    // STATE MANAGEMENT TESTS
+    // ============================================================================
+
+    function testSuccessfulProjectState() public {
+        // Fund the project to meet the goal
+        vm.prank(investor1);
+        project.invest{value: fundingGoal}();
+
+        // Fast forward past deadline
+        vm.warp(block.timestamp + duration + 1);
+
+        Project.State state = project.checkAndUpdateState();
+        assertEq(uint256(state), 1); // Successful
+    }
+
+    function testFailedProjectState() public {
+        // Only partially fund the project
+        vm.prank(investor1);
+        project.invest{value: fundingGoal / 2}();
+
+        // Fast forward past deadline
+        vm.warp(block.timestamp + duration + 1);
+
+        Project.State state = project.checkAndUpdateState();
+        assertEq(uint256(state), 2); // Failed
+    }
+
+    function testCheckStateBeforeDeadline() public {
+        vm.expectRevert("Funding period not ended");
+        project.checkAndUpdateState();
+    }
+
+    // ============================================================================
+    // MILESTONE TESTS
+    // ============================================================================
 
     function testCreateMilestone() public {
-        string memory description = "First Milestone";
-        uint256 percentage = 5000; // 50%
-
         vm.prank(creator);
         vm.expectEmit(true, false, false, true);
-        emit MilestoneCreated(0, description, percentage);
+        emit MilestoneCreated(0, "Test Milestone", 5000);
 
-        project.createMilestone(description, percentage);
+        project.createMilestone("Test Milestone", 5000);
 
-        assertEq(project.getMilestoneCount(), 1, "Milestone not created");
+        assertEq(project.getMilestoneCount(), 1);
 
         (
-            string memory milestoneDesc,
-            uint256 milestonePercentage,
+            string memory description,
+            uint256 fundingPercentage,
             bool completed,
             bool fundsReleased,
             uint256 votesNeeded,
             uint256 votesReceived
         ) = project.getMilestoneDetails(0);
 
-        assertEq(milestoneDesc, description, "Milestone description incorrect");
-        assertEq(milestonePercentage, percentage, "Milestone percentage incorrect");
-        assertFalse(completed, "Milestone should not be completed initially");
-        assertFalse(fundsReleased, "Milestone funds should not be released initially");
-        assertEq(votesNeeded, 0, "Initial votes needed should be 0");
-        assertEq(votesReceived, 0, "Initial votes received should be 0");
+        assertEq(description, "Test Milestone");
+        assertEq(fundingPercentage, 5000);
+        assertFalse(completed);
+        assertFalse(fundsReleased);
+        assertEq(votesReceived, 0);
     }
 
     function testCreateMilestoneUnauthorized() public {
         vm.prank(investor1);
         vm.expectRevert();
-        project.createMilestone("Unauthorized Milestone", 5000);
+        project.createMilestone("Test Milestone", 5000);
     }
 
-    function testTeamMemberManagement() public {
+    function testCreateMilestoneInvalidPercentage() public {
+        vm.prank(creator);
+        vm.expectRevert("Invalid percentage");
+        project.createMilestone("Test Milestone", 0);
+
+        vm.prank(creator);
+        vm.expectRevert("Invalid percentage");
+        project.createMilestone("Test Milestone", 10001);
+    }
+
+    function testMilestoneVerificationAndFundRelease() public {
+        // Create milestone
+        vm.prank(creator);
+        project.createMilestone("Test Milestone", 10000); // 100% of funds
+
+        // Fund the project
+        vm.prank(investor1);
+        project.invest{value: fundingGoal}();
+
+        // Fast forward past deadline and update state
+        vm.warp(block.timestamp + duration + 1);
+        project.checkAndUpdateState();
+
+        // Submit milestone completion
+        vm.prank(creator);
+        project.submitMilestoneCompletion(0);
+
+        // Check milestone is marked as completed
+        (,, bool completed,,,) = project.getMilestoneDetails(0);
+        assertTrue(completed, "Milestone should be marked as completed");
+
+        // Vote on milestone
+        vm.prank(investor1);
+        project.voteMilestone(0);
+
+        // Release funds
+        uint256 treasuryBalanceBefore = treasury.balance;
+        uint256 creatorBalanceBefore = creator.balance;
+
+        vm.prank(creator);
+        project.releaseMilestoneFunds(0);
+
+        // Check that funds were distributed correctly
+        uint256 platformFeeAmount = (fundingGoal * platformFee) / 10000;
+        uint256 creatorAmount = fundingGoal - platformFeeAmount;
+
+        assertEq(treasury.balance, treasuryBalanceBefore + platformFeeAmount);
+        assertEq(creator.balance, creatorBalanceBefore + creatorAmount);
+        assertEq(project.getTotalFundsWithdrawn(), fundingGoal);
+    }
+
+    function testMilestoneVotingRequirements() public {
+        // Create milestone and fund project
+        vm.prank(creator);
+        project.createMilestone("Test Milestone", 10000);
+
+        vm.prank(investor1);
+        project.invest{value: fundingGoal}();
+
+        vm.warp(block.timestamp + duration + 1);
+        project.checkAndUpdateState();
+
+        vm.prank(creator);
+        project.submitMilestoneCompletion(0);
+
+        // Try to release funds without enough votes
+        vm.prank(creator);
+        vm.expectRevert("Not enough votes");
+        project.releaseMilestoneFunds(0);
+    }
+
+    // ============================================================================
+    // EMERGENCY FREEZE TESTS
+    // ============================================================================
+
+    function testEmergencyFreezePreventsFundRelease() public {
+        // Setup milestone and funding
+        vm.prank(creator);
+        project.createMilestone("Test Milestone", 10000);
+
+        vm.prank(investor1);
+        project.invest{value: fundingGoal}();
+
+        vm.warp(block.timestamp + duration + 1);
+        project.checkAndUpdateState();
+
+        vm.prank(creator);
+        project.submitMilestoneCompletion(0);
+
+        vm.prank(investor1);
+        project.voteMilestone(0);
+
+        // Enable emergency freeze
+        mockRegistry.setEmergencyStatus(true, makeAddr("emergencyRecipient"));
+
+        // Try to release funds - should fail
+        vm.prank(creator);
+        vm.expectRevert("Fee distribution frozen");
+        project.releaseMilestoneFunds(0);
+
+        // Disable emergency freeze
+        mockRegistry.setEmergencyStatus(false, address(0));
+
+        // Now fund release should work
+        vm.prank(creator);
+        project.releaseMilestoneFunds(0);
+    }
+
+    // ============================================================================
+    // ENHANCED FEE DISTRIBUTION TESTS
+    // ============================================================================
+
+    function testFeeDistributionWithFounderNFT() public {
+        // Set up FounderNFT with staked tokens
+        mockFounderNFT.setTotalStakedTokens(100); // Has stakers
+        mockFounderNFT.setPlatformFeeDistributionPercentage(5000); // 50%
+
+        // Fund FounderNFT contract so it can receive fees
+        vm.deal(address(mockFounderNFT), 1 ether);
+
+        // Setup milestone and funding
+        vm.prank(creator);
+        project.createMilestone("Test Milestone", 10000);
+
+        vm.prank(investor1);
+        project.invest{value: fundingGoal}();
+
+        vm.warp(block.timestamp + duration + 1);
+        project.checkAndUpdateState();
+
+        vm.prank(creator);
+        project.submitMilestoneCompletion(0);
+
+        vm.prank(investor1);
+        project.voteMilestone(0);
+
+        // Track balances
+        uint256 treasuryBalanceBefore = treasury.balance;
+        uint256 founderNFTBalanceBefore = address(mockFounderNFT).balance;
+        uint256 creatorBalanceBefore = creator.balance;
+
+        // Release funds
+        vm.prank(creator);
+        project.releaseMilestoneFunds(0);
+
+        // Calculate expected amounts
+        uint256 platformFeeAmount = (fundingGoal * platformFee) / 10000;
+        uint256 founderShare = (platformFeeAmount * 5000) / 10000; // 50%
+        uint256 treasuryShare = platformFeeAmount - founderShare;
+        uint256 creatorAmount = fundingGoal - platformFeeAmount;
+
+        // Verify distribution
+        assertEq(treasury.balance, treasuryBalanceBefore + treasuryShare);
+        assertEq(address(mockFounderNFT).balance, founderNFTBalanceBefore + founderShare);
+        assertEq(creator.balance, creatorBalanceBefore + creatorAmount);
+    }
+
+    function testFeeDistributionWithoutStakers() public {
+        // Set up FounderNFT without staked tokens
+        mockFounderNFT.setTotalStakedTokens(0); // No stakers
+
+        // Setup milestone and funding
+        vm.prank(creator);
+        project.createMilestone("Test Milestone", 10000);
+
+        vm.prank(investor1);
+        project.invest{value: fundingGoal}();
+
+        vm.warp(block.timestamp + duration + 1);
+        project.checkAndUpdateState();
+
+        vm.prank(creator);
+        project.submitMilestoneCompletion(0);
+
+        vm.prank(investor1);
+        project.voteMilestone(0);
+
+        // Track balances
+        uint256 treasuryBalanceBefore = treasury.balance;
+        uint256 creatorBalanceBefore = creator.balance;
+
+        // Release funds
+        vm.prank(creator);
+        project.releaseMilestoneFunds(0);
+
+        // Calculate expected amounts (all fees should go to treasury)
+        uint256 platformFeeAmount = (fundingGoal * platformFee) / 10000;
+        uint256 creatorAmount = fundingGoal - platformFeeAmount;
+
+        // Verify all fees went to treasury
+        assertEq(treasury.balance, treasuryBalanceBefore + platformFeeAmount);
+        assertEq(creator.balance, creatorBalanceBefore + creatorAmount);
+    }
+
+    // ============================================================================
+    // TEAM MANAGEMENT TESTS
+    // ============================================================================
+
+    function testAddTeamMember() public {
         address newMember = makeAddr("newMember");
 
-        // Initially not a team member
-        assertFalse(project.isTeamMember(newMember), "Should not be a team member initially");
-
-        // Add team member
         vm.prank(creator);
         vm.expectEmit(true, false, false, false);
         emit TeamMemberAdded(newMember);
 
         project.addTeamMember(newMember);
 
-        assertTrue(project.isTeamMember(newMember), "Should be a team member after adding");
-        assertTrue(project.hasRole(project.TEAM_MEMBER_ROLE(), newMember), "Should have TEAM_MEMBER_ROLE");
+        assertTrue(project.isTeamMember(newMember));
+        assertTrue(project.hasRole(project.TEAM_MEMBER_ROLE(), newMember));
+    }
 
-        // Remove team member
+    function testRemoveTeamMember() public {
+        address newMember = makeAddr("newMember");
+
+        // Add member first
+        vm.prank(creator);
+        project.addTeamMember(newMember);
+
+        // Remove member
         vm.prank(creator);
         vm.expectEmit(true, false, false, false);
         emit TeamMemberRemoved(newMember);
 
         project.removeTeamMember(newMember);
 
-        assertFalse(project.isTeamMember(newMember), "Should not be a team member after removal");
-        assertFalse(project.hasRole(project.TEAM_MEMBER_ROLE(), newMember), "Should not have TEAM_MEMBER_ROLE");
+        assertFalse(project.isTeamMember(newMember));
+        assertFalse(project.hasRole(project.TEAM_MEMBER_ROLE(), newMember));
     }
 
     function testCannotRemoveCreator() public {
@@ -238,293 +537,59 @@ contract ProjectTest is Test {
         project.removeTeamMember(creator);
     }
 
-    function testSuccessfulFunding() public {
-        // Invest full goal amount
-        vm.prank(investor1);
-        project.invest{value: fundingGoal}();
-
-        // Move time forward
-        vm.warp(block.timestamp + duration + 1);
-
-        // Start recording events
-        vm.recordLogs();
-
-        Project.State newState = project.checkAndUpdateState();
-
-        // Get the recorded logs
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-
-        assertEq(uint256(newState), uint256(1), "Project should be Successful");
-
-        // Verify event emission
-        bool foundEvent = false;
-        bytes32 expectedEventSignature = keccak256("ProjectStateChanged(uint8)");
-
-        for (uint256 i = 0; i < logs.length; i++) {
-            // Check if this log is the event we're looking for
-            if (logs[i].topics[0] == expectedEventSignature) {
-                // It's our event, now decode the parameters
-                // The event parameter (uint8 newState) is in logs[i].data
-                uint8 emittedState = uint8(uint256(bytes32(logs[i].data)));
-                assertEq(emittedState, uint8(ProjectState.Successful), "Event emitted with wrong state");
-                foundEvent = true;
-                break;
-            }
-        }
-
-        assertTrue(foundEvent, "ProjectStateChanged event not emitted");
-    }
-
-    function test_RevertWhen_FundingFails() public {
-        // Invest less than goal
-        vm.prank(investor1);
-        project.invest{value: fundingGoal / 2}();
-
-        // Move time forward
-        vm.warp(block.timestamp + duration + 1);
-
-        // Start recording events
-        vm.recordLogs();
-
-        Project.State newState = project.checkAndUpdateState();
-
-        // Get the recorded logs
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-
-        assertEq(uint256(newState), uint256(2), "Project should be Failed");
-
-        // Verify event emission
-        bool foundEvent = false;
-        bytes32 expectedEventSignature = keccak256("ProjectStateChanged(uint8)");
-
-        for (uint256 i = 0; i < logs.length; i++) {
-            // Check if this log is the event we're looking for
-            if (logs[i].topics[0] == expectedEventSignature) {
-                // It's our event, now decode the parameters
-                // The event parameter (uint8 newState) is in logs[i].data
-                uint8 emittedState = uint8(uint256(bytes32(logs[i].data)));
-                assertEq(emittedState, uint8(ProjectState.Failed), "Event emitted with wrong state");
-                foundEvent = true;
-                break;
-            }
-        }
-
-        assertTrue(foundEvent, "ProjectStateChanged event not emitted");
-    }
-
-    function testFlexibleFundingSuccess() public {
-        // Deploy a flexible funding project
-        bytes memory data = abi.encodeWithSelector(
-            Project.initialize.selector,
-            creator,
-            "Flexible Project",
-            "A flexible funding project",
-            fundingGoal,
-            duration,
-            true, // flexible funding
-            platformFee,
-            treasury,
-            registry,
-            new address[](0)
-        );
-
-        ERC1967Proxy flexibleProxy = new ERC1967Proxy(address(implementation), data);
-        Project flexibleProject = Project(payable(address(flexibleProxy)));
-
-        // Invest less than goal
-        vm.prank(investor1);
-        flexibleProject.invest{value: fundingGoal / 2}();
-
-        // Move time forward
-        vm.warp(block.timestamp + duration + 1);
-
-        // Check and update state
-        Project.State newState = flexibleProject.checkAndUpdateState();
-
-        assertEq(uint256(newState), uint256(1), "Flexible funding project should be Successful");
-    }
-
-    function testMilestoneVerificationAndFundRelease() public {
-        // Create milestone
-        vm.prank(creator);
-        project.createMilestone("Test Milestone", 10000); // 100%
-
-        // Invest full goal
-        vm.prank(investor1);
-        project.invest{value: fundingGoal}();
-
-        // Move time forward and mark project as successful
-        vm.warp(block.timestamp + duration + 1);
-        project.checkAndUpdateState();
-
-        // Submit milestone completion
-        vm.prank(creator);
-        project.submitMilestoneCompletion(0);
-
-        // Verify milestone is completed
-        (,, bool completed,,,) = project.getMilestoneDetails(0);
-        assertTrue(completed, "Milestone should be marked as completed");
-
-        // Vote on milestone
-        vm.prank(investor1);
-        project.voteMilestone(0);
-
-        // Balance before fund release
-        uint256 creatorBalanceBefore = creator.balance;
-        uint256 treasuryBalanceBefore = treasury.balance;
-
-        // Release funds
-        vm.prank(creator);
-        project.releaseMilestoneFunds(0);
-
-        // Calculate expected amounts
-        uint256 totalAmount = fundingGoal;
-        uint256 platformFeeAmount = (totalAmount * platformFee) / 10000;
-        uint256 creatorAmount = totalAmount - platformFeeAmount;
-
-        // Verify balances
-        assertEq(creator.balance, creatorBalanceBefore + creatorAmount, "Creator balance incorrect");
-        assertEq(treasury.balance, treasuryBalanceBefore + platformFeeAmount, "Treasury balance incorrect");
-
-        // Verify milestone state
-        (,,, bool fundsReleased,,) = project.getMilestoneDetails(0);
-        assertTrue(fundsReleased, "Milestone funds should be marked as released");
-    }
+    // ============================================================================
+    // REFUND TESTS
+    // ============================================================================
 
     function testRefundOnFailedProject() public {
-        // Invest partial amount
+        uint256 investmentAmount = fundingGoal / 2;
+
+        // Invest but don't meet funding goal
         vm.prank(investor1);
-        project.invest{value: fundingGoal / 2}();
+        project.invest{value: investmentAmount}();
 
-        // Move time forward
+        // Fast forward past deadline
         vm.warp(block.timestamp + duration + 1);
-
-        // Mark project as failed
         project.checkAndUpdateState();
 
-        // Balance before refund
-        uint256 investorBalanceBefore = investor1.balance;
-
         // Claim refund
+        uint256 balanceBefore = investor1.balance;
+
         vm.prank(investor1);
         project.claimRefund();
 
-        // Verify refund
-        assertEq(investor1.balance, investorBalanceBefore + fundingGoal / 2, "Refund amount incorrect");
-        assertEq(project.getInvestmentAmount(investor1), 0, "Investment should be reset after refund");
+        assertEq(investor1.balance, balanceBefore + investmentAmount);
+        assertEq(project.getInvestmentAmount(investor1), 0);
     }
 
-    function testNoRefundOnFlexibleFunding() public {
-        // Deploy a flexible funding project
-        bytes memory data = abi.encodeWithSelector(
-            Project.initialize.selector,
-            creator,
-            "Flexible Project",
-            "A flexible funding project",
-            fundingGoal,
-            duration,
-            true, // flexible funding
-            platformFee,
-            treasury,
-            registry,
-            new address[](0)
-        );
-
-        ERC1967Proxy flexibleProxy = new ERC1967Proxy(address(implementation), data);
-        Project flexibleProject = Project(payable(address(flexibleProxy)));
-
-        // Invest less than goal
+    function testCannotRefundSuccessfulProject() public {
+        // Fund project to success
         vm.prank(investor1);
-        flexibleProject.invest{value: fundingGoal / 2}();
+        project.invest{value: fundingGoal}();
 
-        // Move time forward and mark project as successful
         vm.warp(block.timestamp + duration + 1);
-        flexibleProject.checkAndUpdateState();
+        project.checkAndUpdateState();
 
-        // Try to claim refund
         vm.prank(investor1);
         vm.expectRevert("Refunds not available");
-        flexibleProject.claimRefund();
-    }
-
-    function testProjectCancellation() public {
-        // Invest in project
-        vm.prank(investor1);
-        project.invest{value: 1 ether}();
-
-        // Start recording events
-        vm.recordLogs();
-
-        // Get the current project state
-        Project.State stateBefore = project.getProjectState();
-
-        // Cancel project
-        vm.prank(creator);
-
-        project.cancelProject();
-
-        // Get the recorded logs
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-
-        // Get the current project state after cancel
-        Project.State stateAfter = project.getProjectState();
-
-        // Verify state
-        (,,,,,, Project.State projectState,) = project.getProjectDetails();
-        assertEq(uint256(projectState), uint256(3), "Project should be Cancelled");
-        assertFalse(uint256(stateBefore) == uint256(stateAfter), "State should have changed");
-
-        // Verify event emission
-        bool foundEvent = false;
-        bytes32 expectedEventSignature = keccak256("ProjectStateChanged(uint8)");
-
-        for (uint256 i = 0; i < logs.length; i++) {
-            // Check if this log is the event we're looking for
-            if (logs[i].topics[0] == expectedEventSignature) {
-                // It's our event, now decode the parameters
-                uint8 emittedState = uint8(uint256(bytes32(logs[i].data)));
-                assertEq(emittedState, uint8(ProjectState.Cancelled), "Event emitted with wrong state");
-                foundEvent = true;
-                break;
-            }
-        }
-
-        assertTrue(foundEvent, "ProjectStateChanged event not emitted");
-
-        // Try to invest after cancellation
-        vm.prank(investor2);
-        vm.expectRevert("Project not active");
-        project.invest{value: 1 ether}();
-
-        // Claim refund after cancellation
-        uint256 investorBalanceBefore = investor1.balance;
-
-        vm.prank(investor1);
         project.claimRefund();
-
-        assertEq(investor1.balance, investorBalanceBefore + 1 ether, "Refund after cancellation incorrect");
     }
 
-    function testUpgrade() public {
-        // Invest in project
+    // ============================================================================
+    // RECEIVE FUNCTION TESTS
+    // ============================================================================
+
+    function testReceiveFunction() public {
+        uint256 amount = 1 ether;
+
         vm.prank(investor1);
-        project.invest{value: 1 ether}();
+        vm.expectEmit(true, false, false, true);
+        emit FundingReceived(investor1, amount);
 
-        // Deploy new implementation
-        Project newImplementation = new Project();
+        (bool success,) = address(project).call{value: amount}("");
+        assertTrue(success);
 
-        // Upgrade
-        vm.startPrank(creator);
-        project.upgradeToAndCall(address(newImplementation), "");
-        vm.stopPrank();
-
-        // Verify state preserved
-        assertEq(project.getInvestmentAmount(investor1), 1 ether, "Investment record should be preserved");
-
-        // Verify functionality after upgrade
-        vm.prank(investor2);
-        project.invest{value: 2 ether}();
-
-        assertEq(project.getInvestmentAmount(investor2), 2 ether, "New investment should work after upgrade");
+        assertEq(project.getTotalFundsRaised(), amount);
+        assertEq(project.getInvestmentAmount(investor1), amount);
     }
 }

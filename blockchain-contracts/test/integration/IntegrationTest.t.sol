@@ -134,12 +134,12 @@ contract IntegrationTest is Test {
         // Grant platform role to registry
         founderNFT.grantRole(founderNFT.PLATFORM_ROLE(), address(registryProxy));
 
-        // Set up roles
-        vm.prank(owner);
-        registry.grantProjectCreatorRole(creator);
-
+        // Set up roles for factory
         vm.prank(owner);
         factory.grantRole(factory.ADMIN_ROLE(), address(registryProxy));
+
+        // Note: PROJECT_CREATOR_ROLE is not used in current architecture
+        // The registry calls the factory directly without role-based restrictions
 
         // Verify initial setup using ExtensionKeys
         (uint256 founderPct, uint256 treasuryPct) = registry.getFeeDistribution();
@@ -147,7 +147,7 @@ contract IntegrationTest is Test {
         assertEq(treasuryPct, 5000, "Initial treasury percentage should be 50%");
     }
 
-    function testExtensionKeysIntegration() public {
+    function testExtensionKeysIntegration() public view {
         // Test that all extension keys are properly set
         assertEq(
             registry.getExtension(ExtensionKeys.PROJECT_FACTORY),
@@ -162,21 +162,12 @@ contract IntegrationTest is Test {
         );
 
         // Test extension validation
-        assertTrue(
-            registry.isExtensionRegistered(ExtensionKeys.PROJECT_FACTORY),
-            "ProjectFactory should be registered"
-        );
+        assertTrue(registry.isExtensionRegistered(ExtensionKeys.PROJECT_FACTORY), "ProjectFactory should be registered");
 
-        assertTrue(
-            registry.isExtensionRegistered(ExtensionKeys.FOUNDER_NFT),
-            "FounderNFT should be registered"
-        );
+        assertTrue(registry.isExtensionRegistered(ExtensionKeys.FOUNDER_NFT), "FounderNFT should be registered");
 
         // Test that unregistered extensions return false
-        assertFalse(
-            registry.isExtensionRegistered(ExtensionKeys.ORACLE),
-            "Oracle should not be registered"
-        );
+        assertFalse(registry.isExtensionRegistered(ExtensionKeys.ORACLE), "Oracle should not be registered");
 
         // Test getAllExtensions function
         (bytes32[] memory keys, address[] memory addresses) = registry.getAllExtensions();
@@ -198,7 +189,7 @@ contract IntegrationTest is Test {
         address[] memory teamMembers = new address[](0);
         projectAddress = registry.createProject(
             creator,
-            "Test Project", 
+            "Test Project",
             "A test project for enhanced fee distribution testing",
             10 ether,
             30 days,
@@ -211,7 +202,7 @@ contract IntegrationTest is Test {
         // Step 3: Create milestones
         vm.startPrank(creator);
         project.createMilestone("Initial Development", 3000); // 30% of funds
-        project.createMilestone("MVP Release", 4000); // 40% of funds  
+        project.createMilestone("MVP Release", 4000); // 40% of funds
         project.createMilestone("Final Product", 3000); // 30% of funds
         vm.stopPrank();
 
@@ -295,13 +286,7 @@ contract IntegrationTest is Test {
         vm.prank(creator);
         address[] memory teamMembers = new address[](0);
         projectAddress = registry.createProject(
-            creator,
-            "Emergency Test Project",
-            "Testing emergency fee controls",
-            5 ether,
-            30 days,
-            false,
-            teamMembers
+            creator, "Emergency Test Project", "Testing emergency fee controls", 5 ether, 30 days, false, teamMembers
         );
 
         project = Project(payable(projectAddress));
@@ -352,35 +337,21 @@ contract IntegrationTest is Test {
     function testExtensionManagement() public {
         // Test registering a new extension
         address mockOracle = makeAddr("mockOracle");
-        
+
         vm.prank(owner);
         registry.registerExtension(ExtensionKeys.ORACLE, mockOracle);
 
-        assertTrue(
-            registry.isExtensionRegistered(ExtensionKeys.ORACLE),
-            "Oracle should be registered"
-        );
+        assertTrue(registry.isExtensionRegistered(ExtensionKeys.ORACLE), "Oracle should be registered");
 
-        assertEq(
-            registry.getExtension(ExtensionKeys.ORACLE),
-            mockOracle,
-            "Oracle address should match"
-        );
+        assertEq(registry.getExtension(ExtensionKeys.ORACLE), mockOracle, "Oracle address should match");
 
         // Test removing an extension
         vm.prank(owner);
         registry.removeExtension(ExtensionKeys.ORACLE);
 
-        assertFalse(
-            registry.isExtensionRegistered(ExtensionKeys.ORACLE),
-            "Oracle should be removed"
-        );
+        assertFalse(registry.isExtensionRegistered(ExtensionKeys.ORACLE), "Oracle should be removed");
 
-        assertEq(
-            registry.getExtension(ExtensionKeys.ORACLE),
-            address(0),
-            "Oracle address should be zero"
-        );
+        assertEq(registry.getExtension(ExtensionKeys.ORACLE), address(0), "Oracle address should be zero");
     }
 
     function testExtensionKeyValidation() public {
@@ -402,14 +373,11 @@ contract IntegrationTest is Test {
 
         // Test with unregistered factory
         address fakeFactory = makeAddr("fakeFactory");
-        assertFalse(
-            registry.isFactoryRegistered(fakeFactory),
-            "Fake factory should not be recognized"
-        );
+        assertFalse(registry.isFactoryRegistered(fakeFactory), "Fake factory should not be recognized");
 
         // Test project initialization with unregistered factory
         Project projectImplementation = new Project();
-        
+
         bytes memory initData = abi.encodeWithSelector(
             Project.initialize.selector,
             creator,
@@ -430,15 +398,15 @@ contract IntegrationTest is Test {
         new ERC1967Proxy(address(projectImplementation), initData);
     }
 
-    function testExtensionKeysLibraryFunctions() public {
+    function testExtensionKeysLibraryFunctions() public pure {
         // Test getAllKeys function
         bytes32[] memory allKeys = ExtensionKeys.getAllKeys();
         assertEq(allKeys.length, 8, "Should return 8 extension keys");
-        
+
         // Verify specific keys are included
         bool foundFounderNFT = false;
         bool foundProjectFactory = false;
-        
+
         for (uint256 i = 0; i < allKeys.length; i++) {
             if (allKeys[i] == ExtensionKeys.FOUNDER_NFT) {
                 foundFounderNFT = true;
@@ -447,7 +415,7 @@ contract IntegrationTest is Test {
                 foundProjectFactory = true;
             }
         }
-        
+
         assertTrue(foundFounderNFT, "FOUNDER_NFT key should be in getAllKeys result");
         assertTrue(foundProjectFactory, "PROJECT_FACTORY key should be in getAllKeys result");
 
@@ -465,18 +433,12 @@ contract IntegrationTest is Test {
         );
 
         // Test isValidExtensionKey function
-        assertTrue(
-            ExtensionKeys.isValidExtensionKey(ExtensionKeys.FOUNDER_NFT),
-            "FOUNDER_NFT should be valid"
-        );
+        assertTrue(ExtensionKeys.isValidExtensionKey(ExtensionKeys.FOUNDER_NFT), "FOUNDER_NFT should be valid");
 
-        assertFalse(
-            ExtensionKeys.isValidExtensionKey(keccak256("INVALID_KEY")),
-            "Invalid key should return false"
-        );
+        assertFalse(ExtensionKeys.isValidExtensionKey(keccak256("INVALID_KEY")), "Invalid key should return false");
     }
 
-    function testBackwardCompatibility() public {
+    function testBackwardCompatibility() public view {
         // Test that deprecated constants still work
         assertEq(
             registry.NFT_FACTORY_EXTENSION(),
