@@ -1,0 +1,10 @@
+Warning: optimizer settings have been disabled for accurate coverage reports, if you encounter "stack too deep" errors, consider using `--ir-minimum` which enables viaIR with minimum optimization resolving most of the errors
+Compiling 80 files with Solc 0.8.28
+Solc 0.8.28 finished in 3.48s
+Error: Compiler run failed:
+Error: Compiler error (/solidity/libsolidity/codegen/LValue.cpp:50):Stack too deep. Try compiling with `--via-ir` (cli) or the equivalent `viaIR: true` (standard JSON) while enabling the optimizer. Otherwise, try removing local variables.
+CompilerError: Stack too deep. Try compiling with `--via-ir` (cli) or the equivalent `viaIR: true` (standard JSON) while enabling the optimizer. Otherwise, try removing local variables.
+   --> src/Project.sol:243:17:
+    |
+243 |         require(creator != address(0), "Invalid creator");
+    |                 ^^^^^^^
