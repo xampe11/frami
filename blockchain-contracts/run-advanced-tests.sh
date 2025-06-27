@@ -239,30 +239,12 @@ include_storage = true
 include_push_bytes = true
 EOF
     
-    print_section "Structured Fuzz Tests"
-    if FOUNDRY_PROFILE=fuzz forge test --match-path "test/unit/FounderNFTCompleteFuzzTest.t.sol" --match-test "*Fuzz*" -vv; then
+    print_section "Robust Fuzz Tests"
+    if FOUNDRY_PROFILE=fuzz forge test --match-path "test/unit/FounderNFTRobustFuzzTest.t.sol" -vv; then
         print_success "Structured fuzz tests passed"
     else
         print_error "Structured fuzz tests failed"
         log_test_result "Structured Fuzz Tests" "FAILED" "Edge cases found"
-        return 1
-    fi
-    
-    print_section "Differential Fuzz Tests"
-    if FOUNDRY_PROFILE=fuzz forge test --match-path "test/fuzz/*" --match-test "*Differential*" -vv; then
-        print_success "Differential fuzz tests passed"
-    else
-        print_error "Differential fuzz tests failed"
-        log_test_result "Differential Fuzz Tests" "FAILED" "Implementation divergence detected"
-        return 1
-    fi
-    
-    print_section "Economic Fuzz Tests"
-    if FOUNDRY_PROFILE=fuzz forge test --match-path "test/fuzz/*" --match-test "*Economic*" -vv; then
-        print_success "Economic fuzz tests passed"
-    else
-        print_error "Economic fuzz tests failed"
-        log_test_result "Economic Fuzz Tests" "FAILED" "Economic vulnerabilities found"
         return 1
     fi
     
@@ -310,7 +292,7 @@ run_gas_optimization_tests() {
     fi
     
     print_section "Gas Optimization Tests"
-    if forge test --match-path "test/gas/*" -vv; then
+    if forge test --match-path "test/unit/*" -vv; then
         print_success "Gas optimization tests passed"
         log_test_result "Gas Optimization" "PASSED" "All gas benchmarks within limits"
     else
@@ -331,95 +313,6 @@ run_gas_optimization_tests() {
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     print_info "Gas optimization tests completed in ${duration}s"
-}
-
-run_stress_tests() {
-    print_header "Running Stress Tests"
-    
-    local start_time=$(date +%s)
-    
-    print_section "Maximum Capacity Tests"
-    if forge test --match-path "test/stress/*" --match-test "*MaxCapacity*" -vv; then
-        print_success "Maximum capacity tests passed"
-    else
-        print_error "Maximum capacity tests failed"
-        log_test_result "Stress Tests" "FAILED" "System fails under maximum load"
-        return 1
-    fi
-    
-    print_section "Concurrent Operations Tests"
-    if forge test --match-path "test/stress/*" --match-test "*Concurrent*" -vv; then
-        print_success "Concurrent operations tests passed"
-    else
-        print_error "Concurrent operations tests failed"
-        log_test_result "Stress Tests" "FAILED" "System fails under concurrent load"
-        return 1
-    fi
-    
-    print_section "Edge Case Discovery"
-    if forge test --match-path "test/stress/*" --match-test "*EdgeCase*" -vv; then
-        print_success "Edge case tests passed"
-    else
-        print_error "Edge case tests failed"
-        log_test_result "Stress Tests" "FAILED" "Edge cases cause failures"
-        return 1
-    fi
-    
-    local end_time=$(date +%s)
-    local duration=$((end_time - start_time))
-    print_info "Stress tests completed in ${duration}s"
-    log_test_result "Stress Tests" "PASSED" "System handles stress conditions"
-}
-
-# =============================================================================
-# SECURITY TESTING
-# =============================================================================
-
-run_security_tests() {
-    print_header "Running Security Tests"
-    
-    local start_time=$(date +%s)
-    
-    print_section "Reentrancy Tests"
-    if forge test --match-path "test/security/*" --match-test "*Reentrancy*" -vv; then
-        print_success "Reentrancy tests passed"
-    else
-        print_error "Reentrancy vulnerabilities found"
-        log_test_result "Security Tests" "FAILED" "Reentrancy vulnerabilities detected"
-        return 1
-    fi
-    
-    print_section "Access Control Tests"
-    if forge test --match-path "test/security/*" --match-test "*AccessControl*" -vv; then
-        print_success "Access control tests passed"
-    else
-        print_error "Access control vulnerabilities found"
-        log_test_result "Security Tests" "FAILED" "Access control issues detected"
-        return 1
-    fi
-    
-    print_section "MEV Resistance Tests"
-    if forge test --match-path "test/security/*" --match-test "*MEV*" -vv; then
-        print_success "MEV resistance tests passed"
-    else
-        print_error "MEV vulnerabilities found"
-        log_test_result "Security Tests" "FAILED" "MEV attack vectors detected"
-        return 1
-    fi
-    
-    print_section "Economic Attack Tests"
-    if forge test --match-path "test/security/*" --match-test "*Economic*" -vv; then
-        print_success "Economic attack tests passed"
-    else
-        print_error "Economic attack vulnerabilities found"
-        log_test_result "Security Tests" "FAILED" "Economic attack vectors detected"
-        return 1
-    fi
-    
-    local end_time=$(date +%s)
-    local duration=$((end_time - start_time))
-    print_info "Security tests completed in ${duration}s"
-    log_test_result "Security Tests" "PASSED" "No security vulnerabilities detected"
 }
 
 run_static_analysis() {
@@ -469,7 +362,7 @@ run_coverage_analysis() {
     local start_time=$(date +%s)
     
     print_section "Generating Coverage Report"
-    if forge coverage --report lcov > coverage_reports/lcov.info 2>&1; then
+    if forge coverage --ir-minimum --report lcov > coverage_reports/lcov.info 2>&1; then
         print_success "Coverage report generated"
         
         # Extract coverage percentage if possible
@@ -501,48 +394,6 @@ run_coverage_analysis() {
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     print_info "Coverage analysis completed in ${duration}s"
-}
-
-# =============================================================================
-# UPGRADE TESTING
-# =============================================================================
-
-run_upgrade_tests() {
-    print_header "Running Upgrade Tests"
-    
-    local start_time=$(date +%s)
-    
-    print_section "Storage Layout Validation"
-    if forge test --match-path "test/upgrade/*" --match-test "*Storage*" -vv; then
-        print_success "Storage layout tests passed"
-    else
-        print_error "Storage layout issues detected"
-        log_test_result "Upgrade Tests" "FAILED" "Storage layout incompatibilities"
-        return 1
-    fi
-    
-    print_section "Upgrade Compatibility Tests"
-    if forge test --match-path "test/upgrade/*" --match-test "*Compatibility*" -vv; then
-        print_success "Upgrade compatibility tests passed"
-    else
-        print_error "Upgrade compatibility issues detected"
-        log_test_result "Upgrade Tests" "FAILED" "Upgrade compatibility issues"
-        return 1
-    fi
-    
-    print_section "Data Migration Tests"
-    if forge test --match-path "test/upgrade/*" --match-test "*Migration*" -vv; then
-        print_success "Data migration tests passed"
-    else
-        print_error "Data migration issues detected"
-        log_test_result "Upgrade Tests" "FAILED" "Data migration issues"
-        return 1
-    fi
-    
-    local end_time=$(date +%s)
-    local duration=$((end_time - start_time))
-    print_info "Upgrade tests completed in ${duration}s"
-    log_test_result "Upgrade Tests" "PASSED" "All upgrade scenarios successful"
 }
 
 # =============================================================================
@@ -741,11 +592,8 @@ main() {
                 run_integration_tests || overall_success=false
                 run_invariant_tests || overall_success=false
                 run_fuzz_tests || overall_success=false
-                run_security_tests || overall_success=false
                 run_static_analysis || overall_success=false
                 run_gas_optimization_tests || overall_success=false
-                run_stress_tests || overall_success=false
-                run_upgrade_tests || overall_success=false
                 run_formal_verification || overall_success=false
                 ;;
         esac

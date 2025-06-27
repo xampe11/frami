@@ -1,0 +1,657 @@
+No files changed, compilation skipped
+
+Ran 2 tests for test/integration/TestPhase1Deployment.s.sol:TestPhase1Deployment
+[PASS] tester() (gas: 2307)
+[PASS] testerPrivateKey() (gas: 2352)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 340.64µs (58.42µs CPU time)
+
+Ran 15 tests for test/integration/PlatformFounderNFTIntegrationTest.s.sol:PlatformFounderNFTIntegrationTest
+[PASS] testAccessControlFounderNFT() (gas: 78368)
+[PASS] testAccessControlRegistry() (gas: 77981)
+[PASS] testBatchRewardClaiming() (gas: 818155)
+[PASS] testBatchStaking() (gas: 946343)
+[PASS] testBatchUnstaking() (gas: 1200249)
+[PASS] testDynamicExtensionManagement() (gas: 469728)
+[PASS] testFeeManagement() (gas: 174851)
+[PASS] testFounderNFTInitialization() (gas: 80524)
+[PASS] testFounderNFTMinting() (gas: 625943)
+[PASS] testFounderNFTRewards() (gas: 604002)
+[PASS] testFounderNFTStaking() (gas: 1009080)
+[PASS] testPlatformRegistryFounderNFTIntegration() (gas: 42662)
+[PASS] testPlatformRegistryInitialization() (gas: 59159)
+[PASS] testProjectManagement() (gas: 631777)
+[PASS] testVersioningAndMetadata() (gas: 49358)
+Suite result: ok. 15 passed; 0 failed; 0 skipped; finished in 5.62ms (4.06ms CPU time)
+
+Ran 49 tests for test/unit/PlatformRegistryTest.t.sol:PlatformRegistryTest
+[PASS] testActivateAlreadyActiveExtension() (gas: 44720)
+[PASS] testActivateNonexistentExtension() (gas: 43151)
+[PASS] testBatchExtensionOperations() (gas: 1897191)
+[PASS] testCompleteExtensionLifecycle() (gas: 663927)
+[PASS] testConvenienceGetters() (gas: 32711)
+[PASS] testDeactivateAlreadyInactiveExtension() (gas: 73412)
+[PASS] testDeactivateAndActivateExtension() (gas: 159004)
+[PASS] testDeregisterProject() (gas: 200032)
+[PASS] testExtensionCount() (gas: 350857)
+[PASS] testExtensionKeyUtilities() (gas: 34318)
+[PASS] testExtensionPermissions() (gas: 421309)
+[PASS] testExtensionRoleManagement() (gas: 459141)
+[PASS] testFactoryValidation() (gas: 60218)
+[PASS] testGenerateExtensionKey() (gas: 16583)
+[PASS] testGetAllExtensions() (gas: 80912)
+[PASS] testGetAllProjects() (gas: 294470)
+[PASS] testGetExtensionKey() (gas: 47911)
+[PASS] testGetExtensionsByCategory() (gas: 606596)
+[PASS] testGetTotalProjectsCreated() (gas: 177992)
+[PASS] testInitialization() (gas: 99071)
+[PASS] testManyExtensionsRegistration() (gas: 7277641)
+[PASS] testMultipleExtensionLifecycle() (gas: 888656)
+[PASS] testPauseUnpause() (gas: 129452)
+[PASS] testProjectLifecycle() (gas: 420425)
+[PASS] testRegisterExtension() (gas: 427244)
+[PASS] testRegisterExtensionAlreadyExists() (gas: 49466)
+[PASS] testRegisterExtensionEmptyName() (gas: 46944)
+[PASS] testRegisterExtensionEmptyVersion() (gas: 48392)
+[PASS] testRegisterExtensionInvalidAddress() (gas: 45080)
+[PASS] testRegisterProject() (gas: 167280)
+[PASS] testRegisterProjectUnauthorized() (gas: 42457)
+[PASS] testRemoveExtension() (gas: 405068)
+[PASS] testRoleGranting() (gas: 404982)
+[PASS] testRoleRevocation() (gas: 180192)
+[PASS] testUnauthorizedExtensionManagement() (gas: 108976)
+[PASS] testUpdateFeeDistribution() (gas: 67657)
+[PASS] testUpdateFeeDistributionInvalidSum() (gas: 40804)
+[PASS] testUpdatePlatformFee() (gas: 58398)
+[PASS] testUpdatePlatformFeeTooHigh() (gas: 41277)
+[PASS] testUpdatePlatformFeeUnauthorized() (gas: 41721)
+[PASS] testUpdateTreasury() (gas: 62041)
+[PASS] testUpdateTreasuryInvalidAddress() (gas: 41406)
+[PASS] testUpdateVersion() (gas: 58903)
+[PASS] testUpdateVersionUnauthorized() (gas: 42315)
+[PASS] testUpgrade() (gas: 3474424)
+[PASS] testUpgradeExtension() (gas: 415916)
+[PASS] testUpgradeNonexistentExtension() (gas: 46611)
+[PASS] testUpgradeUnauthorized() (gas: 3450654)
+[PASS] testVersion() (gas: 19121)
+Suite result: ok. 49 passed; 0 failed; 0 skipped; finished in 13.44ms (17.20ms CPU time)
+
+Ran 32 tests for test/unit/FounderNFTTest.t.sol:FounderNFTTest
+[PASS] testAddPlatformFees() (gas: 98087)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testBatchMintByAdmin() (gas: 441215)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testCannotTransferStakedToken() (gas: 451468)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testClaimAllRewards() (gas: 1305162)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testClaimMultipleRewards() (gas: 1001403)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testClaimRewardsWithGuaranteedRewards() (gas: 1307701)
+Logs:
+  Contract deployed and initialized
+  User1 earned: 144285714285667200
+  User2 earned: 144285714285667200
+  === SIMPLE DEBUG ===
+  User1 earned before claim: 144285714285667200
+  User2 earned before claim: 144285714285667200
+  Contract balance: 2200000000000000000
+  Total staked supply: 2
+  Current reward rate: 3339947089946
+  === INTERNAL STATE DEBUG ===
+  _rewards[0]: 0
+  _userRewardPerTokenPaid[0]: 0
+  _rewardPerTokenStored: 0
+  rewardPerToken(): 144285714285667200000000000000000000
+  _lastUpdateTime: 1
+  block.timestamp: 86401
+  Claim succeeded!
+
+[PASS] testGetEstimatedAPR() (gas: 477690)
+Logs:
+  Contract deployed and initialized
+  Estimated APR: 957532 basis points
+
+[PASS] testGetStakingInfoBatch() (gas: 877003)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testInitialization() (gas: 109302)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testMintFailsWhenSaleInactive() (gas: 78402)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testMintFailsWithInsufficientPayment() (gas: 59028)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testMintMultipleNFTs() (gas: 491585)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testMintSingleNFT() (gas: 279129)
+Logs:
+  Contract deployed and initialized
+  Expected redistribution: 10000000000000000
+  Current reward rate: 0
+
+[PASS] testNoRewardsToClaimError() (gas: 462641)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testPlatformFeesDistributionWithStakers() (gas: 489062)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testRewardAccrualOverTime() (gas: 698322)
+Logs:
+  Contract deployed and initialized
+  Initial earned: 0
+  Earned after 1 hour: 119047619044800
+
+[PASS] testRoleSetup() (gas: 82476)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testSetMinimumStakingPeriod() (gas: 52357)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testSetPrice() (gas: 51544)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testSetSaleStatus() (gas: 108254)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testStakeAlreadyStakedToken() (gas: 463419)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testStakeMultipleTokens() (gas: 942394)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testStakeSingleToken() (gas: 505789)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testStakeTokenNotOwned() (gas: 248077)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testStakedTokenTransferRestriction() (gas: 654629)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testTooManyTokensInTransactionError() (gas: 57932)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testTransferRestrictionsComprehensive() (gas: 854207)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testUnstakeBeforeMinimumPeriod() (gas: 465926)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testUnstakeMultipleTokens() (gas: 1122450)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testUnstakeToken() (gas: 592808)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testUpdateFunctionOverride() (gas: 410753)
+Logs:
+  Contract deployed and initialized
+
+[PASS] testWithdrawSalesProceeds() (gas: 258520)
+Logs:
+  Contract deployed and initialized
+
+Suite result: ok. 32 passed; 0 failed; 0 skipped; finished in 812.01ms (7.63ms CPU time)
+
+Ran 10 tests for test/unit/FounderNFTRobustFuzzTest.t.sol:FounderNFTRobustFuzzTest
+[PASS] testFuzz_BatchOperations(uint256,uint8,uint256,bool) (runs: 260, μ: 920117, ~: 1034153)
+[PASS] testFuzz_BoundaryConditions(uint256,uint256,uint256) (runs: 260, μ: 2138332, ~: 648186)
+[PASS] testFuzz_ComplexMultiUserScenario(uint256[3],uint256[3],uint256[3],uint256[3]) (runs: 260, μ: 660576, ~: 531113)
+[PASS] testFuzz_DifferentialRewardCalculation(uint256,uint256,uint256,uint256) (runs: 260, μ: 18260, ~: 18343)
+[PASS] testFuzz_GameTheoryScenarios(uint256,uint256[3],uint256,uint256) (runs: 260, μ: 867416, ~: 975807)
+[PASS] testFuzz_MEVResistance(uint256,uint256,uint256,uint8) (runs: 260, μ: 721755, ~: 708542)
+[PASS] testFuzz_MintingWithRandomInputs(address,uint8,uint256,bool) (runs: 257, μ: 453803, ~: 385591)
+[PASS] testFuzz_RewardCalculations(uint256,uint256,uint256,uint256) (runs: 260, μ: 1163528, ~: 1179284)
+[PASS] testFuzz_StressConditions(uint256,uint256,uint256) (runs: 260, μ: 1372408, ~: 1315326)
+[PASS] testFuzz_UnstakingBehavior(uint256,uint256,uint256,bool) (runs: 260, μ: 1220704, ~: 1220998)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 834.53ms (1.99s CPU time)
+
+Ran 23 tests for test/unit/FounderNFTInvariant.t.sol:FounderNFTCompleteInvariantTest
+[PASS] invariant_balancesSumToTotalSupply() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 2
+
+[PASS] invariant_contractOwnsAllStakedTokens() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 2
+
+[PASS] invariant_mintRevenueConservation() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 1
+
+[PASS] invariant_noValueCreatedFromNothing() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 2
+
+[PASS] invariant_onlyRegistryHasPlatformRole() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 2
+
+[PASS] invariant_onlyStakedTokensEarnRewards() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 1
+
+[PASS] invariant_ownershipConsistency() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 1
+
+[PASS] invariant_rewardRateIsNonNegative() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 2
+
+[PASS] invariant_rewardsBackedByBalance() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 2
+
+[PASS] invariant_stakedSupplyNeverExceedsTotal() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 2
+
+[PASS] invariant_stakedTokensHaveValidInfo() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 1
+
+[PASS] invariant_systemIsSolvent() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 2
+
+[PASS] invariant_timeMonotonicity() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 2
+
+[PASS] invariant_totalSupplyNeverExceedsMax() (runs: 256, calls: 3840, reverts: 3371)
+Logs:
+  Bound result 1
+  Bound result 2
+
+[PASS] testFuzz_RandomOperationSequence(uint256,uint8,uint256[]) (runs: 260, μ: 772248, ~: 697931)
+[PASS] testFuzz_RewardInvariants(uint256,uint256,uint256) (runs: 260, μ: 1263396, ~: 1290673)
+[PASS] testInvariant_AccessControl() (gas: 170714)
+[PASS] testInvariant_BalanceConservation() (gas: 390229)
+Logs:
+  Bound result 300000000000000000
+  Bound result 100000000000000000
+
+[PASS] testInvariant_EconomicConservation() (gas: 451394)
+Logs:
+  Bound result 300000000000000000
+  Bound result 100000000000000000
+  Bound result 32400
+  Bound result 36000
+
+[PASS] testInvariant_OwnershipInvariants() (gas: 564328)
+Logs:
+  Bound result 300000000000000000
+  Bound result 100000000000000000
+  Bound result 32400
+  Bound result 36000
+  Bound result 200000000000000000
+
+[PASS] testInvariant_RewardInvariants() (gas: 665392)
+Logs:
+  Bound result 300000000000000000
+  Bound result 100000000000000000
+  Bound result 32400
+  Bound result 36000
+  Bound result 200000000000000000
+  Bound result 46800
+
+[PASS] testInvariant_SupplyInvariants() (gas: 490726)
+Logs:
+  Bound result 300000000000000000
+  Bound result 100000000000000000
+  Bound result 32400
+  Bound result 36000
+
+[PASS] testInvariant_SystemSolvency() (gas: 1292071)
+Logs:
+  Bound result 300000000000000000
+  Bound result 100000000000000000
+  Bound result 32400
+  Bound result 36000
+  Bound result 200000000000000000
+  Bound result 46800
+  Bound result 200000000000000000
+  Bound result 64800
+  Bound result 100000000000000000
+  Bound result 2
+
+Suite result: ok. 23 passed; 0 failed; 0 skipped; finished in 834.55ms (4.14s CPU time)
+
+╭----------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/FounderNFT.sol:FounderNFT Contract |                 |        |        |        |         |
++===============================================================================================+
+| Deployment Cost                        | Deployment Size |        |        |        |         |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| 4052308                                | 18604           |        |        |        |         |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+|                                        |                 |        |        |        |         |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                          | Min             | Avg    | Median | Max    | # Calls |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| ADMIN_ROLE                             | 1049            | 1049   | 1049   | 1049   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| DEFAULT_ADMIN_ROLE                     | 1290            | 1290   | 1290   | 1290   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| PLATFORM_ROLE                          | 939             | 939    | 939    | 939    | 50      |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| UPGRADER_ROLE                          | 1949            | 1949   | 1949   | 1949   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| addPlatformFees                        | 2448            | 24037  | 17333  | 40033  | 2443    |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| approve                                | 5064            | 5064   | 5064   | 5064   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| balanceOf                              | 3315            | 3315   | 3315   | 3315   | 5434    |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| batchMint                              | 350060          | 350060 | 350060 | 350060 | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| claimAllRewards                        | 218578          | 218578 | 218578 | 218578 | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| claimMultipleRewards                   | 155677          | 155710 | 155710 | 155744 | 2       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| claimReward                            | 23968           | 99889  | 100554 | 111954 | 132     |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| earned                                 | 2213            | 5192   | 2982   | 16213  | 5738    |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getCurrentRewardRate                   | 3815            | 3815   | 3815   | 3815   | 265     |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getEstimatedAPR                        | 5096            | 5096   | 5096   | 5096   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getLastUpdateTime                      | 3548            | 3548   | 3548   | 3548   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getMaxSupply                           | 2822            | 2822   | 2822   | 2822   | 2992    |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getMinimumStakingPeriod                | 3881            | 3881   | 3881   | 3881   | 28      |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getPlatformFeeDistributionPercentage   | 3460            | 3460   | 3460   | 3460   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getPlatformRegistry                    | 2317            | 2317   | 2317   | 2317   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getPrice                               | 3350            | 3350   | 3350   | 3350   | 3       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getRewardPerTokenStored                | 3218            | 3218   | 3218   | 3218   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getRewards                             | 3657            | 3657   | 3657   | 3657   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getSaleStatus                          | 3208            | 3208   | 3208   | 3208   | 3       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getSalesRedistributionPercentage       | 1225            | 1225   | 1225   | 1225   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getStakedByOwner                       | 4482            | 7499   | 6745   | 11271  | 3       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getStakedCountByOwner                  | 3324            | 3324   | 3324   | 3324   | 435     |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getStakingInfo                         | 6377            | 7206   | 6377   | 8377   | 41      |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getStakingInfoBatch                    | 41003           | 41003  | 41003  | 41003  | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getTotalEarnedByOwner                  | 40763           | 40763  | 40763  | 40763  | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getTotalSalesProceeds                  | 3837            | 3837   | 3837   | 3837   | 4       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getTotalStakedSupply                   | 2514            | 2514   | 2514   | 2514   | 6965    |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| getUserRewardPerTokenPaid              | 3041            | 3041   | 3041   | 3041   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| grantRole                              | 7450            | 22592  | 29690  | 29690  | 47      |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| hasRole                                | 3542            | 3542   | 3542   | 3542   | 8       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| hasStakedTokens                        | 3088            | 3088   | 3088   | 3088   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| initialize                             | 377499          | 377499 | 377499 | 377499 | 80      |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| isTokenStaked                          | 4084            | 4084   | 4084   | 4084   | 2503    |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| mint                                   | 7561            | 60791  | 11815  | 172735 | 82      |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| mintMultiple                           | 15197           | 232171 | 162965 | 630529 | 5732    |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| name                                   | 2972            | 2972   | 2972   | 2972   | 3       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| ownerOf                                | 3164            | 3164   | 3164   | 3164   | 2023    |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| rewardPerToken                         | 10333           | 10333  | 10333  | 10333  | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| setApprovalForAll                      | 5634            | 17101  | 25534  | 25534  | 826     |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| setMinimumStakingPeriod                | 7657            | 7657   | 7657   | 7657   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| setPrice                               | 8361            | 8361   | 8361   | 8361   | 1       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| setSaleStatus                          | 3925            | 25356  | 26027  | 26027  | 84      |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| stakeMultipleTokens                    | 12273           | 293091 | 207122 | 519352 | 208     |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| stakeToken                             | 17872           | 212336 | 208212 | 255047 | 1799    |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| symbol                                 | 3962            | 3962   | 3962   | 3962   | 3       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| totalSupply                            | 2521            | 2521   | 2521   | 2521   | 22648   |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| transferFrom                           | 10148           | 34004  | 48319  | 48319  | 8       |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| unstakeMultipleTokens                  | 131895          | 178960 | 131895 | 303390 | 201     |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| unstakeToken                           | 27295           | 168391 | 170653 | 231560 | 348     |
+|----------------------------------------+-----------------+--------+--------+--------+---------|
+| withdrawSalesProceeds                  | 16022           | 16022  | 16022  | 16022  | 1       |
+╰----------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭----------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/PlatformRegistry.sol:PlatformRegistry Contract |                 |        |        |        |         |
++===========================================================================================================+
+| Deployment Cost                                    | Deployment Size |        |        |        |         |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 3372608                                            | 15409           |        |        |        |         |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                    |                 |        |        |        |         |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                      | Min             | Avg    | Median | Max    | # Calls |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| ADMIN_ROLE                                         | 967             | 967    | 967    | 967    | 6       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| FEE_MANAGER_ROLE                                   | 175             | 175    | 175    | 175    | 3       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| UPGRADER_ROLE                                      | 1492            | 1492   | 1492   | 1492   | 1       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| activateExtension                                  | 5175            | 23777  | 18186  | 53560  | 4       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| deactivateExtension                                | 7274            | 13852  | 11779  | 19215  | 5       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| deregisterProject                                  | 21010           | 22610  | 21010  | 25810  | 3       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| extensionExists                                    | 2520            | 2520   | 2520   | 2520   | 6       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| extensionHasPermission                             | 8181            | 8294   | 8328   | 8373   | 3       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| generateExtensionKey                               | 2266            | 2266   | 2266   | 2266   | 4       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getAllExtensions                                   | 55874           | 240719 | 141283 | 624436 | 4       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getAllProjects                                     | 9501            | 13394  | 15341  | 15341  | 3       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getExtension                                       | 3548            | 3548   | 3548   | 3548   | 11      |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getExtensionCount                                  | 12713           | 38679  | 21907  | 105513 | 5       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getExtensionInfo                                   | 20877           | 21634  | 20877  | 23148  | 3       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getExtensionKey                                    | 3484            | 3484   | 3484   | 3484   | 3       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getExtensionsByCategory                            | 26753           | 26753  | 26753  | 26753  | 1       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getFeeDistribution                                 | 5419            | 5419   | 5419   | 5419   | 19      |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getFounderNFT                                      | 2989            | 2989   | 2989   | 2989   | 2       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getPlatformFeePercentage                           | 3114            | 3114   | 3114   | 3114   | 5       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getPlatformTreasury                                | 3292            | 3292   | 3292   | 3292   | 4       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getProjectFactory                                  | 2740            | 2740   | 2740   | 2740   | 1       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getTotalProjectsCreated                            | 2564            | 2564   | 2564   | 2564   | 4       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getVersion                                         | 2961            | 2961   | 2961   | 2961   | 5       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| grantRole                                          | 29520           | 29520  | 29520  | 29520  | 2       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| hasRole                                            | 3460            | 3460   | 3460   | 3460   | 7       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| initialize                                         | 262375          | 280454 | 282275 | 282275 | 153     |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| isExtensionRegistered                              | 2712            | 2712   | 2712   | 2712   | 14      |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| isFactoryRegistered                                | 3658            | 15232  | 15232  | 26807  | 2       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| isProjectRegistered                                | 2748            | 2748   | 2748   | 2748   | 8       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| pause                                              | 26483           | 26483  | 26483  | 26483  | 1       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| paused                                             | 2913            | 2913   | 2913   | 2913   | 3       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| proxiableUUID                                      | 793             | 793    | 793    | 793    | 1       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| registerExtension                                  | 4480            | 292556 | 303383 | 347776 | 192     |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| registerProject                                    | 3406            | 95942  | 114491 | 116710 | 10      |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| removeExtension                                    | 2424            | 65282  | 77798  | 85751  | 5       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| revokeRole                                         | 13466           | 13466  | 13466  | 13466  | 1       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| unpause                                            | 8827            | 8827   | 8827   | 8827   | 1       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| updateFeeDistribution                              | 2804            | 8503   | 8531   | 14148  | 4       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| updatePlatformFee                                  | 3486            | 6041   | 3595   | 9820   | 5       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| updatePlatformTreasury                             | 3512            | 7832   | 9992   | 9992   | 3       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| updateVersion                                      | 3603            | 6254   | 6254   | 8905   | 2       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| upgradeExtension                                   | 5286            | 34491  | 44227  | 44227  | 4       |
+|----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| upgradeToAndCall                                   | 3607            | 7644   | 7644   | 11681  | 2       |
+╰----------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭--------------------------------------------------+-----------------+-------+--------+--------+---------╮
+| src/proxy/ERC1967Proxy.sol:ERC1967Proxy Contract |                 |       |        |        |         |
++========================================================================================================+
+| Deployment Cost                                  | Deployment Size |       |        |        |         |
+|--------------------------------------------------+-----------------+-------+--------+--------+---------|
+| 493086                                           | 1008            |       |        |        |         |
+|--------------------------------------------------+-----------------+-------+--------+--------+---------|
+|                                                  |                 |       |        |        |         |
+|--------------------------------------------------+-----------------+-------+--------+--------+---------|
+| Function Name                                    | Min             | Avg   | Median | Max    | # Calls |
+|--------------------------------------------------+-----------------+-------+--------+--------+---------|
+| fallback                                         | 2499            | 39755 | 7304   | 653716 | 58910   |
+╰--------------------------------------------------+-----------------+-------+--------+--------+---------╯
+
+╭----------------------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| test/unit/FounderNFTInvariant.t.sol:FounderNFTHandler Contract |                 |        |        |        |         |
++=======================================================================================================================+
+| Deployment Cost                                                | Deployment Size |        |        |        |         |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 2450975                                                        | 10910           |        |        |        |         |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                                |                 |        |        |        |         |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                                  | Min             | Avg    | Median | Max    | # Calls |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| addPlatformFees                                                | 76587           | 125190 | 145449 | 148249 | 1360    |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| calculateTotalBalances                                         | 28510           | 28510  | 28510  | 28510  | 1       |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| calculateTotalEarnableRewards                                  | 12906           | 37757  | 38986  | 42795  | 260     |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| claimReward                                                    | 2641            | 10429  | 2641   | 193187 | 1202    |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getLastRecordedTime                                            | 2517            | 2517   | 2517   | 2517   | 1       |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getStakerRevenue                                               | 2853            | 2853   | 2853   | 2853   | 1       |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getTotalMintRevenue                                            | 2407            | 2407   | 2407   | 2407   | 2       |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getTotalSystemValue                                            | 2922            | 2922   | 2922   | 2922   | 1       |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getTotalValueInput                                             | 2988            | 2988   | 2988   | 2988   | 1       |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getTransactionCount                                            | 2341            | 2341   | 2341   | 2341   | 1       |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getTreasuryRevenue                                             | 3051            | 3051   | 3051   | 3051   | 1       |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| mintNFT                                                        | 265632          | 367470 | 360399 | 477318 | 1718    |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| stakeToken                                                     | 3142            | 96639  | 3142   | 319372 | 1804    |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| timeWarp                                                       | 11745           | 19072  | 12183  | 32973  | 1433    |
+|----------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| unstakeToken                                                   | 3125            | 10130  | 3125   | 70239  | 1167    |
+╰----------------------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭--------------------------------------------------------------------------+-----------------+-----+--------+-----+---------╮
+| test/unit/FounderNFTRobustFuzzTest.t.sol:SimpleRewardCalculator Contract |                 |     |        |     |         |
++===========================================================================================================================+
+| Deployment Cost                                                          | Deployment Size |     |        |     |         |
+|--------------------------------------------------------------------------+-----------------+-----+--------+-----+---------|
+| 156699                                                                   | 505             |     |        |     |         |
+|--------------------------------------------------------------------------+-----------------+-----+--------+-----+---------|
+|                                                                          |                 |     |        |     |         |
+|--------------------------------------------------------------------------+-----------------+-----+--------+-----+---------|
+| Function Name                                                            | Min             | Avg | Median | Max | # Calls |
+|--------------------------------------------------------------------------+-----------------+-----+--------+-----+---------|
+| calculateComplexReward                                                   | 725             | 725 | 725    | 725 | 256     |
+╰--------------------------------------------------------------------------+-----------------+-----+--------+-----+---------╯
+
+
+Ran 6 test suites in 2.99s (2.50s CPU time): 131 tests passed, 0 failed, 0 skipped (131 total tests)
