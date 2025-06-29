@@ -164,7 +164,7 @@ deploy_to_network() {
     source .env
     
     # Build deployment command
-    local cmd="forge script script/DeployPhase1.s.sol --rpc-url $network --private-key \$DEPLOYER_PRIVATE_KEY --broadcast"
+    local cmd="forge script script/DeployPhase1.s.sol --rpc-url $network --private-key \$DEPLOYER_PRIVATE_KEY --broadcast --ffi"
     
     # Add verification if requested and not localhost
     if [ "$verify" = "true" ] && [ "$network" != "localhost" ]; then

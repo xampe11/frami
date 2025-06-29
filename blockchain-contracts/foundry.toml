@@ -25,13 +25,13 @@ invariant = { runs = 256, depth = 15 }
 
 # Gas settings
 gas_limit = 9223372036854775807
-gas_price = 20000000000  # 20 gwei
+gas_price = 20000000000         # 20 gwei
 gas_reports = ["*"]
 
 # Remappings for imports
 remappings = [
     "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
-    "forge-std/=lib/forge-std/src/"
+    "forge-std/=lib/forge-std/src/",
 ]
 
 # Auto-detect dependencies
@@ -87,20 +87,20 @@ base_goerli = { key = "${BASE_API_KEY}", url = "https://api-goerli.basescan.org/
 # Production deployment profile
 [profile.production]
 optimizer = true
-optimizer_runs = 1000  # Higher optimization for production
-via_ir = true          # Use IR pipeline for better optimization
-gas_price = 15000000000  # 15 gwei - adjust based on network conditions
+optimizer_runs = 1000   # Higher optimization for production
+via_ir = true           # Use IR pipeline for better optimization
+gas_price = 15000000000 # 15 gwei - adjust based on network conditions
 
 # Testnet deployment profile
 [profile.testnet]
 optimizer = true
 optimizer_runs = 200
-gas_price = 5000000000  # 5 gwei - lower for testnets
+gas_price = 5000000000 # 5 gwei - lower for testnets
 
 # Local development profile
 [profile.local]
-optimizer = false     # Faster compilation for local development
-gas_price = 1000000000  # 1 gwei
+optimizer = false      # Faster compilation for local development
+gas_price = 1000000000 # 1 gwei
 
 # Gas testing profile
 [profile.gas-test]
@@ -118,31 +118,31 @@ gas_limit = 30000000
 optimizer = true
 optimizer_runs = 1000
 via_ir = true
-gas_price = 20000000000  # Adjust based on current gas prices
+gas_price = 20000000000 # Adjust based on current gas prices
 
 # Sepolia Testnet
 [profile.sepolia]
 optimizer = true
 optimizer_runs = 200
-gas_price = 2000000000  # 2 gwei
+gas_price = 2000000000 # 2 gwei
 
 # Polygon
 [profile.polygon]
 optimizer = true
 optimizer_runs = 1000
-gas_price = 50000000000  # 50 gwei in MATIC
+gas_price = 50000000000 # 50 gwei in MATIC
 
 # Arbitrum
 [profile.arbitrum]
 optimizer = true
 optimizer_runs = 1000
-gas_price = 1000000000  # 1 gwei
+gas_price = 1000000000 # 1 gwei
 
 # Base
 [profile.base]
 optimizer = true
 optimizer_runs = 1000
-gas_price = 1000000000  # 1 gwei
+gas_price = 1000000000 # 1 gwei
 
 # =============================================================================
 # FORMATTING & LINTING
@@ -227,7 +227,7 @@ fail_fast = true
 
 # Settings for test coverage reporting
 [profile.coverage]
-optimizer = false  # Disable optimization for accurate coverage
+optimizer = false   # Disable optimization for accurate coverage
 gas_reports = ["*"]
 # Enable coverage for all contracts
 coverage = true
@@ -237,17 +237,21 @@ coverage = true
 # =============================================================================
 
 # Memory limit for compilation (in MB)
-memory_limit = 33554432  # 32 GB
+memory_limit = 33554432 # 32 GB
 
 # Allow paths for file operations
 fs_permissions = [
     { access = "read-write", path = "./deployments" },
+    { access = "read-write", path = "./deployments/" },
+    { access = "read-write", path = "./broadcast" },
     { access = "read-write", path = "./" },
-    { access = "read", path = "./lib" }
+    { access = "read-write", path = "../" },
+    { access = "read-write", path = "../../front-end" },
 ]
 
+
 # FFI settings (be careful with this)
-ffi = true  # Required for some deployment scripts
+ffi = true # Required for some deployment scripts
 
 # Library linking
 libraries = []
@@ -274,8 +278,8 @@ ANVIL_RPC_URL = "http://127.0.0.1:8545"
 
 # Solidity compiler warnings to ignore
 ignored_error_codes = [
-    1878,  # SPDX license identifier not provided
-    3420   # Source file does not specify required compiler version
+    1878, # SPDX license identifier not provided
+    3420, # Source file does not specify required compiler version
 ]
 
 # Enable specific warnings
@@ -290,7 +294,15 @@ warnings = []
 contracts = {}
 engine = "chc"
 timeout = 20000
-targets = ["assert", "underflow", "overflow", "divByZero", "constantCondition", "popEmptyArray", "outOfBounds"]
+targets = [
+    "assert",
+    "underflow",
+    "overflow",
+    "divByZero",
+    "constantCondition",
+    "popEmptyArray",
+    "outOfBounds",
+]
 
 # =============================================================================
 # NOTES
