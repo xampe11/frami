@@ -32,6 +32,7 @@ gas_reports = ["*"]
 remappings = [
     "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
     "forge-std/=lib/forge-std/src/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts",
 ]
 
 # Auto-detect dependencies
@@ -243,6 +244,8 @@ memory_limit = 33554432 # 32 GB
 fs_permissions = [
     { access = "read-write", path = "./deployments" },
     { access = "read-write", path = "./deployments/" },
+    { access = "read-write", path = "deployments/" },
+    { access = "read-write", path = "deployments" },
     { access = "read-write", path = "./broadcast" },
     { access = "read-write", path = "./" },
     { access = "read-write", path = "../" },

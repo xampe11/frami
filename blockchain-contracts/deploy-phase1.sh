@@ -273,7 +273,7 @@ show_next_steps() {
     fi
     
     echo "📚 Important files:"
-    echo "   - Deployment data: ./deployments/phase1-$network-latest.json"
+    echo "   - Deployment data: ./broadcast/phase1-$network-latest.json"
     echo "   - Environment backup: .env.deployed"
     echo "   - Deployment logs: Check console output above"
     echo
