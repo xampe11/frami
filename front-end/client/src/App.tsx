@@ -1,8 +1,8 @@
 // app.tsx - Main application file
 import '@rainbow-me/rainbowkit/styles.css';
-import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { RainbowKitProvider, getDefaultConfig, darkTheme, lightTheme } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
-import { localhost, mainnet, polygon } from 'wagmi/chains';
+import { mainnet, sepolia, polygon, bsc } from 'wagmi/chains';
 import { http } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
@@ -13,8 +13,7 @@ import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { WalletProvider } from "@/contexts/wallet-context";
 import { apiRequest } from "@/lib/queryClient";
-import { ThemeProvider } from "next-themes";
-import { defineChain } from 'viem'
+import { ThemeProvider, useTheme } from "next-themes";
 
 import Home from "@/pages/home";
 import Projects from "@/pages/projects";
@@ -29,7 +28,6 @@ import NotFound from "@/pages/not-found";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { useMediaQuery } from "@/hooks/use-mobile";
-import { env } from 'process';
 
 // Get environment variables with fallback
 const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
@@ -39,7 +37,6 @@ console.log("Wallet Connect Project ID:", projectId ? "Found" : "Not found");
 if (!projectId) {
   console.error("Missing VITE_WALLET_CONNECT_PROJECT_ID. Wallet Connect may not work properly.");
 }
-
 
 const subgraphEndpoint = import.meta.env.VITE_SUBGRAPH_ENDPOINT ||
   'http://localhost:8000/subgraphs/id/QmS4iK7V2vCMcub96XJ1Dif7Kg2YKHhPVZRZB8dbdyF1Tm';
@@ -56,10 +53,7 @@ const apolloClient = new ApolloClient({
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Set up a default query function that will be used for all queries
-      // that don't explicitly provide a queryFn
       queryFn: async ({ queryKey }) => {
-        // Assuming queryKey[0] is the API endpoint
         if (typeof queryKey[0] === 'string' && queryKey[0].startsWith('/')) {
           const response = await apiRequest("GET", queryKey[0]);
           return response.json();
@@ -70,124 +64,100 @@ const queryClient = new QueryClient({
   },
 });
 
-const anvilMainnetFork = defineChain({
-  id: 31337,
-  name: 'Anvil Mainnet Fork',
-  network: 'anvil-mainnet-fork',
-  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-  rpcUrls: {
-    default: { http: ['http://127.0.0.1:8545'] },
-    public: { http: ['http://127.0.0.1:8545'] },
-  },
-})
-
-// Create Wagmi config with RainbowKit
+// Create Wagmi config with RainbowKit - Updated chains
 const config = getDefaultConfig({
   appName: 'Frami',
   projectId: projectId,
-  chains: [mainnet, polygon, anvilMainnetFork],
+  chains: [mainnet, sepolia, polygon, bsc],
   transports: {
     [mainnet.id]: http(),
+    [sepolia.id]: http(),
     [polygon.id]: http(),
-    [anvilMainnetFork.id]: http('http://127.0.0.1:8545'),
+    [bsc.id]: http(),
   },
-  ssr: false, // Disable SSR to prevent duplicate initialization
+  ssr: false,
 });
 
-function Router() {
-  const { toast } = useToast();
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  const [location] = useLocation();
+// Custom RainbowKit themes
+const customLightTheme = lightTheme({
+  accentColor: '#8A63D2',
+  accentColorForeground: 'white',
+  borderRadius: 'medium',
+  fontStack: 'system',
+});
 
-  // Scroll to top on route change
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location]);
+const customDarkTheme = darkTheme({
+  accentColor: '#8A63D2',
+  accentColorForeground: 'white',
+  borderRadius: 'medium',
+  fontStack: 'system',
+});
 
-  useEffect(() => {
-    // Initialize Gsap ScrollTrigger
-    const initGsap = async () => {
-      if (typeof window !== "undefined") {
-        const { gsap } = await import("gsap");
-        const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-
-        gsap.registerPlugin(ScrollTrigger);
-
-        // Return cleanup function to kill all ScrollTriggers when component unmounts
-        return () => {
-          ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-        };
-      }
-    };
-
-    initGsap();
-  }, []);
+function RainbowKitProviderWrapper({ children }: { children: React.ReactNode }) {
+  const { theme } = useTheme();
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground dark:bg-slate-900">
-      <Navbar />
-      <main className="flex-grow">
-        <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/explore" component={Projects} />
-          <Route path="/projects/:slug" component={Project} />
-          <Route path="/create-project" component={CreateProject} />
-          <Route path="/founder-nft" component={FounderNFT} />
-          <Route path="/founder-nft/dashboard" component={FounderNFTDashboard} />
-          <Route path="/my-profile" component={MyProfile} />
-          <Route path="/docs" component={Docs} />
-          <Route path="/contact" component={Contact} />
-          {/* Redirects for old routes */}
-          <Route path="/projects">
-            {() => {
-              window.location.href = '/explore';
-              return null;
-            }}
-          </Route>
-          <Route path="/discover">
-            {() => {
-              window.location.href = '/explore';
-              return null;
-            }}
-          </Route>
-          {/* Redirects for old create project routes */}
-          <Route path="/create">
-            {() => {
-              window.location.href = '/create-project';
-              return null;
-            }}
-          </Route>
-          <Route path="/start-project">
-            {() => {
-              window.location.href = '/create-project';
-              return null;
-            }}
-          </Route>
-          <Route component={NotFound} />
-        </Switch>
-      </main>
-      <Footer />
-    </div>
+    <RainbowKitProvider
+      theme={theme === 'dark' ? customDarkTheme : customLightTheme}
+    >
+      {children}
+    </RainbowKitProvider>
   );
 }
 
 function App() {
+  const [location, setLocation] = useLocation();
+  const { toast } = useToast();
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
+  // Handle client-side routing errors
+  useEffect(() => {
+    const handleError = (error: ErrorEvent) => {
+      console.error('Application error:', error);
+      toast({
+        title: "Application Error",
+        description: "An unexpected error occurred. Please refresh the page.",
+        variant: "destructive",
+      });
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, [toast]);
+
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-          <ApolloProvider client={apolloClient}>
-            <RainbowKitProvider>
-              <WalletProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Router />
-                </TooltipProvider>
-              </WalletProvider>
-            </RainbowKitProvider>
-          </ApolloProvider>
-        </QueryClientProvider>
-      </WagmiProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <TooltipProvider>
+        <WagmiProvider config={config}>
+          <QueryClientProvider client={queryClient}>
+            <RainbowKitProviderWrapper>
+              <ApolloProvider client={apolloClient}>
+                <WalletProvider>
+                  <div className="min-h-screen bg-background flex flex-col">
+                    <Navbar />
+                    <main className="flex-1">
+                      <Switch>
+                        <Route path="/" component={Home} />
+                        <Route path="/projects" component={Projects} />
+                        <Route path="/project/:id" component={Project} />
+                        <Route path="/create-project" component={CreateProject} />
+                        <Route path="/founder-nft" component={FounderNFT} />
+                        <Route path="/founder-nft-dashboard" component={FounderNFTDashboard} />
+                        <Route path="/my-profile" component={MyProfile} />
+                        <Route path="/docs" component={Docs} />
+                        <Route path="/contact" component={Contact} />
+                        <Route component={NotFound} />
+                      </Switch>
+                    </main>
+                    <Footer />
+                    <Toaster />
+                  </div>
+                </WalletProvider>
+              </ApolloProvider>
+            </RainbowKitProviderWrapper>
+          </QueryClientProvider>
+        </WagmiProvider>
+      </TooltipProvider>
     </ThemeProvider>
   );
 }

@@ -14,7 +14,7 @@ import {ERC1967Proxy} from "../src/proxy/ERC1967Proxy.sol";
  * Activates NFT sale for the FounderNFT contract.
  */
 contract ActivateSale is Script {
-    address FOUNDER_NFT_ADDRESS = vm.envAddress("FOUNDER_NFT_PROXY_ADDRESS");
+    address FOUNDER_NFT_ADDRESS = vm.envAddress("FOUNDER_NFT_PROXY");
 
     function run() external {
         // Get deployer account
