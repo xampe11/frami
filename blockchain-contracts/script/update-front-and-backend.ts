@@ -120,9 +120,9 @@ class FrontAndBackendUpdater {
     let founderNftDeploymentFile: string;
     let platformRegisrtyDeploymentFile: string;
 
-    founderNftDeploymentFile = await this.findLatestDeployment();
+    founderNftDeploymentFile = await this.findLatestDeployment("11155111");
     platformRegisrtyDeploymentFile =
-      await this.findLatestPlatformRegistryDeployment();
+      await this.findLatestPlatformRegistryDeployment("11155111");
 
     if (!fs.existsSync(founderNftDeploymentFile)) {
       throw new Error(`Deployment file not found: ${founderNftDeploymentFile}`);
@@ -165,9 +165,7 @@ class FrontAndBackendUpdater {
 
   private async findLatestDeployment(network?: string): Promise<string> {
     const patterns = [
-      `deployments/foundernft-${network || "*"}.json`,
-      `broadcast/**/foundernft-${network || "*"}-*.json`,
-      `deployments/**/foundernft-${network || "*"}.json`,
+      `broadcast/DeployPhase1.s.sol/${network || "*"}/run-latest.json`,
     ];
 
     for (const pattern of patterns) {
@@ -194,9 +192,7 @@ class FrontAndBackendUpdater {
     network?: string
   ): Promise<string> {
     const patterns = [
-      `deployments/platformregistry-${network || "*"}.json`,
-      `broadcast/**/platformregistry-${network || "*"}-*.json`,
-      `deployments/**/platformregistry-${network || "*"}.json`,
+      `broadcast/DeployPhase1.s.sol/${network || "*"}/run-latest.json`,
     ];
 
     for (const pattern of patterns) {

@@ -2,10 +2,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
 import { useWallet } from "@/contexts/wallet-context";
-import { contractConfig } from "../contracts/config";
+import founderNFTAbi from "../contracts/abis/FounderNFT.json";
+import { FOUNDER_NFT_ADDRESS, CHAIN_ID } from "../contracts/addresses";
 
 // Contract ABI - Replace with your actual contract ABI
-const FOUNDER_NFT_ABI = contractConfig.contracts.FounderNFT.abi;
+const FOUNDER_NFT_ABI = founderNFTAbi;
 
 interface NFTContractData {
   price: string; // in ETH
@@ -68,7 +69,7 @@ export const useFounderNFT = () => {
         const readProvider = new ethers.JsonRpcProvider(rpcUrl);
 
         const readContract = new ethers.Contract(
-          contractConfig.contracts.FounderNFT.address,
+          FOUNDER_NFT_ADDRESS,
           FOUNDER_NFT_ABI,
           readProvider
         );
@@ -98,23 +99,23 @@ export const useFounderNFT = () => {
           const web3Provider = new ethers.BrowserProvider(window.ethereum);
           const network = await web3Provider.getNetwork();
 
-          // Switch to Anvil network if needed
-          if (Number(network.chainId) !== contractConfig.chainId) {
+          // Switch to network if needed
+          if (Number(network.chainId) !== CHAIN_ID) {
             try {
               await window.ethereum.request({
                 method: "wallet_switchEthereumChain",
-                params: [
-                  { chainId: `0x${contractConfig.chainId.toString(16)}` },
-                ],
+                params: [{ chainId: `0x${CHAIN_ID.toString(16)}` }],
               });
             } catch (switchError: any) {
-              // If network doesn't exist, add it
-              if (switchError.code === 4902) {
+              // If network doesn't exist, log it
+
+              console.log("Network does not exist");
+              /* if (switchError.code === 4902) {
                 await window.ethereum.request({
                   method: "wallet_addEthereumChain",
                   params: [
                     {
-                      chainId: `0x${contractConfig.chainId.toString(16)}`,
+                      chainId: `0x${CHAIN_ID.toString(16)}`,
                       chainName: "Anvil Local",
                       rpcUrls: ["http://127.0.0.1:8545"],
                       nativeCurrency: {
@@ -126,17 +127,18 @@ export const useFounderNFT = () => {
                   ],
                 });
               }
+            } */
             }
+
+            const nftContract = new ethers.Contract(
+              FOUNDER_NFT_ADDRESS,
+              FOUNDER_NFT_ABI,
+              web3Provider
+            );
+
+            setProvider(web3Provider);
+            setContract(nftContract);
           }
-
-          const nftContract = new ethers.Contract(
-            contractConfig.contracts.FounderNFT.address,
-            FOUNDER_NFT_ABI,
-            web3Provider
-          );
-
-          setProvider(web3Provider);
-          setContract(nftContract);
         }
       } catch (error) {
         console.error("Failed to initialize contract:", error);
@@ -146,9 +148,9 @@ export const useFounderNFT = () => {
           isLoading: false,
         }));
       }
-    };
 
-    initializeContract();
+      initializeContract();
+    };
   }, [isConnected]);
 
   // NEW: Fetch public contract data (no wallet needed)
