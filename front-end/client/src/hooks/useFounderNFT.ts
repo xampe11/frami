@@ -65,7 +65,7 @@ export const useFounderNFT = () => {
     const initializeReadOnlyProvider = async () => {
       try {
         // Use your local Anvil RPC or replace with your target network RPC
-        const rpcUrl = "http://127.0.0.1:8545"; // or process.env.REACT_APP_RPC_URL
+        const rpcUrl = import.meta.env.VITE_RPC_URL; // or process.env.VITE_RPC_URL
         const readProvider = new ethers.JsonRpcProvider(rpcUrl);
 
         const readContract = new ethers.Contract(
@@ -73,6 +73,8 @@ export const useFounderNFT = () => {
           FOUNDER_NFT_ABI,
           readProvider
         );
+
+        console.log("Current contract read:", readContract);
 
         setReadOnlyProvider(readProvider);
         setReadOnlyContract(readContract);
