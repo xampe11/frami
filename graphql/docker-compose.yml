@@ -19,7 +19,7 @@ services:
       postgres_pass: let-me-in
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
-      ethereum: 'anvil:http://172.31.29.14:8545'
+      ethereum: 'sepolia:https://eth-sepolia.g.alchemy.com/v2/lBQKISpKQ9Psmc1VIYtOdqoKglWFUI4B'
       GRAPH_LOG: info
       ETHEREUM_REORG_THRESHOLD: 1
       ETHEREUM_ANCESTOR_COUNT: 1

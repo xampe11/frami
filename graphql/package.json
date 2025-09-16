@@ -8,8 +8,8 @@
     "build": "graph build",
     "deploy": "graph deploy --studio frami-space",
     "setup-local": "./setup-local-graph.sh",
-    "create-local": "graph create --node http://localhost:8020/ frami-space",
-    "remove-local": "graph remove --node http://localhost:8020/ frami-space",
+    "create-local": "graph create --node http://localhost:8020/frami-space",
+    "remove-local": "graph remove --node http://localhost:8020/frami-space",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5002 frami-space",
     "logs": "docker-compose logs -f graph-node",
     "stop": "docker-compose down"

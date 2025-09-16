@@ -138,7 +138,7 @@ function App() {
                     <main className="flex-1">
                       <Switch>
                         <Route path="/" component={Home} />
-                        <Route path="/projects" component={Projects} />
+                        <Route path="/explore" component={Projects} />
                         <Route path="/project/:id" component={Project} />
                         <Route path="/create-project" component={CreateProject} />
                         <Route path="/founder-nft" component={FounderNFT} />

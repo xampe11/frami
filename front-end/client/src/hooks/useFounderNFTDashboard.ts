@@ -139,7 +139,7 @@ export const useFounderNFTDashboard = () => {
   useEffect(() => {
     const initializeReadOnlyProvider = async () => {
       try {
-        const rpcUrl = "http://127.0.0.1:8545";
+        const rpcUrl = import.meta.env.VITE_RPC_URL;
         const readProvider = new ethers.JsonRpcProvider(rpcUrl);
         const readContract = new ethers.Contract(
           FOUNDER_NFT_ADDRESS,

@@ -36,7 +36,7 @@ fi
 echo "🎉 Local Graph Node setup complete!"
 echo ""
 echo "Next steps:"
-echo "1. Deploy your FounderNFT contract to Anvil"
+echo "1. Deploy your FounderNFT contract"
 echo "2. Update subgraph.yaml with contract address"
 echo "3. Run: npm run create-local"
 echo "4. Run: npm run deploy-local"

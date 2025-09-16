@@ -20,11 +20,10 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
           ? "bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-md py-3"
           : "bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm py-4"
-      }`}
+        }`}
     >
       <div className="container mx-auto px-4 sm:px-6 max-w-[110rem]">
         <div className="flex justify-between items-center">
@@ -60,10 +59,10 @@ export default function Navbar() {
                 <span className="px-1 py-1">Founder</span>
                 <ChevronDown className="h-4 w-4 ml-1 transition-transform group-hover:rotate-180" />
               </div>
-              
+
               {/* Invisible bridge to connect hover area */}
               <div className="absolute top-full left-0 w-full h-2 bg-transparent"></div>
-              
+
               {/* Dropdown Menu */}
               <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-[9999]">
                 <div className="py-2">
@@ -72,7 +71,7 @@ export default function Navbar() {
                       NFT Sale
                     </div>
                   </Link>
-                  <Link href="/founder-nft/dashboard">
+                  <Link href="/founder-nft-dashboard">
                     <div className="px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-primary dark:hover:text-primary transition-colors">
                       Dashboard
                     </div>

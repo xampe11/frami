@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: FounderNFT
-    network: anvil
+    network: sepolia
     source:
-      address: '0x4B651dcC3C2e4d2Fa6feF95D73eaEC48432b5d6a'
+      address: "0xA901abB036523D1f7618a0521C1b4749FCd80a3b"
       abi: FounderNFT
-      startBlock: 22704200
+      startBlock: 9099230
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

@@ -138,6 +138,8 @@ export const useFounderNFT = () => {
               web3Provider
             );
 
+            console.log("Current loaded contract: ", nftContract);
+
             setProvider(web3Provider);
             setContract(nftContract);
           }
