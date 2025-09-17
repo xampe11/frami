@@ -147,10 +147,29 @@ export function handleTokenStaked(event: TokenStaked): void {
   let owner = event.params.owner;
   let timestamp = event.block.timestamp;
 
-  // Load NFT
+  // Create or load NFT entity
   let nftId = Bytes.fromByteArray(Bytes.fromBigInt(tokenId));
   let nft = FounderNFT.load(nftId);
-  if (nft == null) return;
+
+  let isNewNFT = false; // Track if we're creating a new NFT
+
+  if (nft == null) {
+    // Create NFT entity if it doesn't exist (in case minting wasn't captured)
+    nft = new FounderNFT(nftId);
+    nft.tokenId = tokenId;
+    nft.currentOwner = owner;
+    nft.mintedBy = owner; // Assume same as current owner
+    nft.totalRewardsEarned = ZERO_BD;
+    nft.totalRewardsClaimed = ZERO_BD;
+    nft.lastRewardUpdate = timestamp;
+    nft.canUnstake = false;
+    nft.nextUnstakeDate = null;
+    nft.stakingDuration = ZERO_BI;
+    nft.mintedAt = timestamp; // Best guess
+    nft.createdAt = timestamp;
+
+    isNewNFT = true; // Mark that this is a new NFT
+  }
 
   // Update NFT staking status
   nft.isStaked = true;
@@ -159,13 +178,20 @@ export function handleTokenStaked(event: TokenStaked): void {
   nft.canUnstake = false;
   nft.updatedAt = timestamp;
   nft.lastRewardUpdate = timestamp;
-  //Update rewards from contract after staking
+
+  // Update rewards from contract after staking
   updateRewardsFromContract(nftId, tokenId, event.address, timestamp);
   nft.save();
 
   // Update user
   let user = getOrCreateUser(owner, timestamp);
   user.totalNFTsStaked = user.totalNFTsStaked + 1;
+
+  // If this is a new NFT (not previously tracked), increment totalNFTsOwned
+  if (isNewNFT) {
+    user.totalNFTsOwned = user.totalNFTsOwned + 1;
+  }
+
   user.save();
 
   // Create stake event

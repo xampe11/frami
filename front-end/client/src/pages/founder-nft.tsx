@@ -419,7 +419,7 @@ export default function FounderNFT() {
                         {mintState.transactionHash && (
                           <div className="mt-1">
                             <a
-                              href={`http://localhost:8545/tx/${mintState.transactionHash}`}
+                              href={`${import.meta.env.VITE_ETHERSCAN_URL}/tx/${mintState.transactionHash}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-sm underline flex items-center"

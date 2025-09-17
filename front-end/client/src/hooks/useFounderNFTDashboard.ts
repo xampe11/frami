@@ -174,23 +174,6 @@ export const useFounderNFTDashboard = () => {
             });
           } catch (switchError: any) {
             console.log("Network dows not exist");
-            /*             if (switchError.code === 4902) {
-              await window.ethereum.request({
-                method: "wallet_addEthereumChain",
-                params: [
-                  {
-                    chainId: `0x${CHAIN_ID.toString(16)}`,
-                    chainName: "Anvil Local",
-                    rpcUrls: ["http://127.0.0.1:8545"],
-                    nativeCurrency: {
-                      name: "Ethereum",
-                      symbol: "ETH",
-                      decimals: 18,
-                    },
-                  },
-                ],
-              });
-            } */
           }
         }
         const walletContract = new ethers.Contract(
@@ -224,33 +207,60 @@ export const useFounderNFTDashboard = () => {
   ]);
 
   // Keep all your existing helper functions
+  // Fixed getUserTokenIds with proper TypeScript event handling
+
+  // Replace your getUserTokenIds with this simplified version that avoids RPC limits
+
   const getUserTokenIds = useCallback(
     async (userContract: ethers.Contract): Promise<number[]> => {
       if (!address) return [];
+
       try {
+        console.log("🔍 Getting user tokens for:", address);
+
+        // Step 1: Get wallet-owned tokens (unstaked)
         const balance = await userContract.balanceOf(address);
-        const tokenIds: number[] = [];
+        const ownedTokenIds: number[] = [];
+
         for (let i = 0; i < Number(balance); i++) {
           const tokenId = await userContract.tokenOfOwnerByIndex(address, i);
-          tokenIds.push(Number(tokenId));
+          ownedTokenIds.push(Number(tokenId));
         }
+
+        console.log("📦 Wallet-owned tokens:", ownedTokenIds);
+
+        // Step 2: Get staked tokens from GraphQL (no RPC limits)
+        let stakedTokenIds: number[] = [];
+
         if (userGraphQLData?.user?.nfts) {
-          const allGraphQLIds = userGraphQLData.user.nfts.map((nft: any) =>
-            Number(nft.tokenId)
+          stakedTokenIds = userGraphQLData.user.nfts
+            .filter((nft: any) => nft.isStaked)
+            .map((nft: any) => Number(nft.tokenId));
+
+          console.log("📊 GraphQL staked tokens:", stakedTokenIds);
+        } else {
+          console.log(
+            "⚠️ No GraphQL user data - this means user hasn't interacted with contract yet"
           );
-          const missingIds = allGraphQLIds.filter(
-            (id: any) => !tokenIds.includes(id)
-          );
-          console.log("🔍 Additional NFTs from GraphQL:", missingIds);
-          tokenIds.push(...missingIds);
         }
-        return tokenIds;
+
+        // Step 3: Combine both
+        const allTokenIds = [...new Set([...ownedTokenIds, ...stakedTokenIds])];
+
+        console.log("🎯 Final token list:", {
+          owned: ownedTokenIds.length,
+          staked: stakedTokenIds.length,
+          total: allTokenIds.length,
+          tokens: allTokenIds,
+        });
+
+        return allTokenIds;
       } catch (error) {
         console.error("Failed to get user token IDs:", error);
         return [];
       }
     },
-    [address]
+    [address, userGraphQLData]
   );
 
   const calculateStakingDuration = (stakingSince: number): string => {
@@ -497,7 +507,7 @@ export const useFounderNFTDashboard = () => {
       const totalOwned =
         userGraphQLData?.user?.totalNFTsOwned !== undefined
           ? userGraphQLData.user.totalNFTsOwned
-          : tokenIds.length;
+          : totalStaked + tokenIds.length; // staked + unstaked = total owned
 
       const totalEarnings =
         userGraphQLData?.user?.totalRewardsEarned !== undefined
@@ -514,6 +524,8 @@ export const useFounderNFTDashboard = () => {
 
       const currentGraphQLRewardRate =
         platformGraphQLData?.platformStats?.currentRewardRate;
+
+      console.log("Setting Dashboad Data, current totalOwned: ", totalOwned);
 
       setDashboardData((prev) => ({
         ...prev,

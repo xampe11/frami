@@ -64,9 +64,24 @@ export const useFounderNFT = () => {
   useEffect(() => {
     const initializeReadOnlyProvider = async () => {
       try {
-        // Use your local Anvil RPC or replace with your target network RPC
-        const rpcUrl = import.meta.env.VITE_RPC_URL; // or process.env.VITE_RPC_URL
+        const rpcUrl = import.meta.env.VITE_RPC_URL;
+
+        if (!rpcUrl) {
+          throw new Error("VITE_RPC_URL environment variable not set");
+        }
+
+        console.log("Initializing read-only provider with RPC:", rpcUrl);
+        console.log("Contract address:", FOUNDER_NFT_ADDRESS);
+        console.log("Expected chain ID:", CHAIN_ID);
+
         const readProvider = new ethers.JsonRpcProvider(rpcUrl);
+
+        // Test the connection
+        const network = await readProvider.getNetwork();
+        console.log("Connected to network:", {
+          chainId: network.chainId.toString(),
+          name: network.name,
+        });
 
         const readContract = new ethers.Contract(
           FOUNDER_NFT_ADDRESS,
@@ -74,7 +89,7 @@ export const useFounderNFT = () => {
           readProvider
         );
 
-        console.log("Current contract read:", readContract);
+        console.log("Read-only contract created:", readContract.target);
 
         setReadOnlyProvider(readProvider);
         setReadOnlyContract(readContract);
@@ -84,84 +99,85 @@ export const useFounderNFT = () => {
         console.error("Failed to initialize read-only provider:", error);
         setContractData((prev) => ({
           ...prev,
-          error: "Failed to connect to contract",
+          error: `Failed to connect to contract: ${error}`,
           isLoading: false,
         }));
       }
     };
 
     initializeReadOnlyProvider();
-  }, []); // No dependencies - runs once on mount
+  }, []);
 
   // Initialize wallet provider and contract (for transactions)
   useEffect(() => {
     const initializeContract = async () => {
-      try {
-        if (typeof window !== "undefined" && window.ethereum && isConnected) {
-          const web3Provider = new ethers.BrowserProvider(window.ethereum);
-          const network = await web3Provider.getNetwork();
-
-          // Switch to network if needed
-          if (Number(network.chainId) !== CHAIN_ID) {
-            try {
-              await window.ethereum.request({
-                method: "wallet_switchEthereumChain",
-                params: [{ chainId: `0x${CHAIN_ID.toString(16)}` }],
-              });
-            } catch (switchError: any) {
-              // If network doesn't exist, log it
-
-              console.log("Network does not exist");
-              /* if (switchError.code === 4902) {
-                await window.ethereum.request({
-                  method: "wallet_addEthereumChain",
-                  params: [
-                    {
-                      chainId: `0x${CHAIN_ID.toString(16)}`,
-                      chainName: "Anvil Local",
-                      rpcUrls: ["http://127.0.0.1:8545"],
-                      nativeCurrency: {
-                        name: "Ethereum",
-                        symbol: "ETH",
-                        decimals: 18,
-                      },
-                    },
-                  ],
-                });
-              }
-            } */
-            }
-
-            const nftContract = new ethers.Contract(
-              FOUNDER_NFT_ADDRESS,
-              FOUNDER_NFT_ABI,
-              web3Provider
-            );
-
-            console.log("Current loaded contract: ", nftContract);
-
-            setProvider(web3Provider);
-            setContract(nftContract);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to initialize contract:", error);
-        setContractData((prev) => ({
-          ...prev,
-          error: "Failed to connect to contract",
-          isLoading: false,
-        }));
+      if (!isConnected || typeof window === "undefined" || !window.ethereum) {
+        return;
       }
 
-      initializeContract();
+      try {
+        console.log("Initializing wallet contract...");
+        const web3Provider = new ethers.BrowserProvider(window.ethereum);
+        const network = await web3Provider.getNetwork();
+
+        console.log("Wallet network:", {
+          chainId: network.chainId.toString(),
+          expected: CHAIN_ID.toString(),
+        });
+
+        // Switch to network if needed
+        if (Number(network.chainId) !== CHAIN_ID) {
+          console.log("Wrong network, attempting to switch...");
+          try {
+            await window.ethereum.request({
+              method: "wallet_switchEthereumChain",
+              params: [{ chainId: `0x${CHAIN_ID.toString(16)}` }],
+            });
+
+            // Re-get network after switch
+            const newNetwork = await web3Provider.getNetwork();
+            console.log("Switched to network:", newNetwork.chainId.toString());
+          } catch (switchError: any) {
+            console.log("Network switch failed:", switchError);
+            setContractData((prev) => ({
+              ...prev,
+              error: `Please switch to the correct network (Chain ID: ${CHAIN_ID})`,
+            }));
+            return;
+          }
+        }
+
+        const nftContract = new ethers.Contract(
+          FOUNDER_NFT_ADDRESS,
+          FOUNDER_NFT_ABI,
+          web3Provider
+        );
+
+        console.log("Wallet contract created:", nftContract.target);
+
+        setProvider(web3Provider);
+        setContract(nftContract);
+      } catch (error) {
+        console.error("Failed to initialize wallet contract:", error);
+        setContractData((prev) => ({
+          ...prev,
+          error: `Failed to connect wallet contract: ${error}`,
+        }));
+      }
     };
+
+    initializeContract();
   }, [isConnected]);
 
   // NEW: Fetch public contract data (no wallet needed)
   const fetchPublicData = useCallback(async () => {
-    if (!readOnlyContract) return;
+    if (!readOnlyContract) {
+      console.log("No read-only contract available for fetchPublicData");
+      return;
+    }
 
     try {
+      console.log("Fetching public contract data...");
       setContractData((prev) => ({ ...prev, isLoading: true, error: null }));
 
       const [price, totalSupply, maxSupply, saleActive] = await Promise.all([
@@ -178,6 +194,12 @@ export const useFounderNFT = () => {
         saleActive,
       });
 
+      if (!saleActive) {
+        console.warn(
+          "⚠️ NFT sale is not active! Contact admin to activate sales."
+        );
+      }
+
       setContractData((prev) => ({
         ...prev,
         price: ethers.formatEther(price),
@@ -185,13 +207,13 @@ export const useFounderNFT = () => {
         totalSupply: Number(totalSupply),
         maxSupply: Number(maxSupply),
         isLoading: false,
-        error: null,
+        error: saleActive ? null : "NFT sale is currently inactive",
       }));
     } catch (error) {
       console.error("Failed to fetch public contract data:", error);
       setContractData((prev) => ({
         ...prev,
-        error: "Failed to fetch contract data",
+        error: `Failed to fetch contract data: ${error}`,
         isLoading: false,
       }));
     }
@@ -202,6 +224,7 @@ export const useFounderNFT = () => {
     if (!contract || !address) return;
 
     try {
+      console.log("Fetching user data for:", address);
       const userBalance = await contract.balanceOf(address);
 
       setContractData((prev) => ({
@@ -236,22 +259,25 @@ export const useFounderNFT = () => {
     // First fetch public data
     await fetchPublicData();
     // Then fetch user data if wallet is connected
-    if (isConnected) {
+    if (isConnected && contract && address) {
       await fetchUserData();
     }
-  }, [fetchPublicData, fetchUserData, isConnected]);
+  }, [fetchPublicData, fetchUserData, isConnected, contract, address]);
 
-  // In your useFounderNFT hook, add chain verification
+  // FIXED: Network verification
   useEffect(() => {
     const checkNetwork = async () => {
       if (provider) {
         const network = await provider.getNetwork();
-        console.log("Current network:", network.chainId);
+        console.log("Current wallet network:", network.chainId.toString());
 
         // Make sure we're on the expected network
-        if (network.chainId !== 31337n) {
-          console.warn("Wrong network! Expected 31337, got", network.chainId);
-          // Request network switch or show error
+        if (Number(network.chainId) !== CHAIN_ID) {
+          console.warn(
+            `Wrong network! Expected ${CHAIN_ID}, got ${network.chainId}`
+          );
+        } else {
+          console.log("✅ Wallet connected to correct network");
         }
       }
     };
@@ -276,40 +302,23 @@ export const useFounderNFT = () => {
           to: contract.target,
         });
 
-        // Try different gas estimation methods
-        try {
-          // Add this debug line to see what functions are available
-          console.log(
-            "Available functions:",
-            Object.keys(contract.interface.fragments)
-          );
-          // Method 1: Direct estimateGas
-          const gasLimit = 400000;
-          console.log("Gas estimation successful:", gasLimit.toString());
+        // Use a reasonable gas estimate for NFT minting
+        const gasLimit = BigInt(200000 + quantity * 100000); // Base gas + per-NFT gas
 
-          const feeData = await provider.getFeeData();
-          const gasPrice = feeData.gasPrice || 0n;
+        const feeData = await provider.getFeeData();
+        const gasPrice = feeData.gasPrice || BigInt("20000000000"); // 20 gwei fallback
 
-          return {
-            gasLimit: BigInt(gasLimit),
-            gasPrice,
-            gasCost: ethers.formatEther(BigInt(gasLimit) * gasPrice),
-          };
-        } catch (estimateError) {
-          console.error("Direct gas estimation failed:", estimateError);
+        console.log("Gas estimation successful:", {
+          gasLimit: gasLimit.toString(),
+          gasPrice: gasPrice.toString(),
+          gasCost: ethers.formatEther(gasLimit * gasPrice),
+        });
 
-          // Method 2: Try calling the function first to see the actual error
-          try {
-            await contractWithSigner.mintMultiple.staticCall(quantity, {
-              value: totalCost,
-            });
-            console.log("Static call succeeded - this is weird");
-          } catch (staticError) {
-            console.error("Static call failed with:", staticError);
-          }
-
-          throw estimateError;
-        }
+        return {
+          gasLimit,
+          gasPrice,
+          gasCost: ethers.formatEther(gasLimit * gasPrice),
+        };
       } catch (error) {
         console.error("Gas estimation failed:", error);
         return null;
@@ -325,6 +334,12 @@ export const useFounderNFT = () => {
         throw new Error("Contract not initialized or wallet not connected");
       }
 
+      console.log("Starting mint process:", {
+        quantity,
+        price: contractData.price,
+        totalCost: ethers.formatEther(contractData.priceWei * BigInt(quantity)),
+      });
+
       setMintState({
         isLoading: true,
         status: "pending",
@@ -339,17 +354,19 @@ export const useFounderNFT = () => {
         // Calculate total cost
         const totalCost = contractData.priceWei * BigInt(quantity);
 
-        // Estimate gas
-        const gasEstimate = 400000;
-
-        if (!gasEstimate) {
-          throw new Error("Failed to estimate gas");
-        }
+        console.log("Sending mint transaction:", {
+          function: "mintMultiple",
+          quantity,
+          value: ethers.formatEther(totalCost) + " ETH",
+        });
 
         // Send transaction
         const transaction = await contractWithSigner.mintMultiple(quantity, {
           value: totalCost,
+          gasLimit: BigInt(200000 + quantity * 100000), // Dynamic gas limit
         });
+
+        console.log("Transaction sent:", transaction.hash);
 
         setMintState((prev) => ({
           ...prev,
@@ -357,7 +374,14 @@ export const useFounderNFT = () => {
         }));
 
         // Wait for confirmation
+        console.log("Waiting for transaction confirmation...");
         const receipt = await transaction.wait();
+
+        console.log("Transaction confirmed:", {
+          hash: receipt.hash,
+          gasUsed: receipt.gasUsed.toString(),
+          status: receipt.status,
+        });
 
         setMintState({
           isLoading: false,
@@ -379,7 +403,7 @@ export const useFounderNFT = () => {
 
         let errorMessage = "Transaction failed";
 
-        if (error.code === "ACTION_REJECTED") {
+        if (error.code === "ACTION_REJECTED" || error.code === 4001) {
           errorMessage = "Transaction was rejected by user";
         } else if (error.code === "INSUFFICIENT_FUNDS") {
           errorMessage = "Insufficient funds for transaction";
@@ -391,6 +415,8 @@ export const useFounderNFT = () => {
           errorMessage = "Transaction reverted. Check contract conditions.";
         } else if (error.message?.includes("user rejected")) {
           errorMessage = "Transaction was rejected by user";
+        } else if (error.message?.includes("Sale is not active")) {
+          errorMessage = "NFT sale is currently not active";
         }
 
         setMintState({
@@ -408,7 +434,7 @@ export const useFounderNFT = () => {
       provider,
       address,
       contractData.priceWei,
-      estimateGas,
+      contractData.price,
       fetchContractData,
     ]
   );
@@ -418,7 +444,7 @@ export const useFounderNFT = () => {
     async (quantity: number) => {
       const mintCost = parseFloat(contractData.price) * quantity;
       const gasEstimate = await estimateGas(quantity);
-      const gasCost = gasEstimate ? parseFloat(gasEstimate.gasCost) : 0.005; // fallback
+      const gasCost = gasEstimate ? parseFloat(gasEstimate.gasCost) : 0.01; // Realistic fallback
 
       return {
         mintCost,
@@ -429,7 +455,7 @@ export const useFounderNFT = () => {
     [contractData.price, estimateGas]
   );
 
-  // Reset mintMultiple state
+  // Reset mint state
   const resetMintState = useCallback(() => {
     setMintState({
       isLoading: false,
@@ -486,10 +512,10 @@ export const useFounderNFT = () => {
 
     // Connection status
     isContractReady: !!contract && !!provider,
-    isPublicDataReady: !!readOnlyContract, // NEW: For checking if public data is available
+    isPublicDataReady: !!readOnlyContract && !contractData.isLoading, // FIXED: Check loading state
     provider,
     contract,
-    readOnlyProvider, // NEW: Expose read-only provider
-    readOnlyContract, // NEW: Expose read-only contract
+    readOnlyProvider,
+    readOnlyContract,
   };
 };
