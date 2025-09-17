@@ -32,6 +32,9 @@ export const GET_USER_DASHBOARD = gql`
         timestamp
         blockNumber
         transactionHash
+        nft {
+          tokenId
+        }
       }
       rewardsClaimed(first: 10, orderBy: timestamp, orderDirection: desc) {
         id
@@ -39,6 +42,9 @@ export const GET_USER_DASHBOARD = gql`
         timestamp
         blockNumber
         transactionHash
+        nft {
+          tokenId
+        }
       }
     }
   }
@@ -73,6 +79,30 @@ export const GET_USER_NFTS = gql`
         tokenId
         isStaked
         currentStaker
+        stakingSince
+        totalRewardsEarned
+        totalRewardsClaimed
+        canUnstake
+        nextUnstakeDate
+        stakingDuration
+        mintedAt
+      }
+    }
+  }
+`;
+
+// Additional query specifically for user's staked NFTs
+export const GET_USER_STAKED_NFTS = gql`
+  query GetUserStakedNFTs($userAddress: ID!) {
+    user(id: $userAddress) {
+      id
+      nfts(where: { isStaked: true, currentStaker: $userAddress }) {
+        id
+        tokenId
+        isStaked
+        currentStaker {
+          id
+        }
         stakingSince
         totalRewardsEarned
         totalRewardsClaimed

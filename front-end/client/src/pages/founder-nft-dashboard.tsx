@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWallet } from "@/contexts/wallet-context";
 import { useFounderNFTDashboard } from "@/hooks/useFounderNFTDashboard";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,103 @@ export default function FounderNFTDashboard() {
     refreshData,
     resetTransactionState,
     isContractReady,
+    graphqlUserData,
+    hasGraphQLData,
   } = useFounderNFTDashboard();
+
+  const { address } = useWallet();
+
+  // Enhanced debug logging
+  useEffect(() => {
+    console.log('=== DASHBOARD DEBUG REPORT ===');
+
+    // Basic status
+    console.log('💡 Connection Status:', {
+      isConnected,
+      address: address,
+      isContractReady,
+      isLoading,
+      error,
+      hasGraphQLData
+    });
+
+    // NFT Data Analysis
+    const stakedNFTs = nftData.filter(nft => nft.status === "staked");
+    const unstakedNFTs = nftData.filter(nft => nft.status === "unstaked");
+
+    console.log('📊 NFT Data Summary:', {
+      totalNFTs: nftData.length,
+      stakedCount: stakedNFTs.length,
+      unstakedCount: unstakedNFTs.length,
+      stakingDataTotal: stakingData.totalStaked, // Should match stakedCount
+      stakingDataOwned: stakingData.totalOwned   // Should match totalNFTs
+    });
+
+    // Detailed NFT breakdown
+    console.log('🔍 NFT Details:', nftData.map(nft => ({
+      id: nft.id,
+      tokenId: nft.tokenId,
+      status: nft.status,
+      canUnstake: nft.canUnstake,
+      earnedRewards: nft.earnedRewards,
+      stakingSince: nft.stakingSince
+    })));
+
+    // GraphQL vs Processed Data Comparison
+    if (graphqlUserData?.user) {
+      const graphqlNFTs = graphqlUserData.user.nfts || [];
+
+      console.log('🔄 GraphQL vs Processed Comparison:', {
+        graphqlTotal: graphqlNFTs.length,
+        graphqlOwned: graphqlUserData.user.totalNFTsOwned,
+        graphqlStaked: graphqlUserData.user.totalNFTsStaked,
+        processedTotal: nftData.length,
+        processedStaked: stakedNFTs.length
+      });
+
+      // Check for staked NFTs in GraphQL
+      const graphqlStakedNFTs = graphqlNFTs.filter((nft: any) => nft.isStaked);
+      console.log('📋 GraphQL Staked NFTs:', graphqlStakedNFTs.map((nft: any) => ({
+        tokenId: nft.tokenId,
+        isStaked: nft.isStaked,
+        currentStaker: nft.currentStaker?.id,
+        isUserStaker: nft.currentStaker?.id?.toLowerCase() === address?.toLowerCase(),
+        stakingSince: nft.stakingSince,
+        rewards: nft.totalRewardsEarned
+      })));
+
+      // Check for missing staked NFTs
+      const graphqlStakedIds = graphqlStakedNFTs
+        .filter((nft: any) => nft.currentStaker?.id?.toLowerCase() === address?.toLowerCase())
+        .map((nft: any) => Number(nft.tokenId));
+      const processedStakedIds = stakedNFTs.map(nft => nft.id);
+
+      const missingStakedNFTs = graphqlStakedIds.filter((id: any) => !processedStakedIds.includes(id));
+      const extraStakedNFTs = processedStakedIds.filter(id => !graphqlStakedIds.includes(id));
+
+      if (missingStakedNFTs.length > 0 || extraStakedNFTs.length > 0) {
+        console.warn('⚠️ STAKED NFT MISMATCH DETECTED:');
+        console.warn('Missing from processed:', missingStakedNFTs);
+        console.warn('Extra in processed:', extraStakedNFTs);
+      }
+    } else {
+      console.warn('⚠️ No GraphQL user data available');
+    }
+
+    // Earnings comparison
+    console.log('💰 Earnings Analysis:', {
+      earningsDataTotal: earningsData.totalEarnings,
+      earningsDataClaimable: earningsData.claimableAmount,
+      graphqlTotalRewards: graphqlUserData?.user?.totalRewardsEarned || 'N/A',
+      individualNFTTotal: nftData.reduce((sum, nft) =>
+        sum + parseFloat(nft.earnedRewards.replace(' ETH', '')), 0
+      ).toFixed(6) + ' ETH'
+    });
+
+    console.log('=== END DEBUG REPORT ===\n');
+
+  }, [isConnected, nftData, stakingData, earningsData, isLoading, error, isContractReady, graphqlUserData, address]);
+
 
   console.log('Dashboard Debug:', {
     isConnected,
