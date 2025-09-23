@@ -89,7 +89,7 @@ contract DeployPhase1 is Script {
         logDeploymentSummary(result, config);
 
         // Save deployment data
-        //saveDeploymentData(result, config);
+        saveDeploymentData(result, config);
 
         console.log(" Phase 1 Deployment Completed Successfully!");
         console.log("================================================================");
@@ -417,7 +417,7 @@ contract DeployPhase1 is Script {
                 ",\n",
                 '    "salesActive": ',
                 config.activateSaleImmediately ? "true" : "false",
-                "\n",
+                ",\n",
                 '    "platformFeeDistributionPercentage": ',
                 vm.toString(config.platformFeeDistributionPercentage),
                 ",\n",
@@ -431,13 +431,16 @@ contract DeployPhase1 is Script {
 
         // Save to file
         string memory filename = string(
-            abi.encodePacked("phase1-", result.networkName, "-", vm.toString(result.deploymentTimestamp), ".json")
+            abi.encodePacked(
+                "./deployments/phase1-", result.networkName, "-", vm.toString(result.deploymentTimestamp), ".json"
+            )
         );
         vm.writeFile(filename, deploymentData);
         console.log("    Deployment data saved to:", filename);
 
         // Also save a latest file for easy reference
-        string memory latestFilename = string(abi.encodePacked("phase1-", result.networkName, "-latest.json"));
+        string memory latestFilename =
+            string(abi.encodePacked("./deployments/phase1-", result.networkName, "-latest.json"));
         vm.writeFile(latestFilename, deploymentData);
         console.log("    Latest deployment saved to:", latestFilename);
 

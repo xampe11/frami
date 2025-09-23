@@ -32,6 +32,19 @@ import { useMediaQuery } from "@/hooks/use-mobile";
 // Get environment variables with fallback
 const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
+const anvil = {
+  id: 31337,
+  name: 'anvil',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['http://127.0.0.1:8545'] },
+  },
+  blockExplorers: {
+    default: { name: 'Local', url: 'http://localhost:8545' },
+  },
+  testnet: true,
+};
+
 // Debug environment variables
 console.log("Wallet Connect Project ID:", projectId ? "Found" : "Not found");
 if (!projectId) {
@@ -68,10 +81,11 @@ const queryClient = new QueryClient({
 const config = getDefaultConfig({
   appName: 'Frami',
   projectId: projectId,
-  chains: [mainnet, sepolia, polygon, bsc],
+  chains: [mainnet, sepolia, anvil, polygon, bsc],
   transports: {
     [mainnet.id]: http(),
     [sepolia.id]: http(),
+    [anvil.id]: http(),
     [polygon.id]: http(),
     [bsc.id]: http(),
   },

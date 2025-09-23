@@ -4,8 +4,21 @@ import { createContext, useContext, ReactNode, useEffect } from 'react';
 import { injected } from 'wagmi/connectors';
 import { mainnet, sepolia, polygon, bsc } from 'wagmi/chains';
 
+const anvil = {
+  id: 31337,
+  name: 'anvil',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['http://127.0.0.1:8545'] },
+  },
+  blockExplorers: {
+    default: { name: 'Local', url: 'http://localhost:8545' },
+  },
+  testnet: true,
+};
+
 // Supported chains array
-const supportedChains = [mainnet, sepolia, polygon, bsc];
+const supportedChains = [mainnet, sepolia, polygon, bsc, anvil];
 
 // Helper function to get chain by ID
 const getChainById = (chainId: number) => {

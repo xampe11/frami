@@ -23,6 +23,18 @@ verbosity = 2
 fuzz = { runs = 256 }
 invariant = { runs = 256, depth = 15 }
 
+# Allow paths for file operations
+fs_permissions = [
+    { access = "read-write", path = "./deployments" },
+    { access = "read-write", path = "./deployments/" },
+    { access = "read-write", path = "deployments/" },
+    { access = "read-write", path = "deployments" },
+    { access = "read-write", path = "./broadcast" },
+    { access = "read-write", path = "./" },
+    { access = "read-write", path = "../" },
+    { access = "read-write", path = "../../front-end" },
+]
+
 # Gas settings
 gas_limit = 9223372036854775807
 gas_price = 20000000000         # 20 gwei

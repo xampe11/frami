@@ -1,25 +1,19 @@
 // Auto-generated contract addresses
-// Generated at: 2025-09-13T22:29:16.698Z
+// Generated at: 2025-09-23T00:40:16.188Z
 // Network: localhost
 
-export const FOUNDER_NFT_ADDRESS =
-  "0xA901abB036523D1f7618a0521C1b4749FCd80a3b" as const;
-export const FOUNDER_NFT_IMPLEMENTATION =
-  "0xF721dE96A74Fbd6C3cB930fb2e31384287ff0282" as const;
-export const PLATFORM_REGISTRY_ADDRESS =
-  "0xE47C9763d98364fdf496AF5d3d80B53169114440" as const;
-export const PLATFORM_REGISTRY_IMPLEMENTATION =
-  "0xD714f2a03129f77ee76a28A56d52253226E753f7" as const;
+export const FOUNDER_NFT_ADDRESS = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9" as const;
+export const FOUNDER_NFT_IMPLEMENTATION = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0" as const;
+export const PLATFORM_REGISTRY_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512" as const;
 
 export const CONTRACT_ADDRESSES = {
   FOUNDER_NFT: FOUNDER_NFT_ADDRESS,
   FOUNDER_NFT_IMPLEMENTATION: FOUNDER_NFT_IMPLEMENTATION,
   PLATFORM_REGISTRY: PLATFORM_REGISTRY_ADDRESS,
-  PLATFORM_REGISTRY_IMPLEMENTATION: PLATFORM_REGISTRY_IMPLEMENTATION,
 } as const;
 
-export const NETWORK = "Sepolia" as const;
-export const CHAIN_ID = 11155111 as const;
+export const NETWORK = "localhost" as const;
+export const CHAIN_ID = 31337 as const;
 
 export type ContractAddresses = typeof CONTRACT_ADDRESSES;
 export type SupportedNetwork = typeof NETWORK;

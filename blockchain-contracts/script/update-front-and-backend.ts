@@ -4,47 +4,34 @@ import fs from "fs-extra";
 import path from "path";
 import glob from "glob";
 import yaml from "js-yaml";
-//import deployment from "../deployments/foundernft-mainnet.json";
 
-interface founderNftDeploymentData {
-  network: string;
-  blockNumber: number;
-  timestamp: number;
-  founderNFT: {
-    proxy: string;
-    implementation: string;
-    extensionType: string;
-  };
-  platformRegistry?: string;
-}
-interface platformRegistryDeploymentData {
-  network: string;
-  blockNumber: number;
-  timestamp: number;
-  PlatformRegistry: {
-    proxy: string;
-    implementation: string;
-  };
-}
-
-interface ContractConfig {
+interface DeploymentData {
   network: string;
   chainId: number;
-  blockNumber: number;
-  timestamp: number;
+  deploymentBlock: number;
+  deploymentTimestamp: number;
+  deployer: string;
+  treasury: string;
   contracts: {
-    FounderNFT: {
-      address: string;
+    platformRegistry: {
       implementation: string;
-      abi?: any[];
+      proxy: string;
+      abi: any[];
     };
-    PlatformRegistry: {
-      address: string;
-      abi?: any[];
+    founderNFT: {
+      implementation: string;
+      proxy: string;
+      abi: any[];
     };
   };
-  constants: {
-    FOUNDER_NFT_EXTENSION: string;
+  configuration?: {
+    platformFeePercentage: number;
+    maxSupply: number;
+    price: string;
+    minimumStakingPeriod: number;
+    salesActive: boolean;
+    platformFeeDistributionPercentage: number;
+    daoTokenAllocationPercentage: number;
   };
 }
 
@@ -71,26 +58,20 @@ class FrontAndBackendUpdater {
 
     try {
       // Load deployment data
-      const [founderNftDeploymentData, platformRegistryDeploymentData] =
-        await this.loadfounderNftDeploymentData();
-      console.log(
-        `✓ Loaded deployment data for ${founderNftDeploymentData.network}`
-      );
+      const [deploymentData] = await this.loadfounderNftDeploymentData();
+      console.log(`✓ Loaded deployment data for ${deploymentData.network}`);
 
       // Generate contract configuration
-      await this.generateContractConfig(
-        founderNftDeploymentData,
-        platformRegistryDeploymentData
-      );
+      await this.generateContractConfig(deploymentData);
 
       // Copy contract ABIs
       await this.copyContractABIs();
 
       // Generate TypeScript types
-      await this.generateTypeScriptTypes(founderNftDeploymentData);
+      await this.generateTypeScriptTypes(deploymentData);
 
       // Update subgraph configuration
-      await this.updateSubgraphConfig(founderNftDeploymentData);
+      await this.updateSubgraphConfig(deploymentData);
 
       console.log("\n✅ Frontend update completed successfully!");
       console.log("\nGenerated files:");
@@ -112,61 +93,39 @@ class FrontAndBackendUpdater {
     }
   }
 
-  private async loadfounderNftDeploymentData(): Promise<
-    [founderNftDeploymentData, platformRegistryDeploymentData]
-  > {
+  private async loadfounderNftDeploymentData(): Promise<[DeploymentData]> {
     console.log("📄 Loading deployment data...");
 
-    let founderNftDeploymentFile: string;
-    let platformRegisrtyDeploymentFile: string;
+    const deploymentFile = await this.findLatestDeployment("localhost");
 
-    founderNftDeploymentFile = await this.findLatestDeployment("11155111");
-    platformRegisrtyDeploymentFile =
-      await this.findLatestPlatformRegistryDeployment("11155111");
-
-    if (!fs.existsSync(founderNftDeploymentFile)) {
-      throw new Error(`Deployment file not found: ${founderNftDeploymentFile}`);
+    if (!fs.existsSync(deploymentFile)) {
+      throw new Error(`Deployment file not found: ${deploymentFile}`);
     }
 
-    console.log(
-      `   Using FounderNFTdeployment file: ${founderNftDeploymentFile}`
-    );
-    console.log(
-      `   Using PlatformRegistrydeployment file: ${platformRegisrtyDeploymentFile}`
-    );
+    console.log(`   deployment file: ${deploymentFile}`);
 
-    const foundeNftDeploymentContent = await fs.readJSON(
-      founderNftDeploymentFile
-    );
+    const DeploymentContent = await fs.readJSON(deploymentFile);
 
-    console.log("Converted founder to Json files successfully.");
-
-    const platformRegistryDeploymentContent = await fs.readJSON(
-      platformRegisrtyDeploymentFile
-    );
-
-    console.log("Converted platform to Json files successfully.");
+    console.log("Converted deployment file to Json files successfully.");
 
     // Validate required fields
-    if (!foundeNftDeploymentContent.founderNFT?.proxy) {
+    if (!DeploymentContent.contracts.founderNFT?.proxy) {
       throw new Error("Invalid deployment file: missing founderNFT.proxy");
     }
-    if (!platformRegistryDeploymentContent.PlatformRegistry?.proxy) {
+    if (!DeploymentContent.contracts.platformRegistry?.proxy) {
       throw new Error(
         "Invalid deployment file: missing platformRegistry.proxy"
       );
     }
 
-    return [foundeNftDeploymentContent, platformRegistryDeploymentContent] as [
-      founderNftDeploymentData,
-      platformRegistryDeploymentData
-    ];
+    console.log(DeploymentContent.blockNumber);
+    console.log(DeploymentContent.deploymentTimestamp);
+
+    return [DeploymentContent] as [DeploymentData];
   }
 
   private async findLatestDeployment(network?: string): Promise<string> {
-    const patterns = [
-      `broadcast/DeployPhase1.s.sol/${network || "*"}/run-latest.json`,
-    ];
+    const patterns = [`./deployments/phase1-${network || "*"}-latest.json`];
 
     for (const pattern of patterns) {
       const files = glob.sync(pattern);
@@ -191,9 +150,7 @@ class FrontAndBackendUpdater {
   private async findLatestPlatformRegistryDeployment(
     network?: string
   ): Promise<string> {
-    const patterns = [
-      `broadcast/DeployPhase1.s.sol/${network || "*"}/run-latest.json`,
-    ];
+    const patterns = [`./deployments/phase1-${network || "*"}-latest.json`];
 
     for (const pattern of patterns) {
       const files = glob.sync(pattern);
@@ -216,12 +173,11 @@ class FrontAndBackendUpdater {
   }
 
   private async generateContractConfig(
-    founderData: founderNftDeploymentData,
-    platformRegistryData: platformRegistryDeploymentData
+    deploymentData: DeploymentData
   ): Promise<void> {
     console.log("⚙️  Generating contract configuration...");
 
-    const chainId = this.getChainId(founderData.network);
+    const chainId = this.getChainId(deploymentData.network);
 
     // Load ABIs
     const founderNFTABI = await this.loadContractABI("FounderNFT");
@@ -229,25 +185,26 @@ class FrontAndBackendUpdater {
       "PlatformRegistry"
     ).catch(() => []);
 
-    const config: ContractConfig = {
-      network: founderData.network,
+    const config: DeploymentData = {
+      network: deploymentData.network,
       chainId,
-      blockNumber: founderData.blockNumber,
-      timestamp: founderData.timestamp,
+      deploymentBlock: deploymentData.deploymentBlock,
+      deploymentTimestamp: deploymentData.deploymentTimestamp,
       contracts: {
-        FounderNFT: {
-          address: founderData.founderNFT.proxy,
-          implementation: founderData.founderNFT.implementation,
+        founderNFT: {
+          proxy: deploymentData.contracts.founderNFT.proxy,
+          implementation: deploymentData.contracts.founderNFT.implementation,
           abi: founderNFTABI,
         },
-        PlatformRegistry: {
-          address: platformRegistryData.PlatformRegistry.implementation || "",
+        platformRegistry: {
+          implementation:
+            deploymentData.contracts.platformRegistry.implementation || "",
+          proxy: deploymentData.contracts.platformRegistry.proxy,
           abi: platformRegistryABI,
         },
       },
-      constants: {
-        FOUNDER_NFT_EXTENSION: founderData.founderNFT.extensionType,
-      },
+      deployer: "",
+      treasury: "",
     };
 
     const outputPath = path.join(
@@ -289,12 +246,7 @@ class FrontAndBackendUpdater {
     );
     await fs.ensureDir(frontendAbiOutputPath);
 
-    const contracts = [
-      "FounderNFT",
-      "ERC1967Proxy",
-      "PlatformRegistry",
-      "IERC20",
-    ];
+    const contracts = ["FounderNFT", "ERC1967Proxy", "PlatformRegistry"];
 
     for (const contractName of contracts) {
       try {
@@ -349,7 +301,7 @@ class FrontAndBackendUpdater {
   }
 
   private async updateSubgraphConfig(
-    founderData: founderNftDeploymentData
+    deploymentData: DeploymentData
   ): Promise<void> {
     console.log("📊 Updating subgraph configuration...");
 
@@ -369,29 +321,22 @@ class FrontAndBackendUpdater {
       const subgraphConfig = yaml.load(subgraphContent) as any;
 
       // Update the address in dataSources
-      if (
-        subgraphConfig.dataSources &&
-        Array.isArray(subgraphConfig.dataSources)
-      ) {
+      if (subgraphConfig.dataSources) {
         for (const dataSource of subgraphConfig.dataSources) {
-          if (
-            dataSource.source &&
-            dataSource.source.address &&
-            dataSource.source.startBlock
-          ) {
+          if (dataSource.source) {
             const oldAddress = dataSource.source.address;
             const oldBlock = dataSource.source.startBlock;
-            dataSource.source.address = founderData.founderNFT.proxy;
-            dataSource.source.startBlock = founderData.blockNumber - 40;
+            dataSource.source.address =
+              deploymentData.contracts.founderNFT.proxy;
+            dataSource.source.startBlock = deploymentData.deploymentBlock;
             console.log(
-              `   ✓ Updated dataSource address from ${oldAddress} to ${founderData.founderNFT.proxy}`
+              `   ✓ Updated dataSource address from ${oldAddress} to ${deploymentData.contracts.founderNFT.proxy}`
             );
             console.log(
-              `   ✓ Updated dataSource startingBlock from ${oldBlock} to ${dataSource.source.address}`
+              `   ✓ Updated dataSource startingBlock from ${oldBlock} to ${dataSource.source.startBlock}`
             );
           }
-
-          founderData.blockNumber;
+          deploymentData.deploymentBlock;
         }
       } else {
         console.log("   ⚠️  No dataSources found in subgraph.yaml");
@@ -414,9 +359,7 @@ class FrontAndBackendUpdater {
     }
   }
 
-  private async generateTypeScriptTypes(
-    data: founderNftDeploymentData
-  ): Promise<void> {
+  private async generateTypeScriptTypes(data: DeploymentData): Promise<void> {
     console.log("📝 Generating TypeScript types...");
 
     const typesOutputPath = path.join(
@@ -434,7 +377,7 @@ class FrontAndBackendUpdater {
     console.log("   ✓ Generated TypeScript types");
   }
 
-  private generateJSConfig(config: ContractConfig): string {
+  private generateJSConfig(config: DeploymentData): string {
     return `// Auto-generated contract configuration
 // Generated at: ${new Date().toISOString()}
 // Network: ${config.network}
@@ -442,9 +385,9 @@ class FrontAndBackendUpdater {
 export const contractConfig = ${JSON.stringify(config, null, 2)};
 
 export const ADDRESSES = {
-  FOUNDER_NFT: "${config.contracts.FounderNFT.address}",
-  FOUNDER_NFT_IMPLEMENTATION: "${config.contracts.FounderNFT.implementation}",
-  PLATFORM_REGISTRY: "${config.contracts.PlatformRegistry.address}"
+  FOUNDER_NFT: "${config.contracts.founderNFT.proxy}",
+  FOUNDER_NFT_IMPLEMENTATION: "${config.contracts.founderNFT.implementation}",
+  PLATFORM_REGISTRY: "${config.contracts.platformRegistry.proxy}"
 };
 
 export const CHAIN_ID = ${config.chainId};
@@ -452,19 +395,19 @@ export const NETWORK = "${config.network}";
 `;
   }
 
-  private generateAddressesTS(config: ContractConfig): string {
+  private generateAddressesTS(config: DeploymentData): string {
     return `// Auto-generated contract addresses
 // Generated at: ${new Date().toISOString()}
 // Network: ${config.network}
 
 export const FOUNDER_NFT_ADDRESS = "${
-      config.contracts.FounderNFT.address
+      config.contracts.founderNFT.proxy
     }" as const;
 export const FOUNDER_NFT_IMPLEMENTATION = "${
-      config.contracts.FounderNFT.implementation
+      config.contracts.founderNFT.implementation
     }" as const;
 export const PLATFORM_REGISTRY_ADDRESS = "${
-      config.contracts.PlatformRegistry.address
+      config.contracts.platformRegistry.proxy
     }" as const;
 
 export const CONTRACT_ADDRESSES = {
@@ -481,7 +424,7 @@ export type SupportedNetwork = typeof NETWORK;
 export type SupportedChainId = typeof CHAIN_ID;
 `;
   }
-  private generateTypeScriptContent(data: founderNftDeploymentData): string {
+  private generateTypeScriptContent(data: DeploymentData): string {
     return `// Auto-generated contract types
 // Generated at: ${new Date().toISOString()}
 // Network: ${data.network}
@@ -495,8 +438,8 @@ export interface ContractAddresses {
 export interface DeploymentInfo {
   network: string;
   chainId: number;
-  blockNumber: number;
-  timestamp: number;
+  deploymentBlock: number;
+  deploymentTimestamp: number;
 }
 
 export const NETWORK = "${data.network}" as const;
@@ -506,16 +449,16 @@ export type SupportedNetwork = "${data.network}";
 export type SupportedChainId = ${this.getChainId(data.network)};
 
 export const CONTRACT_ADDRESSES: ContractAddresses = {
-  FOUNDER_NFT: "${data.founderNFT.proxy}",
-  FOUNDER_NFT_IMPLEMENTATION: "${data.founderNFT.implementation}",
-  PLATFORM_REGISTRY: "${data.platformRegistry || ""}"
+  FOUNDER_NFT: "${data.contracts.founderNFT.proxy}",
+  FOUNDER_NFT_IMPLEMENTATION: "${data.contracts.founderNFT.implementation}",
+  PLATFORM_REGISTRY: "${data.contracts.platformRegistry.proxy || ""}"
 };
 
 export const DEPLOYMENT_INFO: DeploymentInfo = {
   network: "${data.network}",
   chainId: ${this.getChainId(data.network)},
-  blockNumber: ${data.blockNumber},
-  timestamp: ${data.timestamp}
+  deploymentBlock: ${data.deploymentBlock},
+  deploymentTimestamp: ${data.deploymentTimestamp}
 };
 `;
   }
