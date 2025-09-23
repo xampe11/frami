@@ -6,11 +6,6 @@ type User @entity(immutable: false) {
   totalRewardsEarned: BigDecimal!
   totalRewardsClaimed: BigDecimal!
 
-  # NEW: Enhanced fields
-  totalFeesPaid: BigDecimal!
-  stakingEfficiency: BigDecimal!
-  membershipLevel: String!
-
   # Relationships
   nfts: [FounderNFT!]! @derivedFrom(field: "currentOwner")
   stakingHistory: [StakeEvent!]! @derivedFrom(field: "user")
