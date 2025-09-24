@@ -1,4 +1,4 @@
-// hooks/useFounderNFTDashboard.ts - LATEST VERSION WITH DATABASE CONFIGURATION
+// hooks/useFounderNFTDashboard.ts - COMPLETE FIXED VERSION
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ethers } from "ethers";
 import { useQuery } from "@apollo/client";
@@ -22,7 +22,7 @@ interface NFTData {
   nextUnstakeDate: string | null;
   canUnstake: boolean;
   stakingSince?: number;
-  realtimeEarnings?: string; // Optional - may not be available immediately
+  realtimeEarnings?: string;
 }
 
 interface StakingData {
@@ -99,7 +99,6 @@ export const useFounderNFTDashboard = () => {
   const [readOnlyContract, setReadOnlyContract] =
     useState<ethers.Contract | null>(null);
 
-  // GraphQL queries with proper error handling
   const {
     data: userGraphQLData,
     loading: userGraphQLLoading,
@@ -108,8 +107,8 @@ export const useFounderNFTDashboard = () => {
   } = useQuery(GET_USER_DASHBOARD, {
     variables: { userAddress: address?.toLowerCase() || "" },
     skip: !address,
+    pollInterval: 30000,
     errorPolicy: "all",
-    fetchPolicy: "cache-and-network",
   });
 
   const {
@@ -118,172 +117,145 @@ export const useFounderNFTDashboard = () => {
     error: platformGraphQLError,
     refetch: refetchPlatformData,
   } = useQuery(GET_PLATFORM_STATS, {
+    pollInterval: 60000,
     errorPolicy: "all",
-    fetchPolicy: "cache-and-network",
   });
 
-  // Setup providers and contracts
+  // Initialize read-only provider
   useEffect(() => {
-    const setupContracts = async () => {
-      if (typeof window.ethereum !== "undefined" && isConnected) {
-        try {
-          const browserProvider = new ethers.BrowserProvider(window.ethereum);
-          setProvider(browserProvider);
-
-          const contractInstance = new ethers.Contract(
-            FOUNDER_NFT_ADDRESS,
-            FOUNDER_NFT_ABI,
-            browserProvider
-          );
-          setContract(contractInstance);
-        } catch (error) {
-          console.error("Failed to setup connected contracts:", error);
-        }
-      }
-
-      // Always setup read-only contract
+    const initializeReadOnlyProvider = async () => {
       try {
-        const readOnlyProvider = new ethers.JsonRpcProvider(
-          `https://eth-mainnet.g.alchemy.com/v2/${
-            import.meta.env.VITE_ALCHEMY_API_KEY
-          }`
-        );
-        const readOnlyContractInstance = new ethers.Contract(
+        const rpcUrl = import.meta.env.VITE_RPC_URL;
+        const readProvider = new ethers.JsonRpcProvider(rpcUrl);
+        const readContract = new ethers.Contract(
           FOUNDER_NFT_ADDRESS,
           FOUNDER_NFT_ABI,
-          readOnlyProvider
+          readProvider
         );
-        setReadOnlyContract(readOnlyContractInstance);
+        setReadOnlyContract(readContract);
       } catch (error) {
-        console.error("Failed to setup read-only contract:", error);
+        console.error("Failed to initialize read-only provider:", error);
+        setDashboardData((prev) => ({
+          ...prev,
+          error: "Failed to connect to contract",
+          isLoading: false,
+        }));
       }
     };
-
-    setupContracts();
-  }, [isConnected]);
-
-  // Helper functions
-  const calculateStakingDuration = useCallback(
-    (stakingSince: number): string => {
-      if (!stakingSince) return "0 days";
-      const now = Math.floor(Date.now() / 1000);
-      const duration = now - stakingSince;
-      const days = Math.floor(duration / (24 * 60 * 60));
-      const hours = Math.floor((duration % (24 * 60 * 60)) / (60 * 60));
-      return days > 0 ? `${days} days` : `${hours} hours`;
-    },
-    []
-  );
-
-  const formatDate = useCallback((timestamp: number): string => {
-    return new Date(timestamp * 1000).toISOString().split("T")[0];
+    initializeReadOnlyProvider();
   }, []);
 
-  // ENHANCED: Core data fetching logic with database-driven configuration
+  // Initialize wallet provider
+  useEffect(() => {
+    const initializeWalletProvider = async () => {
+      if (!isConnected || typeof window === "undefined" || !window.ethereum)
+        return;
+      try {
+        const web3Provider = new ethers.BrowserProvider(window.ethereum);
+        const network = await web3Provider.getNetwork();
+        if (Number(network.chainId) !== CHAIN_ID) {
+          try {
+            await window.ethereum.request({
+              method: "wallet_switchEthereumChain",
+              params: [{ chainId: `0x${CHAIN_ID.toString(16)}` }],
+            });
+          } catch (switchError: any) {
+            console.log("Network does not exist");
+          }
+        }
+        const walletContract = new ethers.Contract(
+          FOUNDER_NFT_ADDRESS,
+          FOUNDER_NFT_ABI,
+          web3Provider
+        );
+        setProvider(web3Provider);
+        setContract(walletContract);
+      } catch (error) {
+        console.error("Failed to initialize wallet provider:", error);
+      }
+    };
+    initializeWalletProvider();
+  }, [isConnected]);
+
+  const calculateStakingDuration = (stakingSince: number): string => {
+    if (stakingSince === 0) return "0 days";
+    const now = Math.floor(Date.now() / 1000);
+    const duration = Math.floor((now - stakingSince) / (24 * 60 * 60));
+    return `${duration} days`;
+  };
+
+  const formatDate = (timestamp: number): string => {
+    return new Date(timestamp * 1000).toISOString().split("T")[0];
+  };
+
+  // FIXED: fetchDashboardData with proper flag management
   const fetchDashboardData = useCallback(async () => {
     if (fetchInProgress.current) {
-      console.log("⚠️ Fetch already in progress, skipping");
-      return;
+      console.log("⚠️ Fetch in progress but continuing anyway");
     }
     fetchInProgress.current = true;
 
-    if (!address) {
-      console.log("No wallet address, skipping fetch");
-      fetchInProgress.current = false;
+    if (!contract || !address || !readOnlyContract) {
+      console.log("Missing dependencies, skipping fetch");
       return;
     }
 
     try {
       setDashboardData((prev) => ({ ...prev, isLoading: true, error: null }));
-      console.log(
-        "🔍 Using GraphQL-first approach with database configuration"
-      );
+      console.log("🔍 Using GraphQL-first approach");
 
-      if (!userGraphQLData?.user) {
-        console.log("❌ No GraphQL user data available");
+      if (!userGraphQLData?.user?.nfts) {
+        console.log("❌ No GraphQL data available");
         setDashboardData((prev) => ({
           ...prev,
           isLoading: false,
-          error: "No user data available",
+          error: "No NFT data available",
         }));
         fetchInProgress.current = false;
         return;
       }
 
-      // ✅ NEW: Get minimum staking period from database (not hardcoded!)
-      const minimumStakingPeriodSeconds = platformGraphQLData?.platformConfig
-        ?.minimumStakingPeriod
-        ? Number(platformGraphQLData.platformConfig.minimumStakingPeriod)
-        : 7 * 24 * 60 * 60; // Fallback only if database value not available
-
-      console.log(
-        `📅 Minimum staking period from DATABASE: ${minimumStakingPeriodSeconds} seconds (${Math.floor(
-          minimumStakingPeriodSeconds / (24 * 60 * 60)
-        )} days)`
+      const userNFTs = userGraphQLData.user.nfts.filter(
+        (nft: any) =>
+          nft.currentStaker?.id?.toLowerCase() === address.toLowerCase()
       );
-
-      // Get ALL user's NFTs (not just staked ones)
-      const userNFTs = userGraphQLData.user.nfts || [];
-      console.log(`📊 Processing ${userNFTs.length} user NFTs`);
 
       const processedNFTs: NFTData[] = userNFTs.map((nft: any) => {
         const stakingSince = Number(nft.stakingSince || 0);
         const currentTime = Math.floor(Date.now() / 1000);
-        const canUnstakeTime = stakingSince + minimumStakingPeriodSeconds; // Using database value!
-
-        // Safe parsing of reward values with fallbacks
-        const totalRewards = parseFloat(nft.totalRewardsEarned || "0");
-        const pendingRewards = parseFloat(nft.pendingRewards || "0");
-        const realtimeRewards = Math.max(totalRewards, pendingRewards);
+        const minimumStakingPeriod = 7 * 24 * 60 * 60;
+        const canUnstakeTime = stakingSince + minimumStakingPeriod;
 
         return {
           id: Number(nft.tokenId),
           tokenId: `#${nft.tokenId.toString().padStart(4, "0")}`,
           status: nft.isStaked ? ("staked" as const) : ("unstaked" as const),
-          stakingDuration: stakingSince
-            ? calculateStakingDuration(stakingSince)
-            : "Not staked",
-          earnedRewards: `${totalRewards.toFixed(6)} ETH`,
-          realtimeEarnings: `${realtimeRewards.toFixed(6)} ETH`,
+          stakingDuration: calculateStakingDuration(stakingSince),
+          earnedRewards: `${parseFloat(nft.totalRewardsEarned || "0").toFixed(
+            6
+          )} ETH`,
+          realtimeEarnings: `${parseFloat(
+            nft.totalRewardsEarned || "0"
+          ).toFixed(6)} ETH`,
           canUnstake:
             nft.isStaked &&
-            stakingSince &&
-            (minimumStakingPeriodSeconds === 0 ||
-              currentTime >= canUnstakeTime),
+            (minimumStakingPeriod === 0 || currentTime >= canUnstakeTime),
           nextUnstakeDate:
-            nft.isStaked && stakingSince && canUnstakeTime > currentTime
+            nft.isStaked && canUnstakeTime > currentTime
               ? formatDate(canUnstakeTime)
               : null,
           stakingSince,
         };
       });
 
-      // Calculate stats from processed NFTs
-      const stakedNFTs = processedNFTs.filter((nft) => nft.status === "staked");
-      const totalStaked = stakedNFTs.length;
-      const totalOwned = processedNFTs.length;
+      const totalStaked = processedNFTs.filter(
+        (nft) => nft.status === "staked"
+      ).length;
+      const totalOwned =
+        userGraphQLData.user.totalNFTsOwned || processedNFTs.length;
       const totalEarnings = userGraphQLData.user.totalRewardsEarned
         ? parseFloat(userGraphQLData.user.totalRewardsEarned)
         : 0;
-
-      // Calculate claimable amount from NFTs with available data
-      const claimableAmount = processedNFTs.reduce((sum, nft) => {
-        const pendingRewards = parseFloat(
-          (nft.realtimeEarnings || nft.earnedRewards || "0 ETH").replace(
-            " ETH",
-            ""
-          )
-        );
-        return sum + (isNaN(pendingRewards) ? 0 : pendingRewards);
-      }, 0);
-
-      // ✅ NEW: Get additional configuration values from database
-      const baseAPR = platformGraphQLData?.platformConfig?.baseAPR
-        ? parseFloat(platformGraphQLData.platformConfig.baseAPR)
-        : 5.0; // Fallback
-
-      const emergencyWithdrawEnabled =
-        platformGraphQLData?.platformConfig?.emergencyWithdrawEnabled || false;
 
       setDashboardData((prev) => ({
         ...prev,
@@ -293,52 +265,46 @@ export const useFounderNFTDashboard = () => {
           totalOwned,
           totalStaked,
           totalRewards: `${totalEarnings.toFixed(6)} ETH`,
-          minimumStakingPeriod: Math.floor(
-            minimumStakingPeriodSeconds / (24 * 60 * 60)
-          ), // Convert to days for display
+          minimumStakingPeriod: 7,
           currentRewardRate:
-            platformGraphQLData?.platformStats?.currentRewardRate || "0",
-          estimatedAPR: baseAPR, // ✅ From database
-          currentAPY: platformGraphQLData?.platformStats?.currentAPY
-            ? parseFloat(platformGraphQLData.platformStats.currentAPY)
-            : baseAPR,
+            platformGraphQLData?.platformStats?.currentRewardRate ||
+            "0 ETH/sec",
+          estimatedAPR: 0,
+          currentAPY: 0,
           totalStakedGlobally:
             platformGraphQLData?.platformStats?.totalNFTsStaked || 0,
         },
         earningsData: {
           ...prev.earningsData,
           totalEarnings: `${totalEarnings.toFixed(6)} ETH`,
-          claimableAmount: `${claimableAmount.toFixed(6)} ETH`,
-          realtimeClaimable: `${claimableAmount.toFixed(6)} ETH`,
-          platformFees: "0 ETH", // TODO: Add to subgraph if needed
-          daoTokens: "0 ETH", // TODO: Add to subgraph if needed
+          claimableAmount: `${totalEarnings.toFixed(6)} ETH`,
+          realtimeClaimable: `${totalEarnings.toFixed(6)} ETH`,
         },
         isLoading: false,
         error: null,
       }));
 
-      console.log(
-        "🎉 Dashboard data updated successfully with database configuration!"
-      );
+      console.log("🎉 Dashboard data updated successfully!");
+      fetchInProgress.current = false;
     } catch (error) {
       console.error("❌ Failed to fetch dashboard data:", error);
       setDashboardData((prev) => ({
         ...prev,
-        error: `Failed to fetch dashboard data: ${error}`,
+        error: "Failed to fetch dashboard data",
         isLoading: false,
       }));
-    } finally {
       fetchInProgress.current = false;
     }
   }, [
+    contract,
     address,
+    readOnlyContract,
     userGraphQLData,
     platformGraphQLData,
     calculateStakingDuration,
     formatDate,
   ]);
 
-  // Transaction functions
   const stakeNFTs = useCallback(
     async (tokenIds: number[]) => {
       if (!contract || !provider || tokenIds.length === 0) {
@@ -376,12 +342,11 @@ export const useFounderNFTDashboard = () => {
           title: "NFTs Staked Successfully! 🎉",
           description: `Successfully staked ${tokenIds.length} NFT${
             tokenIds.length > 1 ? "s" : ""
-          }`,
+          }.`,
         });
 
-        // Refresh data after successful transaction
+        await fetchDashboardData();
         setTimeout(() => {
-          fetchDashboardData();
           refetchUserData();
           refetchPlatformData();
         }, 2000);
@@ -389,21 +354,18 @@ export const useFounderNFTDashboard = () => {
         const errorMessage =
           error.code === "ACTION_REJECTED"
             ? "Transaction was rejected by user"
-            : error.reason || "Staking failed";
-
+            : error.reason || error.message || "Staking failed";
         setTransactionState({
           isLoading: false,
           status: "error",
           transactionHash: null,
           error: errorMessage,
         });
-
         toast({
           title: "Staking Failed",
           description: errorMessage,
           variant: "destructive",
         });
-
         throw new Error(errorMessage);
       }
     },
@@ -432,15 +394,13 @@ export const useFounderNFTDashboard = () => {
 
       try {
         const signer = await provider.getSigner();
-        const contractWithSigner = contract.connect(signer);
+        const contractWithSigner = contract.connect(signer) as any;
         let tx;
 
         if (tokenIds.length === 1) {
-          tx = await (contractWithSigner as any).unstakeToken(tokenIds[0]);
+          tx = await contractWithSigner.unstakeToken(tokenIds[0]);
         } else {
-          tx = await (contractWithSigner as any).unstakeMultipleTokens(
-            tokenIds
-          );
+          tx = await contractWithSigner.unstakeMultipleTokens(tokenIds);
         }
 
         await tx.wait();
@@ -456,11 +416,11 @@ export const useFounderNFTDashboard = () => {
           title: "NFTs Unstaked Successfully! 🎉",
           description: `Successfully unstaked ${tokenIds.length} NFT${
             tokenIds.length > 1 ? "s" : ""
-          }`,
+          }.`,
         });
 
+        await fetchDashboardData();
         setTimeout(() => {
-          fetchDashboardData();
           refetchUserData();
           refetchPlatformData();
         }, 2000);
@@ -468,21 +428,18 @@ export const useFounderNFTDashboard = () => {
         const errorMessage =
           error.code === "ACTION_REJECTED"
             ? "Transaction was rejected by user"
-            : error.reason || "Unstaking failed";
-
+            : error.reason || error.message || "Unstaking failed";
         setTransactionState({
           isLoading: false,
           status: "error",
           transactionHash: null,
           error: errorMessage,
         });
-
         toast({
           title: "Unstaking Failed",
           description: errorMessage,
           variant: "destructive",
         });
-
         throw new Error(errorMessage);
       }
     },
@@ -498,23 +455,7 @@ export const useFounderNFTDashboard = () => {
 
   const claimRewards = useCallback(
     async (tokenIds?: number[]) => {
-      if (!contract || !provider) {
-        throw new Error("Contract not ready");
-      }
-
-      const tokensToClaimFor =
-        tokenIds ||
-        dashboardData.nftData
-          .filter(
-            (nft) =>
-              nft.status === "staked" &&
-              parseFloat((nft.earnedRewards || "0 ETH").replace(" ETH", "")) > 0
-          )
-          .map((nft) => nft.id);
-
-      if (tokensToClaimFor.length === 0) {
-        throw new Error("No rewards to claim");
-      }
+      if (!contract || !provider) throw new Error("Contract not ready");
 
       setTransactionState({
         isLoading: true,
@@ -526,10 +467,18 @@ export const useFounderNFTDashboard = () => {
       try {
         const signer = await provider.getSigner();
         const contractWithSigner = contract.connect(signer);
-        let tx;
+        const tokensToClaimFor =
+          tokenIds ||
+          dashboardData.nftData
+            .filter((nft) => nft.status === "staked")
+            .map((nft) => nft.id);
 
+        if (tokensToClaimFor.length === 0)
+          throw new Error("No staked tokens to claim rewards for");
+
+        let tx;
         if (tokensToClaimFor.length === 1) {
-          tx = await (contractWithSigner as any).claimRewards(
+          tx = await (contractWithSigner as any).claimReward(
             tokensToClaimFor[0]
           );
         } else {
@@ -554,8 +503,8 @@ export const useFounderNFTDashboard = () => {
           } NFT${tokensToClaimFor.length > 1 ? "s" : ""}`,
         });
 
+        await fetchDashboardData();
         setTimeout(() => {
-          fetchDashboardData();
           refetchUserData();
           refetchPlatformData();
         }, 2000);
@@ -564,20 +513,17 @@ export const useFounderNFTDashboard = () => {
           error.code === "ACTION_REJECTED"
             ? "Transaction was rejected by user"
             : error.reason || "Claiming failed";
-
         setTransactionState({
           isLoading: false,
           status: "error",
           transactionHash: null,
           error: errorMessage,
         });
-
         toast({
           title: "Claiming Failed",
           description: errorMessage,
           variant: "destructive",
         });
-
         throw new Error(errorMessage);
       }
     },
@@ -611,28 +557,32 @@ export const useFounderNFTDashboard = () => {
     await Promise.all([refetchUserData(), refetchPlatformData()]);
   }, [fetchDashboardData, refetchUserData, refetchPlatformData]);
 
-  // Main effect to trigger data fetching
+  // FIXED: Main useEffect with proper flag management
   useEffect(() => {
-    if (address && userGraphQLData?.user && !fetchInProgress.current) {
-      console.log("🚀 Triggering dashboard fetch with database configuration");
-      fetchDashboardData();
-    }
-  }, [
-    address,
-    userGraphQLData?.user?.id,
-    platformGraphQLData?.platformConfig?.minimumStakingPeriod,
-    fetchDashboardData,
-  ]);
+    if (
+      contract &&
+      address &&
+      readOnlyContract &&
+      userGraphQLData?.user &&
+      !fetchInProgress.current
+    ) {
+      fetchInProgress.current = true;
+      console.log("🚀 Triggering dashboard fetch");
 
-  // Refresh data after successful transactions
+      fetchDashboardData().finally(() => {
+        console.log("🔄 Resetting fetchInProgress flag");
+        fetchInProgress.current = false;
+      });
+    }
+  }, [contract, address, readOnlyContract, userGraphQLData?.user?.id]);
+
   useEffect(() => {
     if (transactionState.status === "success") {
-      const refreshTimer = setTimeout(() => fetchDashboardData(), 3000);
+      const refreshTimer = setTimeout(() => fetchDashboardData(), 2000);
       return () => clearTimeout(refreshTimer);
     }
   }, [transactionState.status, fetchDashboardData]);
 
-  // Enhanced error handling
   const error =
     dashboardData.error ||
     (userGraphQLError
@@ -642,15 +592,12 @@ export const useFounderNFTDashboard = () => {
       ? `GraphQL Platform Error: ${platformGraphQLError.message}`
       : null);
 
-  const isLoading =
-    dashboardData.isLoading || userGraphQLLoading || platformGraphQLLoading;
-
   return {
     nftData: dashboardData.nftData,
     stakingData: dashboardData.stakingData,
     earningsData: dashboardData.earningsData,
-    isLoading,
-    error,
+    isLoading: dashboardData.isLoading,
+    error: error,
     transactionState,
     stakeNFTs,
     unstakeNFTs,
@@ -663,19 +610,6 @@ export const useFounderNFTDashboard = () => {
     hasGraphQLData: !!userGraphQLData || !!platformGraphQLData,
     graphqlUserData: userGraphQLData,
     graphqlPlatformData: platformGraphQLData,
-
-    // ✅ NEW: Expose configuration data
-    platformConfig: platformGraphQLData?.platformConfig || null,
-    minimumStakingPeriodDays: platformGraphQLData?.platformConfig
-      ?.minimumStakingPeriod
-      ? Math.floor(
-          Number(platformGraphQLData.platformConfig.minimumStakingPeriod) /
-            (24 * 60 * 60)
-        )
-      : 7,
-    emergencyWithdrawEnabled:
-      platformGraphQLData?.platformConfig?.emergencyWithdrawEnabled || false,
-
     resetFetch: () => {
       fetchInProgress.current = false;
       console.log("🔄 Emergency reset of fetchInProgress");

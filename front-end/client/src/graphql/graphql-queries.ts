@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-// Enhanced User Dashboard Query - gets all user data needed for dashboard
+// FIXED: User Dashboard Query - ONLY includes fields that exist in current subgraph
 export const GET_USER_DASHBOARD = gql`
   query GetUserDashboard($userAddress: ID!) {
     user(id: $userAddress) {
@@ -9,14 +9,10 @@ export const GET_USER_DASHBOARD = gql`
       totalNFTsStaked
       totalRewardsEarned
       totalRewardsClaimed
-
-      # NEW: Enhanced user fields
-      totalFeesPaid
-      stakingEfficiency
-      membershipLevel
-
       firstInteraction
       lastInteraction
+      createdAt
+      updatedAt
 
       nfts {
         id
@@ -29,37 +25,20 @@ export const GET_USER_DASHBOARD = gql`
         totalRewardsEarned
         totalRewardsClaimed
 
-        # NEW: Real-time reward fields
+        # These fields are implemented in current subgraph
         pendingRewards
         claimableAmount
         lastRewardCalculation
         rewardAccumulationRate
 
-        # Existing computed fields
+        # Computed fields that exist
         canUnstake
         nextUnstakeDate
         stakingDuration
         mintedAt
-      }
-
-      # NEW: User analytics
-      analytics {
-        averageStakingDuration
-        totalTransactions
-        stakingStreak
-        longestStakingStreak
-        rewardEfficiency
-        riskProfile
-        membershipTier
-        lastActivityDate
-      }
-
-      # NEW: Fee analytics
-      feeAnalytics {
-        totalFeespaid
-        stakingFees
-        claimFees
-        lastFeePayment
+        lastRewardUpdate
+        createdAt
+        updatedAt
       }
 
       stakingHistory(first: 10, orderBy: timestamp, orderDirection: desc) {
@@ -85,41 +64,10 @@ export const GET_USER_DASHBOARD = gql`
         }
       }
     }
-
-    # Enhanced platform stats with APY/APR
-    platformStats(id: "0x706c6174666f726d") {
-      id
-      totalNFTsMinted
-      totalNFTsStaked
-      totalUsers
-      totalStakers
-      totalRewardsDistributed
-      currentRewardRate
-      totalETHReceived
-
-      # NEW: Dynamic rate calculations
-      currentAPY
-      currentAPR
-      averageStakingDuration
-      participationRate
-
-      lastUpdated
-    }
-
-    # NEW: Platform configuration
-    platformConfig(id: "0x636f6e666967") {
-      minimumStakingPeriod
-      baseAPR
-      performanceMultiplier
-      rewardCalculationPeriod
-      maxStakeAmount
-      emergencyWithdrawEnabled
-      lastConfigUpdate
-    }
   }
 `;
 
-// Enhanced Platform Stats Query - now includes APY/APR data
+// FIXED: Platform Stats Query - only implemented fields
 export const GET_PLATFORM_STATS = gql`
   query GetPlatformStats {
     platformStats(id: "0x706c6174666f726d") {
@@ -132,7 +80,7 @@ export const GET_PLATFORM_STATS = gql`
       currentRewardRate
       totalETHReceived
 
-      # NEW: Enhanced metrics
+      # Only include if these are actually implemented in your subgraph
       currentAPY
       currentAPR
       averageStakingDuration
@@ -141,45 +89,82 @@ export const GET_PLATFORM_STATS = gql`
       lastUpdated
     }
 
-    # NEW: Platform configuration
-    platformConfig(id: "0x636f6e666967") {
-      minimumStakingPeriod
-      baseAPR
-      performanceMultiplier
-      rewardCalculationPeriod
-      maxStakeAmount
-      emergencyWithdrawEnabled
+    # Get recent ETH received events
+    ethReceiveds(first: 5, orderBy: timestamp, orderDirection: desc) {
+      id
+      from
+      amount
+      timestamp
+      blockNumber
+      transactionHash
     }
 
-    # NEW: Recent APY snapshots for trending
-    apySnapshots(first: 7, orderBy: date, orderDirection: desc) {
+    # Get recent reward rate updates
+    rewardRates(first: 5, orderBy: timestamp, orderDirection: desc) {
       id
-      date
-      currentAPY
-      currentAPR
-      totalStakedValue
-      rewardRate
-      participationRate
-      averageStakingDuration
+      oldRate
+      newRate
+      timestamp
+      blockNumber
+      transactionHash
     }
   }
 `;
 
-// Enhanced User NFTs Query - with real-time reward data
+// SIMPLIFIED: User Profile Query without non-existent fields
+export const GET_USER_PROFILE = gql`
+  query GetUserProfile($userAddress: ID!) {
+    user(id: $userAddress) {
+      id
+      totalNFTsOwned
+      totalNFTsStaked
+      totalRewardsEarned
+      totalRewardsClaimed
+      firstInteraction
+      lastInteraction
+
+      # Get user's NFTs
+      nfts {
+        id
+        tokenId
+        isStaked
+        totalRewardsEarned
+        totalRewardsClaimed
+        mintedAt
+      }
+
+      # Recent staking history
+      stakingHistory(first: 20, orderBy: timestamp, orderDirection: desc) {
+        id
+        action
+        timestamp
+        nft {
+          tokenId
+        }
+      }
+
+      # Recent reward claims
+      rewardsClaimed(first: 20, orderBy: timestamp, orderDirection: desc) {
+        id
+        amount
+        timestamp
+        nft {
+          tokenId
+        }
+      }
+    }
+  }
+`;
+
+// NEW: Minimal query for basic NFT data
 export const GET_USER_NFTS = gql`
   query GetUserNFTs($userAddress: ID!) {
     user(id: $userAddress) {
       id
       totalNFTsOwned
       totalNFTsStaked
-      totalRewardsEarned
-      totalRewardsClaimed
 
-      # NEW: Enhanced user metrics
-      stakingEfficiency
-      membershipLevel
-
-      nfts(orderBy: tokenId, orderDirection: asc) {
+      nfts {
         id
         tokenId
         isStaked
@@ -188,190 +173,87 @@ export const GET_USER_NFTS = gql`
         }
         stakingSince
         totalRewardsEarned
-        totalRewardsClaimed
-
-        # NEW: Real-time calculations
         pendingRewards
-        claimableAmount
-        lastRewardCalculation
-        rewardAccumulationRate
-
         canUnstake
         nextUnstakeDate
-        stakingDuration
         mintedAt
-      }
-
-      # NEW: User analytics for dashboard insights
-      analytics {
-        averageStakingDuration
-        stakingStreak
-        rewardEfficiency
-        membershipTier
       }
     }
   }
 `;
 
-// Enhanced User Staked NFTs Query - optimized for staking interface
-export const GET_USER_STAKED_NFTS = gql`
-  query GetUserStakedNFTs($userAddress: ID!) {
-    user(id: $userAddress) {
-      id
+// NEW: Real-time staking data query
+export const GET_STAKING_DATA = gql`
+  query GetStakingData {
+    platformStats(id: "0x706c6174666f726d") {
       totalNFTsStaked
-      totalRewardsEarned
-
-      nfts(where: { isStaked: true }) {
-        id
-        tokenId
-        isStaked
-        currentStaker {
-          id
-        }
-        stakingSince
-        totalRewardsEarned
-        totalRewardsClaimed
-
-        # NEW: Critical for staking UI
-        pendingRewards
-        claimableAmount
-        rewardAccumulationRate
-
-        canUnstake
-        nextUnstakeDate
-        stakingDuration
-        mintedAt
-      }
-    }
-
-    # Include platform config for staking rules
-    platformConfig(id: "0x636f6e666967") {
-      minimumStakingPeriod
-      baseAPR
-      maxStakeAmount
+      totalStakers
+      currentRewardRate
+      totalRewardsDistributed
+      lastUpdated
     }
   }
 `;
 
-// Enhanced Recent Activity Query - includes fee tracking
+// NEW: Recent activity query
 export const GET_RECENT_ACTIVITY = gql`
-  query GetRecentActivity($userAddress: ID!, $first: Int = 20) {
-    user(id: $userAddress) {
+  query GetRecentActivity($limit: Int = 20) {
+    stakeEvents(first: $limit, orderBy: timestamp, orderDirection: desc) {
       id
-
-      stakingHistory(first: $first, orderBy: timestamp, orderDirection: desc) {
+      action
+      timestamp
+      user {
         id
-        nft {
-          tokenId
-        }
-        action
-        timestamp
-        blockNumber
-        transactionHash
-        rewardPerTokenAtTime
       }
-
-      rewardsClaimed(first: $first, orderBy: timestamp, orderDirection: desc) {
-        id
-        nft {
-          tokenId
-        }
-        amount
-        timestamp
-        blockNumber
-        transactionHash
+      nft {
+        tokenId
       }
+      transactionHash
     }
 
-    # NEW: Recent fee collections for this user
-    feeCollections(
-      where: { user: $userAddress }
-      first: $first
-      orderBy: timestamp
-      orderDirection: desc
-    ) {
+    rewardClaims(first: $limit, orderBy: timestamp, orderDirection: desc) {
       id
-      feeType
       amount
       timestamp
+      user {
+        id
+      }
+      nft {
+        tokenId
+      }
       transactionHash
-      feeDestination
     }
   }
 `;
 
-// Enhanced Staking Rewards Query - comprehensive reward tracking
-export const GET_STAKING_REWARDS = gql`
-  query GetStakingRewards($userAddress: ID!) {
-    user(id: $userAddress) {
-      id
-      totalRewardsEarned
-      totalRewardsClaimed
-
-      # NEW: Fee information
-      totalFeesPaid
-
-      nfts(where: { isStaked: true }) {
-        id
-        tokenId
-        stakingSince
-        totalRewardsEarned
-        totalRewardsClaimed
-
-        # NEW: Real-time reward data
-        pendingRewards
-        claimableAmount
-        rewardAccumulationRate
-        lastRewardCalculation
-
-        canUnstake
-        nextUnstakeDate
-        stakingDuration
-      }
-
-      # NEW: User analytics for reward optimization
-      analytics {
-        rewardEfficiency
-        averageStakingDuration
-        stakingStreak
-      }
-
-      # NEW: Fee analytics
-      feeAnalytics {
-        totalFeespaid
-        stakingFees
-        claimFees
-      }
-    }
-
-    # Platform context for reward calculations
-    platformStats(id: "0x706c6174666f726d") {
-      currentRewardRate
-      currentAPY
-      currentAPR
-    }
-
+export const GET_PLATFORM_CONFIG = gql`
+  query GetPlatformConfig {
     platformConfig(id: "0x636f6e666967") {
+      id
+      minimumStakingPeriod
       baseAPR
       performanceMultiplier
       rewardCalculationPeriod
+      maxStakeAmount
+      emergencyWithdrawEnabled
+      lastConfigUpdate
     }
   }
 `;
 
-// NEW: Comprehensive Analytics Query - for dashboard insights
+// COMMENT: Queries for PHASE 2 - After subgraph enhancements
+// These are currently commented out because the fields don't exist yet
+
+/*
+// FUTURE: Enhanced User Analytics (after Phase 2)
 export const GET_USER_ANALYTICS = gql`
   query GetUserAnalytics($userAddress: ID!) {
     user(id: $userAddress) {
       id
-      totalNFTsOwned
-      totalNFTsStaked
-      totalRewardsEarned
-      totalRewardsClaimed
-      totalFeesPaid
-      stakingEfficiency
       membershipLevel
-
+      stakingEfficiency
+      totalFeesPaid
+      
       analytics {
         averageStakingDuration
         totalTransactions
@@ -379,10 +261,10 @@ export const GET_USER_ANALYTICS = gql`
         longestStakingStreak
         rewardEfficiency
         riskProfile
-        lastActivityDate
         membershipTier
+        lastActivityDate
       }
-
+      
       feeAnalytics {
         totalFeespaid
         stakingFees
@@ -393,48 +275,23 @@ export const GET_USER_ANALYTICS = gql`
   }
 `;
 
-// NEW: Platform Performance Query - for admin/analytics dashboard
-export const GET_PLATFORM_PERFORMANCE = gql`
-  query GetPlatformPerformance($days: Int = 30) {
-    platformStats(id: "0x706c6174666f726d") {
-      totalNFTsMinted
-      totalNFTsStaked
-      totalUsers
-      totalStakers
-      totalRewardsDistributed
-      currentRewardRate
-      currentAPY
-      currentAPR
-      participationRate
-      averageStakingDuration
-    }
-
-    # Historical APY data
-    apySnapshots(first: $days, orderBy: date, orderDirection: desc) {
+// FUTURE: APY Snapshots (after Phase 2)
+export const GET_APY_HISTORY = gql`
+  query GetAPYHistory($limit: Int = 30) {
+    apySnapshots(first: $limit, orderBy: date, orderDirection: desc) {
+      id
       date
       currentAPY
       currentAPR
       totalStakedValue
+      rewardRate
       participationRate
       averageStakingDuration
-    }
-
-    # Daily snapshots for trends
-    dailySnapshots(first: $days, orderBy: date, orderDirection: desc) {
-      date
-      totalStaked
-      totalStakers
-      totalUsers
-      rewardsDistributed
-      newStakers
-      newUsers
-      averageStakingDuration
-      rewardRate
     }
   }
 `;
 
-// NEW: User Fee Summary Query - for fee transparency
+// FUTURE: User Fees (after Phase 2)
 export const GET_USER_FEES = gql`
   query GetUserFees($userAddress: ID!, $first: Int = 50) {
     user(id: $userAddress) {
@@ -464,54 +321,4 @@ export const GET_USER_FEES = gql`
     }
   }
 `;
-
-// NEW: Real-time Rewards Query - for live reward tracking
-export const GET_REALTIME_REWARDS = gql`
-  query GetRealtimeRewards($userAddress: ID!) {
-    user(id: $userAddress) {
-      id
-      totalRewardsEarned
-      totalRewardsClaimed
-
-      nfts(where: { isStaked: true }) {
-        id
-        tokenId
-        stakingSince
-
-        # Focus on real-time data
-        pendingRewards
-        claimableAmount
-        rewardAccumulationRate
-        lastRewardCalculation
-
-        canUnstake
-        nextUnstakeDate
-      }
-    }
-
-    platformStats(id: "0x706c6174666f726d") {
-      currentRewardRate
-      lastUpdated
-    }
-  }
-`;
-
-// NEW: Membership Tier Query - for gamification features
-export const GET_USER_MEMBERSHIP = gql`
-  query GetUserMembership($userAddress: ID!) {
-    user(id: $userAddress) {
-      id
-      membershipLevel
-      stakingEfficiency
-
-      analytics {
-        stakingStreak
-        longestStakingStreak
-        rewardEfficiency
-        riskProfile
-        membershipTier
-        totalTransactions
-      }
-    }
-  }
-`;
+*/

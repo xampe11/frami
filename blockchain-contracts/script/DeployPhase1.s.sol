@@ -114,7 +114,7 @@ contract DeployPhase1 is Script {
             price: vm.envOr("FOUNDER_NFT_PRICE", uint256(0.1 ether)),
             platformFeeDistributionPercentage: vm.envOr("PLATFORM_FEE_DISTRIBUTION_PERCENTAGE", uint256(2500)), // 25%
             daoTokenAllocationPercentage: vm.envOr("DAO_TOKEN_ALLOCATION_PERCENTAGE", uint256(1000)), // 10%
-            minimumStakingPeriod: vm.envOr("MINIMUM_STAKING_PERIOD", uint256(7 days)),
+            minimumStakingPeriod: vm.envOr("MINIMUM_STAKING_PERIOD", uint256(0)),
             activateSaleImmediately: vm.envOr("ACTIVATE_SALE_IMMEDIATELY", true)
         });
 

@@ -6,7 +6,7 @@ dataSources:
     name: FounderNFT
     network: localhost
     source:
-      address: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+      address: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9'
       abi: FounderNFT
       startBlock: 0
     mapping:
@@ -20,8 +20,6 @@ dataSources:
         - RewardClaim
         - PlatformStats
         - RewardRate
-        - ETHReceived
-        - PlatformConfig # ADDED: Missing entity for configuration
       abis:
         - name: FounderNFT
           file: ./abis/FounderNFT.json

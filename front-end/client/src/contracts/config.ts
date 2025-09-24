@@ -1,12 +1,12 @@
 // Auto-generated contract configuration
-// Generated at: 2025-09-23T00:40:16.184Z
+// Generated at: 2025-09-23T19:32:35.170Z
 // Network: localhost
 
 export const contractConfig = {
   "network": "localhost",
   "chainId": 31337,
   "deploymentBlock": 0,
-  "deploymentTimestamp": 1758587820,
+  "deploymentTimestamp": 1758655880,
   "contracts": {
     "founderNFT": {
       "proxy": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
