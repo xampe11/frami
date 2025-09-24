@@ -89,25 +89,7 @@ export const GET_PLATFORM_STATS = gql`
       lastUpdated
     }
 
-    # Get recent ETH received events
-    ethReceiveds(first: 5, orderBy: timestamp, orderDirection: desc) {
-      id
-      from
-      amount
-      timestamp
-      blockNumber
-      transactionHash
-    }
 
-    # Get recent reward rate updates
-    rewardRates(first: 5, orderBy: timestamp, orderDirection: desc) {
-      id
-      oldRate
-      newRate
-      timestamp
-      blockNumber
-      transactionHash
-    }
   }
 `;
 
@@ -245,6 +227,27 @@ export const GET_PLATFORM_CONFIG = gql`
 // These are currently commented out because the fields don't exist yet
 
 /*
+
+     # Get recent ETH received events
+    ethReceiveds(first: 5, orderBy: timestamp, orderDirection: desc) {
+      id
+      from
+      amount
+      timestamp
+      blockNumber
+      transactionHash
+    }
+
+    # Get recent reward rate updates
+    rewardRates(first: 5, orderBy: timestamp, orderDirection: desc) {
+      id
+      oldRate
+      newRate
+      timestamp
+      blockNumber
+      transactionHash
+    }
+      
 // FUTURE: Enhanced User Analytics (after Phase 2)
 export const GET_USER_ANALYTICS = gql`
   query GetUserAnalytics($userAddress: ID!) {
