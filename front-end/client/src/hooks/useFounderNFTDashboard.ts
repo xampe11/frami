@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   GET_USER_DASHBOARD,
   GET_PLATFORM_STATS,
+  GET_PLATFORM_CONFIG,
 } from "@/graphql/graphql-queries";
 
 const FOUNDER_NFT_ABI = founderNFTAbi;
@@ -122,6 +123,16 @@ export const useFounderNFTDashboard = () => {
     fetchPolicy: "cache-and-network",
   });
 
+  const {
+    data: platformConfigData,
+    loading: platformConfigLoading,
+    error: platformConfigError,
+    refetch: refetchPlatformConfig,
+  } = useQuery(GET_PLATFORM_CONFIG, {
+    errorPolicy: "all",
+    fetchPolicy: "cache-and-network",
+  });
+
   // Setup providers and contracts
   useEffect(() => {
     const setupContracts = async () => {
@@ -211,7 +222,7 @@ export const useFounderNFTDashboard = () => {
       }
 
       // ✅ NEW: Get minimum staking period from database (not hardcoded!)
-      const minimumStakingPeriodSeconds = platformGraphQLData?.platformConfig
+      const minimumStakingPeriodSeconds = platformConfigData?.platformConfig
         ?.minimumStakingPeriod
         ? Number(platformGraphQLData.platformConfig.minimumStakingPeriod)
         : 7 * 24 * 60 * 60; // Fallback only if database value not available
@@ -334,6 +345,7 @@ export const useFounderNFTDashboard = () => {
     address,
     userGraphQLData,
     platformGraphQLData,
+    platformConfigData,
     calculateStakingDuration,
     formatDate,
   ]);
@@ -640,10 +652,16 @@ export const useFounderNFTDashboard = () => {
       : null) ||
     (platformGraphQLError
       ? `GraphQL Platform Error: ${platformGraphQLError.message}`
+      : null) ||
+    (platformConfigError
+      ? `GraphQL Config Error: ${platformConfigError.message}`
       : null);
 
   const isLoading =
-    dashboardData.isLoading || userGraphQLLoading || platformGraphQLLoading;
+    dashboardData.isLoading ||
+    userGraphQLLoading ||
+    platformGraphQLLoading ||
+    platformConfigLoading;
 
   return {
     nftData: dashboardData.nftData,
@@ -665,16 +683,18 @@ export const useFounderNFTDashboard = () => {
     graphqlPlatformData: platformGraphQLData,
 
     // ✅ NEW: Expose configuration data
-    platformConfig: platformGraphQLData?.platformConfig || null,
-    minimumStakingPeriodDays: platformGraphQLData?.platformConfig
+    platformConfig: platformConfigData?.platformConfig || null,
+    minimumStakingPeriodDays: platformConfigData?.platformConfig
       ?.minimumStakingPeriod
       ? Math.floor(
-          Number(platformGraphQLData.platformConfig.minimumStakingPeriod) /
+          Number(platformConfigData.platformConfig.minimumStakingPeriod) /
             (24 * 60 * 60)
         )
       : 7,
     emergencyWithdrawEnabled:
-      platformGraphQLData?.platformConfig?.emergencyWithdrawEnabled || false,
+      platformConfigData?.platformConfig?.emergencyWithdrawEnabled || false,
+
+    refreshConfig: refetchPlatformConfig,
 
     resetFetch: () => {
       fetchInProgress.current = false;
