@@ -2,7 +2,8 @@
 pragma solidity 0.8.28;
 
 // 1. Imports (explicit imports following modern practices)
-import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import {ERC721EnumerableUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -60,19 +61,15 @@ contract FounderNFT is
     bytes32 public constant PLATFORM_ROLE = keccak256("PLATFORM_ROLE");
 
     uint256 public constant SALES_REDISTRIBUTION_PERCENTAGE = 1000; // 10%
-    uint256 public constant BASIS_POINTS = 10000; // 100%
+    uint256 public constant BASIS_POINTS = 10_000; // 100%
     uint256 public constant PRECISION = 1e18; // For reward calculations
-    uint256 private constant REWARD_DURATION = 604800; // 7 days (7 * 24 * 60 * 60)
+    uint256 private constant REWARD_DURATION = 604_800; // 7 days (7 * 24 * 60 * 60)
     uint256 private constant MAX_BATCH_SIZE = 20; // Maximum tokens per batch operation
 
     // 3. Events
     event FounderNFTMinted(address indexed to, uint256 indexed tokenId);
     event RewardAdded(uint256 amount, uint256 newRewardRate);
-    event RewardClaimed(
-        address indexed user,
-        uint256 indexed tokenId,
-        uint256 amount
-    );
+    event RewardClaimed(address indexed user, uint256 indexed tokenId, uint256 amount);
     event TokenStaked(address indexed owner, uint256 indexed tokenId);
     event TokenUnstaked(address indexed owner, uint256 indexed tokenId);
     event RewardRateUpdated(uint256 oldRate, uint256 newRate);
@@ -87,12 +84,8 @@ contract FounderNFT is
         uint256 newRewardPerToken = rewardPerToken();
 
         // Use max uint256 as sentinel value instead of 0
-        if (
-            tokenId != type(uint256).max &&
-            _stakedTokens[tokenId].owner != address(0)
-        ) {
-            uint256 rewardPerTokenDiff = newRewardPerToken -
-                _userRewardPerTokenPaid[tokenId];
+        if (tokenId != type(uint256).max && _stakedTokens[tokenId].owner != address(0)) {
+            uint256 rewardPerTokenDiff = newRewardPerToken - _userRewardPerTokenPaid[tokenId];
             _rewards[tokenId] += rewardPerTokenDiff / PRECISION;
             _userRewardPerTokenPaid[tokenId] = newRewardPerToken;
         }
@@ -110,10 +103,7 @@ contract FounderNFT is
         uint256 newRewardPerToken = rewardPerToken();
 
         // Use max uint256 as sentinel value instead of 0
-        if (
-            tokenId != type(uint256).max &&
-            _stakedTokens[tokenId].owner != address(0)
-        ) {
+        if (tokenId != type(uint256).max && _stakedTokens[tokenId].owner != address(0)) {
             // For settlement: set TOTAL rewards, not incremental
             _rewards[tokenId] = earned(tokenId);
             _userRewardPerTokenPaid[tokenId] = newRewardPerToken;
@@ -161,7 +151,10 @@ contract FounderNFT is
         uint256 platformFeeDistributionPercentage,
         uint256 daoTokenAllocationPercentage,
         uint256 minimumStakingPeriod
-    ) external initializer {
+    )
+        external
+        initializer
+    {
         __ERC721_init("Frami Founder", "FRAMI");
         __ERC721Enumerable_init();
         __Ownable_init(initialOwner);
@@ -209,17 +202,19 @@ contract FounderNFT is
      */
     function mintMultiple(uint256 quantity) external payable nonReentrant {
         if (!_saleActive) revert SaleNotActive();
-        if (quantity == 0 || quantity > 10)
+        if (quantity == 0 || quantity >= 10) {
             revert InvalidQuantity(quantity, 10);
+        }
         if (totalSupply() + quantity > _maxSupply) revert MaxSupplyReached();
 
         uint256 totalCost = _price * quantity;
-        if (msg.value < totalCost)
+        if (msg.value < totalCost) {
             revert InsufficientPayment(totalCost, msg.value);
+        }
 
         _processMintPayment(msg.value);
 
-        for (uint256 i = 0; i < quantity; ) {
+        for (uint256 i = 0; i < quantity;) {
             _mintToken(msg.sender);
             unchecked {
                 ++i;
@@ -232,15 +227,14 @@ contract FounderNFT is
      * @dev No payment required, admin only
      * @param recipients Array of addresses to receive NFTs
      */
-    function batchMint(
-        address[] memory recipients
-    ) external onlyRole(ADMIN_ROLE) {
+    function batchMint(address[] memory recipients) external onlyRole(ADMIN_ROLE) {
         if (!_saleActive) revert SaleNotActive();
-        if (totalSupply() + recipients.length > _maxSupply)
+        if (totalSupply() + recipients.length > _maxSupply) {
             revert MaxSupplyReached();
+        }
 
         uint256 length = recipients.length;
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length;) {
             _mintToken(recipients[i]);
             unchecked {
                 ++i;
@@ -253,9 +247,7 @@ contract FounderNFT is
      * @dev Only callable by platform contracts
      * @param amount Amount of rewards to add (if no ETH sent)
      */
-    function addPlatformFees(
-        uint256 amount
-    )
+    function addPlatformFees(uint256 amount)
         external
         payable
         onlyRole(PLATFORM_ROLE)
@@ -272,13 +264,13 @@ contract FounderNFT is
      * @dev Transfers NFT to contract and starts reward accrual
      * @param tokenId The ID of the token to stake
      */
-    function stakeToken(
-        uint256 tokenId
-    ) external nonReentrant updateRewardIncremental(tokenId) {
-        if (ownerOf(tokenId) != msg.sender)
+    function stakeToken(uint256 tokenId) external nonReentrant updateRewardIncremental(tokenId) {
+        if (ownerOf(tokenId) != msg.sender) {
             revert TokenNotOwned(tokenId, msg.sender);
-        if (_stakedTokens[tokenId].owner != address(0))
+        }
+        if (_stakedTokens[tokenId].owner != address(0)) {
             revert TokenAlreadyStaked(tokenId);
+        }
 
         _stakeToken(msg.sender, tokenId);
     }
@@ -288,22 +280,27 @@ contract FounderNFT is
      * @dev More gas efficient than multiple single stakes
      * @param tokenIds Array of token IDs to stake
      */
-    function stakeMultipleTokens(
-        uint256[] calldata tokenIds
-    ) external nonReentrant updateRewardIncremental(type(uint256).max) {
+    function stakeMultipleTokens(uint256[] calldata tokenIds)
+        external
+        nonReentrant
+        updateRewardIncremental(type(uint256).max)
+    {
         uint256 length = tokenIds.length;
         if (length == 0) revert NoStakedTokens();
-        if (length > MAX_BATCH_SIZE)
+        if (length > MAX_BATCH_SIZE) {
             revert TooManyTokensInTransaction(length, MAX_BATCH_SIZE);
+        }
 
         uint256 newlyStaked = 0;
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length;) {
             uint256 tokenId = tokenIds[i];
 
-            if (ownerOf(tokenId) != msg.sender)
+            if (ownerOf(tokenId) != msg.sender) {
                 revert TokenNotOwned(tokenId, msg.sender);
-            if (_stakedTokens[tokenId].owner != address(0))
+            }
+            if (_stakedTokens[tokenId].owner != address(0)) {
                 revert TokenAlreadyStaked(tokenId);
+            }
 
             //Transfer NFT to contract BEFORE updating state
             _transfer(msg.sender, address(this), tokenId);
@@ -326,19 +323,14 @@ contract FounderNFT is
      * @dev Automatically claims all pending rewards
      * @param tokenId The ID of the token to unstake
      */
-    function unstakeToken(
-        uint256 tokenId
-    ) external nonReentrant updateRewardComplete(tokenId) {
-        if (_stakedTokens[tokenId].owner != msg.sender)
+    function unstakeToken(uint256 tokenId) external nonReentrant updateRewardComplete(tokenId) {
+        if (_stakedTokens[tokenId].owner != msg.sender) {
             revert TokenNotStaked(tokenId);
+        }
 
-        uint256 timeStaked = block.timestamp -
-            _stakedTokens[tokenId].stakedSince;
+        uint256 timeStaked = block.timestamp - _stakedTokens[tokenId].stakedSince;
         if (timeStaked < _minimumStakingPeriod) {
-            revert MinimumStakingPeriodNotMet(
-                tokenId,
-                _minimumStakingPeriod - timeStaked
-            );
+            revert MinimumStakingPeriodNotMet(tokenId, _minimumStakingPeriod - timeStaked);
         }
 
         _unstakeToken(msg.sender, tokenId);
@@ -349,30 +341,30 @@ contract FounderNFT is
      * @dev Claims all rewards and returns all NFTs
      * @param tokenIds Array of token IDs to unstake
      */
-    function unstakeMultipleTokens(
-        uint256[] calldata tokenIds
-    ) external nonReentrant updateRewardComplete(type(uint256).max) {
+    function unstakeMultipleTokens(uint256[] calldata tokenIds)
+        external
+        nonReentrant
+        updateRewardComplete(type(uint256).max)
+    {
         uint256 length = tokenIds.length;
         if (length == 0) revert NoStakedTokens();
-        if (length > MAX_BATCH_SIZE)
+        if (length > MAX_BATCH_SIZE) {
             revert TooManyTokensInTransaction(length, MAX_BATCH_SIZE);
+        }
 
         uint256 totalRewards = 0;
         uint256 unstaked = 0;
 
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length;) {
             uint256 tokenId = tokenIds[i];
 
-            if (_stakedTokens[tokenId].owner != msg.sender)
+            if (_stakedTokens[tokenId].owner != msg.sender) {
                 revert TokenNotStaked(tokenId);
+            }
 
-            uint256 timeStaked = block.timestamp -
-                _stakedTokens[tokenId].stakedSince;
+            uint256 timeStaked = block.timestamp - _stakedTokens[tokenId].stakedSince;
             if (timeStaked < _minimumStakingPeriod) {
-                revert MinimumStakingPeriodNotMet(
-                    tokenId,
-                    _minimumStakingPeriod - timeStaked
-                );
+                revert MinimumStakingPeriodNotMet(tokenId, _minimumStakingPeriod - timeStaked);
             }
 
             // Calculate and accumulate rewards
@@ -400,7 +392,7 @@ contract FounderNFT is
         // Clean up the user staked tokens array after all unstaking is complete
         // This prevents array manipulation issues during the loop
         uint256[] storage userTokens = _userStakedTokens[msg.sender];
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length;) {
             uint256 tokenId = tokenIds[i];
 
             // Find and remove the token from the array
@@ -430,11 +422,10 @@ contract FounderNFT is
      * @dev NFT remains staked, only rewards are claimed
      * @param tokenId The ID of the token to claim rewards for
      */
-    function claimReward(
-        uint256 tokenId
-    ) external nonReentrant updateRewardComplete(tokenId) {
-        if (_stakedTokens[tokenId].owner != msg.sender)
+    function claimReward(uint256 tokenId) external nonReentrant updateRewardComplete(tokenId) {
+        if (_stakedTokens[tokenId].owner != msg.sender) {
             revert TokenNotStaked(tokenId);
+        }
 
         uint256 reward = _rewards[tokenId];
         if (reward == 0) revert NoRewardsToClaim();
@@ -452,16 +443,19 @@ contract FounderNFT is
      * @dev More gas efficient than multiple single claims
      * @param tokenIds Array of token IDs to claim rewards for
      */
-    function claimMultipleRewards(
-        uint256[] calldata tokenIds
-    ) external nonReentrant updateRewardComplete(type(uint256).max) {
+    function claimMultipleRewards(uint256[] calldata tokenIds)
+        external
+        nonReentrant
+        updateRewardComplete(type(uint256).max)
+    {
         uint256 length = tokenIds.length;
         uint256 totalReward = 0;
 
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length;) {
             uint256 tokenId = tokenIds[i];
-            if (_stakedTokens[tokenId].owner != msg.sender)
+            if (_stakedTokens[tokenId].owner != msg.sender) {
                 revert TokenNotStaked(tokenId);
+            }
 
             _rewards[tokenId] = earned(tokenId);
             _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
@@ -487,11 +481,7 @@ contract FounderNFT is
      * @notice Claim rewards for all staked tokens owned by caller
      * @dev Convenient function to claim all rewards at once
      */
-    function claimAllRewards()
-        external
-        nonReentrant
-        updateRewardComplete(type(uint256).max)
-    {
+    function claimAllRewards() external nonReentrant updateRewardComplete(type(uint256).max) {
         address owner = msg.sender;
         uint256[] memory stakedTokens = _userStakedTokens[owner];
         if (stakedTokens.length == 0) revert NoStakedTokens();
@@ -499,7 +489,7 @@ contract FounderNFT is
         uint256 totalRewards = 0;
         uint256 length = stakedTokens.length;
 
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length;) {
             uint256 tokenId = stakedTokens[i];
 
             _rewards[tokenId] = earned(tokenId);
@@ -535,10 +525,8 @@ contract FounderNFT is
             return _rewardPerTokenStored;
         }
 
-        return
-            _rewardPerTokenStored +
-            (((block.timestamp - _lastUpdateTime) * _rewardRate * PRECISION) /
-                _totalStakedSupply);
+        return _rewardPerTokenStored
+            + (((block.timestamp - _lastUpdateTime) * _rewardRate * PRECISION) / _totalStakedSupply);
     }
 
     /**
@@ -552,10 +540,7 @@ contract FounderNFT is
             return 0;
         }
 
-        return
-            (rewardPerToken() - _userRewardPerTokenPaid[tokenId]) /
-            PRECISION +
-            _rewards[tokenId];
+        return (rewardPerToken() - _userRewardPerTokenPaid[tokenId]) / PRECISION + _rewards[tokenId];
     }
 
     /**
@@ -564,9 +549,7 @@ contract FounderNFT is
      * @param owner The address to query staked tokens for
      * @return Array of token IDs that are currently staked by the owner
      */
-    function getStakedByOwner(
-        address owner
-    ) external view returns (uint256[] memory) {
+    function getStakedByOwner(address owner) external view returns (uint256[] memory) {
         if (owner == address(0)) revert InvalidOwnerAddress();
         return _userStakedTokens[owner];
     }
@@ -577,9 +560,7 @@ contract FounderNFT is
      * @param owner The address to check
      * @return Number of tokens staked by the owner
      */
-    function getStakedCountByOwner(
-        address owner
-    ) external view returns (uint256) {
+    function getStakedCountByOwner(address owner) external view returns (uint256) {
         return _userStakedTokens[owner].length;
     }
 
@@ -599,14 +580,12 @@ contract FounderNFT is
      * @param owner The address to calculate total rewards for
      * @return Total earned rewards in wei
      */
-    function getTotalEarnedByOwner(
-        address owner
-    ) external view returns (uint256) {
+    function getTotalEarnedByOwner(address owner) external view returns (uint256) {
         uint256[] memory stakedTokens = _userStakedTokens[owner];
         uint256 totalEarned = 0;
         uint256 length = stakedTokens.length;
 
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length;) {
             totalEarned += earned(stakedTokens[i]);
             unchecked {
                 ++i;
@@ -645,9 +624,7 @@ contract FounderNFT is
      * @return earnedRewards Array of earned rewards
      * @return canUnstake Array of unstaking eligibility
      */
-    function getStakingInfoBatch(
-        uint256[] calldata tokenIds
-    )
+    function getStakingInfoBatch(uint256[] calldata tokenIds)
         external
         view
         returns (
@@ -663,14 +640,15 @@ contract FounderNFT is
         earnedRewards = new uint256[](length);
         canUnstake = new bool[](length);
 
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length;) {
             uint256 tokenId = tokenIds[i];
             owners[i] = _stakedTokens[tokenId].owner;
             stakedAt[i] = _stakedTokens[tokenId].stakedSince;
             earnedRewards[i] = earned(tokenId);
-            canUnstake[i] = (_stakedTokens[tokenId].owner != address(0) &&
-                block.timestamp >=
-                _stakedTokens[tokenId].stakedSince + _minimumStakingPeriod);
+            canUnstake[i] = (
+                _stakedTokens[tokenId].owner != address(0)
+                    && block.timestamp >= _stakedTokens[tokenId].stakedSince + _minimumStakingPeriod
+            );
 
             unchecked {
                 ++i;
@@ -688,9 +666,7 @@ contract FounderNFT is
         return _rewards[tokenId];
     }
 
-    function getUserRewardPerTokenPaid(
-        uint256 tokenId
-    ) external view returns (uint256) {
+    function getUserRewardPerTokenPaid(uint256 tokenId) external view returns (uint256) {
         return _userRewardPerTokenPaid[tokenId];
     }
 
@@ -726,11 +702,7 @@ contract FounderNFT is
         return _userStakedTokens[account].length > 0;
     }
 
-    function getPlatformFeeDistributionPercentage()
-        external
-        view
-        returns (uint256)
-    {
+    function getPlatformFeeDistributionPercentage() external view returns (uint256) {
         return _platformFeeDistributionPercentage;
     }
 
@@ -742,11 +714,7 @@ contract FounderNFT is
         return _totalSalesProceeds;
     }
 
-    function getSalesRedistributionPercentage()
-        external
-        pure
-        returns (uint256)
-    {
+    function getSalesRedistributionPercentage() external pure returns (uint256) {
         return SALES_REDISTRIBUTION_PERCENTAGE;
     }
 
@@ -771,25 +739,21 @@ contract FounderNFT is
     }
 
     // Admin functions
-    function setMinimumStakingPeriod(
-        uint256 newPeriod
-    ) external onlyRole(ADMIN_ROLE) {
+    function setMinimumStakingPeriod(uint256 newPeriod) external onlyRole(ADMIN_ROLE) {
         _minimumStakingPeriod = newPeriod;
     }
 
-    function setPlatformFeeDistributionPercentage(
-        uint256 newPercentage
-    ) external onlyRole(ADMIN_ROLE) {
-        if (newPercentage > BASIS_POINTS)
+    function setPlatformFeeDistributionPercentage(uint256 newPercentage) external onlyRole(ADMIN_ROLE) {
+        if (newPercentage > BASIS_POINTS) {
             revert InvalidPercentage(newPercentage);
+        }
         _platformFeeDistributionPercentage = newPercentage;
     }
 
-    function setDaoTokenAllocationPercentage(
-        uint256 newPercentage
-    ) external onlyRole(ADMIN_ROLE) {
-        if (newPercentage > BASIS_POINTS)
+    function setDaoTokenAllocationPercentage(uint256 newPercentage) external onlyRole(ADMIN_ROLE) {
+        if (newPercentage > BASIS_POINTS) {
             revert InvalidPercentage(newPercentage);
+        }
         _daoTokenAllocationPercentage = newPercentage;
     }
 
@@ -801,24 +765,18 @@ contract FounderNFT is
         _price = newPrice;
     }
 
-    function setRewardRate(
-        uint256 newRate
-    ) external onlyRole(ADMIN_ROLE) updateRewardIncremental(type(uint256).max) {
+    function setRewardRate(uint256 newRate) external onlyRole(ADMIN_ROLE) updateRewardIncremental(type(uint256).max) {
         uint256 oldRate = _rewardRate;
         _rewardRate = newRate;
         emit RewardRateUpdated(oldRate, newRate);
     }
 
-    function addEarlyAccessProject(
-        address projectAddress
-    ) external onlyRole(ADMIN_ROLE) {
+    function addEarlyAccessProject(address projectAddress) external onlyRole(ADMIN_ROLE) {
         _earlyAccessProjects[projectAddress] = true;
         emit EarlyAccessProjectAdded(projectAddress);
     }
 
-    function removeEarlyAccessProject(
-        address projectAddress
-    ) external onlyRole(ADMIN_ROLE) {
+    function removeEarlyAccessProject(address projectAddress) external onlyRole(ADMIN_ROLE) {
         _earlyAccessProjects[projectAddress] = false;
         emit EarlyAccessProjectRemoved(projectAddress);
     }
@@ -835,7 +793,7 @@ contract FounderNFT is
         uint256 totalPendingRewards = _pendingRewards;
         uint256 supply = totalSupply();
 
-        for (uint256 i = 0; i < supply; ) {
+        for (uint256 i = 0; i < supply;) {
             uint256 tokenId = tokenByIndex(i);
             if (_stakedTokens[tokenId].owner != address(0)) {
                 totalPendingRewards += earned(tokenId);
@@ -852,16 +810,11 @@ contract FounderNFT is
     }
 
     // Public functions
-    function hasEarlyAccess(
-        address account,
-        address projectAddress
-    ) public view returns (bool) {
+    function hasEarlyAccess(address account, address projectAddress) public view returns (bool) {
         return balanceOf(account) > 0 && _earlyAccessProjects[projectAddress];
     }
 
-    function getStakingInfo(
-        uint256 tokenId
-    )
+    function getStakingInfo(uint256 tokenId)
         public
         view
         returns (address owner, uint256 stakedSince, uint256 lastRewardsClaimed)
@@ -870,16 +823,12 @@ contract FounderNFT is
         return (info.owner, info.stakedSince, info.lastRewardsClaimed);
     }
 
-    function tokenURI(
-        uint256 tokenId
-    ) public view override returns (string memory) {
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
         _requireOwned(tokenId);
         return string(abi.encodePacked(super.tokenURI(tokenId), "/founder"));
     }
 
-    function supportsInterface(
-        bytes4 interfaceId
-    )
+    function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
@@ -903,8 +852,7 @@ contract FounderNFT is
     }
 
     function _processMintPayment(uint256 payment) internal {
-        uint256 redistributionAmount = (payment *
-            SALES_REDISTRIBUTION_PERCENTAGE) / BASIS_POINTS;
+        uint256 redistributionAmount = (payment * SALES_REDISTRIBUTION_PERCENTAGE) / BASIS_POINTS;
         uint256 salesProceedsAmount = payment - redistributionAmount;
 
         _totalSalesProceeds += salesProceedsAmount;
@@ -929,18 +877,13 @@ contract FounderNFT is
     }
 
     function _stakeTokenInternal(address owner, uint256 tokenId) internal {
-        _stakedTokens[tokenId] = StakeInfo({
-            owner: owner,
-            stakedSince: block.timestamp,
-            lastRewardsClaimed: block.timestamp
-        });
+        _stakedTokens[tokenId] =
+            StakeInfo({owner: owner, stakedSince: block.timestamp, lastRewardsClaimed: block.timestamp});
 
         // CRITICAL: Use the UPDATED _rewardPerTokenStored value
         _userRewardPerTokenPaid[tokenId] = _rewardPerTokenStored;
         _userStakedTokens[owner].push(tokenId);
-        _userStakedTokenIndex[owner][tokenId] =
-            _userStakedTokens[owner].length -
-            1;
+        _userStakedTokenIndex[owner][tokenId] = _userStakedTokens[owner].length - 1;
 
         emit TokenStaked(owner, tokenId);
     }
@@ -961,10 +904,7 @@ contract FounderNFT is
         emit TokenUnstaked(owner, tokenId);
     }
 
-    function _unstakeTokenInternal(
-        address owner,
-        uint256 tokenId
-    ) internal returns (uint256) {
+    function _unstakeTokenInternal(address owner, uint256 tokenId) internal returns (uint256) {
         _rewards[tokenId] = earned(tokenId);
         uint256 reward = _rewards[tokenId];
 
@@ -985,10 +925,7 @@ contract FounderNFT is
         return reward;
     }
 
-    function _removeFromUserStakedTokens(
-        address owner,
-        uint256 tokenId
-    ) internal {
+    function _removeFromUserStakedTokens(address owner, uint256 tokenId) internal {
         uint256 tokenIndex = _userStakedTokenIndex[owner][tokenId];
         uint256 lastTokenIndex = _userStakedTokens[owner].length - 1;
 
@@ -1015,7 +952,7 @@ contract FounderNFT is
     }
 
     function _transferRewards(address to, uint256 amount) internal {
-        (bool success, ) = to.call{value: amount}("");
+        (bool success,) = to.call{value: amount}("");
         if (!success) revert TransferFailed();
     }
 
@@ -1023,15 +960,15 @@ contract FounderNFT is
         address to,
         uint256 tokenId,
         address auth
-    ) internal override(ERC721EnumerableUpgradeable) returns (address) {
+    )
+        internal
+        override(ERC721EnumerableUpgradeable)
+        returns (address)
+    {
         address from = _ownerOf(tokenId);
 
         if (from != address(0) && to != address(0)) {
-            if (
-                _stakedTokens[tokenId].owner != address(0) &&
-                from != address(this) &&
-                to != address(this)
-            ) {
+            if (_stakedTokens[tokenId].owner != address(0) && from != address(this) && to != address(this)) {
                 revert CannotTransferStakedToken(tokenId);
             }
         }
@@ -1039,9 +976,7 @@ contract FounderNFT is
         return super._update(to, tokenId, auth);
     }
 
-    function _authorizeUpgrade(
-        address newImplementation
-    ) internal override onlyRole(UPGRADER_ROLE) {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
     // Private functions
     // (None required for this contract)
