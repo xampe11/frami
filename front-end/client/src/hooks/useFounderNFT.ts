@@ -334,6 +334,18 @@ export const useFounderNFT = () => {
         throw new Error("Contract not initialized or wallet not connected");
       }
 
+      // Validate quantity range
+      if (quantity < 1 || quantity > 5) {
+        const errorMessage = "Quantity must be between 1 and 5 NFTs";
+        setMintState({
+          isLoading: false,
+          status: "error",
+          transactionHash: null,
+          error: errorMessage,
+        });
+        throw new Error(errorMessage);
+      }
+
       console.log("Starting mint process:", {
         quantity,
         price: contractData.price,
@@ -353,6 +365,76 @@ export const useFounderNFT = () => {
 
         // Calculate total cost
         const totalCost = contractData.priceWei * BigInt(quantity);
+
+        const saleActiveCheck = await contract.getSaleStatus();
+
+        // Pre-flight checks before sending transaction
+        console.log("Pre-flight checks:", {
+          saleActive: saleActiveCheck,
+          userAddress: address,
+          totalSupply: contractData.totalSupply,
+          maxSupply: contractData.maxSupply,
+          remainingSupply: contractData.maxSupply - contractData.totalSupply,
+        });
+
+        // Check if sale is active
+        if (!saleActiveCheck) {
+          throw new Error("Sale is not active");
+        }
+
+        // Check if enough supply remains
+        if (contractData.totalSupply + quantity > contractData.maxSupply) {
+          throw new Error(
+            `Not enough NFTs remaining. Only ${
+              contractData.maxSupply - contractData.totalSupply
+            } left.`
+          );
+        }
+
+        // Check user's balance
+        const balance = await provider.getBalance(address);
+        console.log("User balance:", ethers.formatEther(balance), "ETH");
+        console.log("Required amount:", ethers.formatEther(totalCost), "ETH");
+
+        if (balance < totalCost) {
+          throw new Error(
+            `Insufficient funds. You need ${ethers.formatEther(
+              totalCost
+            )} ETH but only have ${ethers.formatEther(balance)} ETH`
+          );
+        }
+
+        // Estimate gas before sending
+        try {
+          const estimatedGas =
+            await contractWithSigner.mintMultiple.estimateGas(quantity, {
+              value: totalCost,
+            });
+          console.log("Estimated gas:", estimatedGas.toString());
+        } catch (gasError: any) {
+          console.error("Gas estimation failed:", gasError);
+
+          // Try to extract the revert reason
+          let revertReason = "Unknown error";
+          if (gasError.reason) {
+            revertReason = gasError.reason;
+          } else if (gasError.data) {
+            try {
+              // Try to decode the error
+              const errorData = gasError.data;
+              if (typeof errorData === "string" && errorData.startsWith("0x")) {
+                // Custom error or revert string
+                revertReason = `Contract error: ${errorData}`;
+              }
+            } catch (e) {
+              console.error("Could not decode error:", e);
+            }
+          } else if (gasError.message) {
+            revertReason = gasError.message;
+          }
+
+          throw new Error(`Transaction will fail: ${revertReason}`);
+        }
 
         console.log("Sending mint transaction:", {
           function: "mintMultiple",
@@ -381,6 +463,7 @@ export const useFounderNFT = () => {
           hash: receipt.hash,
           gasUsed: receipt.gasUsed.toString(),
           status: receipt.status,
+          blockNumber: receipt.blockNumber,
         });
 
         setMintState({
@@ -389,6 +472,9 @@ export const useFounderNFT = () => {
           transactionHash: receipt.hash,
           error: null,
         });
+
+        // Add delay before refreshing to allow blockchain to sync
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // Refresh contract data
         await fetchContractData();
@@ -400,6 +486,12 @@ export const useFounderNFT = () => {
         };
       } catch (error: any) {
         console.error("Minting failed:", error);
+        console.error("Error details:", {
+          code: error.code,
+          message: error.message,
+          reason: error.reason,
+          data: error.data,
+        });
 
         let errorMessage = "Transaction failed";
 
@@ -407,16 +499,23 @@ export const useFounderNFT = () => {
           errorMessage = "Transaction was rejected by user";
         } else if (error.code === "INSUFFICIENT_FUNDS") {
           errorMessage = "Insufficient funds for transaction";
+        } else if (error.message?.includes("Insufficient funds")) {
+          errorMessage = error.message;
+        } else if (error.message?.includes("Not enough NFTs remaining")) {
+          errorMessage = error.message;
+        } else if (error.message?.includes("Sale is not active")) {
+          errorMessage = "NFT sale is currently not active";
+        } else if (error.message?.includes("Transaction will fail")) {
+          errorMessage = error.message;
         } else if (error.reason) {
           errorMessage = `Transaction reverted: ${error.reason}`;
-        } else if (error.message?.includes("insufficient funds")) {
-          errorMessage = "Insufficient funds for transaction";
         } else if (error.message?.includes("execution reverted")) {
           errorMessage = "Transaction reverted. Check contract conditions.";
         } else if (error.message?.includes("user rejected")) {
           errorMessage = "Transaction was rejected by user";
-        } else if (error.message?.includes("Sale is not active")) {
-          errorMessage = "NFT sale is currently not active";
+        } else if (error.code === -32603) {
+          errorMessage =
+            "RPC error. Please check your network connection and try again.";
         }
 
         setMintState({
@@ -435,6 +534,8 @@ export const useFounderNFT = () => {
       address,
       contractData.priceWei,
       contractData.price,
+      contractData.totalSupply,
+      contractData.maxSupply,
       fetchContractData,
     ]
   );

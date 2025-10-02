@@ -202,8 +202,8 @@ contract FounderNFT is
      */
     function mintMultiple(uint256 quantity) external payable nonReentrant {
         if (!_saleActive) revert SaleNotActive();
-        if (quantity == 0 || quantity >= 10) {
-            revert InvalidQuantity(quantity, 10);
+        if (quantity == 0 || quantity > 5) {
+            revert InvalidQuantity(quantity, 5);
         }
         if (totalSupply() + quantity > _maxSupply) revert MaxSupplyReached();
 

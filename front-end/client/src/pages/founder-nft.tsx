@@ -344,7 +344,7 @@ export default function FounderNFT() {
                       <button
                         onClick={incrementQuantity}
                         className="w-7 h-7 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors border-l border-gray-300 dark:border-gray-700"
-                        disabled={quantity >= 10}
+                        disabled={quantity >= 5}
                       >
                         +
                       </button>

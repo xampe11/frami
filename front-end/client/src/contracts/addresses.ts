@@ -1,5 +1,5 @@
 // Auto-generated contract addresses
-// Generated at: 2025-09-30T17:33:31.997Z
+// Generated at: 2025-09-30T22:07:16.374Z
 // Network: localhost
 
 export const FOUNDER_NFT_ADDRESS = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9" as const;

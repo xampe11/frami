@@ -1,3 +1,5 @@
+// graphql/src/founder-nft.ts - REVISED APPROACH
+
 import { BigInt, BigDecimal, Address, Bytes } from "@graphprotocol/graph-ts";
 import {
   FounderNFTMinted,
@@ -7,7 +9,6 @@ import {
   RewardRateUpdated,
   RewardAdded,
   ETHReceived,
-  FounderNFT as FounderNFTContract,
 } from "../generated/FounderNFT/FounderNFT";
 import {
   User,
@@ -21,47 +22,13 @@ import {
 } from "../generated/schema";
 
 // Constants
-let ZERO_BI = BigInt.fromI32(0);
-let ZERO_BD = BigDecimal.fromString("0");
-let ONE_BI = BigInt.fromI32(1);
-let PLATFORM_ID = Bytes.fromHexString("0x706c6174666f726d");
-let CONFIG_ID = Bytes.fromHexString("0x636f6e666967");
+const ZERO_BI = BigInt.fromI32(0);
+const ZERO_BD = BigDecimal.fromString("0");
+const PLATFORM_ID = Bytes.fromHexString("0x706c6174666f726d");
+const CONFIG_ID = Bytes.fromHexString("0x636f6e666967");
 
 function toDecimal(value: BigInt): BigDecimal {
   return value.toBigDecimal().div(BigDecimal.fromString("1000000000000000000"));
-}
-
-// NEW: Create or get platform configuration
-function getOrCreatePlatformConfig(
-  contractAddress: Address,
-  timestamp: BigInt
-): PlatformConfig {
-  let config = PlatformConfig.load(CONFIG_ID);
-  if (config == null) {
-    config = new PlatformConfig(CONFIG_ID);
-
-    // Get values from contract
-    let contract = FounderNFTContract.bind(contractAddress);
-
-    // Try to get minimum staking period from contract
-    let minimumStakingPeriodResult = contract.try_getMinimumStakingPeriod();
-    if (!minimumStakingPeriodResult.reverted) {
-      config.minimumStakingPeriod = minimumStakingPeriodResult.value;
-    } else {
-      config.minimumStakingPeriod = BigInt.fromI32(604800); // Default 7 days
-    }
-
-    // Set default values for other config fields
-    config.baseAPR = BigDecimal.fromString("5.0"); // 5% default
-    config.performanceMultiplier = BigDecimal.fromString("1.0");
-    config.rewardCalculationPeriod = BigInt.fromI32(86400); // 1 day
-    config.maxStakeAmount = BigInt.fromI32(1000); // Default max supply
-    config.emergencyWithdrawEnabled = false;
-    config.lastConfigUpdate = timestamp;
-
-    config.save();
-  }
-  return config as PlatformConfig;
 }
 
 function getOrCreateUser(address: Address, timestamp: BigInt): User {
@@ -96,66 +63,35 @@ function getOrCreatePlatformStats(timestamp: BigInt): PlatformStats {
     stats.totalRewardsDistributed = ZERO_BD;
     stats.currentRewardRate = ZERO_BD;
     stats.totalETHReceived = ZERO_BD;
-
-    // FIXED: Initialize all enhanced stats fields properly
     stats.currentAPY = ZERO_BD;
     stats.currentAPR = ZERO_BD;
     stats.averageStakingDuration = ZERO_BD;
     stats.participationRate = ZERO_BD;
-
     stats.lastUpdated = timestamp;
     stats.save();
   }
   return stats as PlatformStats;
 }
 
-// FIXED: Enhanced reward calculation function
-function updateRewardsFromContract(
-  nftId: Bytes,
-  tokenId: BigInt,
+function getOrCreatePlatformConfig(
   contractAddress: Address,
   timestamp: BigInt
-): void {
-  let nft = FounderNFT.load(nftId);
-  if (nft == null || !nft.isStaked) return;
-
-  // Bind to the contract and get current earned rewards
-  let contract = FounderNFTContract.bind(contractAddress);
-  let earnedResult = contract.try_earned(tokenId);
-
-  if (!earnedResult.reverted) {
-    let earnedAmount = toDecimal(earnedResult.value);
-
-    // Update the total rewards earned
-    nft.totalRewardsEarned = earnedAmount;
-
-    // FIXED: Calculate real-time reward fields properly
-    nft.pendingRewards = earnedAmount.minus(nft.totalRewardsClaimed);
-    nft.claimableAmount = earnedAmount.minus(nft.totalRewardsClaimed);
-    nft.lastRewardCalculation = timestamp;
-
-    // FIXED: Calculate accumulation rate with proper null checking
-    if (nft.stakingSince !== null) {
-      let stakingSinceValue = nft.stakingSince as BigInt;
-      let stakingDuration = timestamp.minus(stakingSinceValue);
-      if (stakingDuration.gt(ZERO_BI)) {
-        nft.rewardAccumulationRate = earnedAmount.div(
-          stakingDuration.toBigDecimal()
-        );
-      } else {
-        nft.rewardAccumulationRate = ZERO_BD;
-      }
-    } else {
-      nft.rewardAccumulationRate = ZERO_BD;
-    }
-
-    nft.lastRewardUpdate = timestamp;
-    nft.updatedAt = timestamp;
-    nft.save();
+): PlatformConfig {
+  let config = PlatformConfig.load(CONFIG_ID);
+  if (config == null) {
+    config = new PlatformConfig(CONFIG_ID);
+    config.minimumStakingPeriod = BigInt.fromI32(7 * 24 * 60 * 60); // 7 days default
+    config.baseAPR = BigDecimal.fromString("5.0"); // 5% default
+    config.performanceMultiplier = BigDecimal.fromString("1.0");
+    config.rewardCalculationPeriod = BigInt.fromI32(3600); // 1 hour
+    config.maxStakeAmount = BigInt.fromI32(10000);
+    config.emergencyWithdrawEnabled = false;
+    config.lastConfigUpdate = timestamp;
+    config.save();
   }
+  return config as PlatformConfig;
 }
 
-// FIXED: Calculate platform-wide APY/APR
 function updatePlatformMetrics(timestamp: BigInt): void {
   let stats = getOrCreatePlatformStats(timestamp);
 
@@ -163,32 +99,28 @@ function updatePlatformMetrics(timestamp: BigInt): void {
   if (stats.totalNFTsMinted > 0) {
     stats.participationRate = BigDecimal.fromString(
       stats.totalNFTsStaked.toString()
-    ).div(BigDecimal.fromString(stats.totalNFTsMinted.toString()));
-  } else {
-    stats.participationRate = ZERO_BD;
+    )
+      .div(BigDecimal.fromString(stats.totalNFTsMinted.toString()))
+      .times(BigDecimal.fromString("100"));
   }
-
-  // TODO: Implement APY/APR calculation based on current reward rate and total staked
-  // This would require more complex calculations based on your staking mechanics
 
   stats.lastUpdated = timestamp;
   stats.save();
 }
+
+// ==================== EVENT HANDLERS ====================
 
 export function handleFounderNFTMinted(event: FounderNFTMinted): void {
   let tokenId = event.params.tokenId;
   let to = event.params.to;
   let timestamp = event.block.timestamp;
 
-  // Create or get user
+  // Create user if needed
   let user = getOrCreateUser(to, timestamp);
   user.totalNFTsOwned = user.totalNFTsOwned + 1;
   user.save();
 
-  // ADDED: Ensure platform config exists
-  getOrCreatePlatformConfig(event.address, timestamp);
-
-  // Create NFT entity with ALL required fields
+  // Create NFT entity with minimal data
   let nftId = Bytes.fromByteArray(Bytes.fromBigInt(tokenId));
   let nft = new FounderNFT(nftId);
   nft.tokenId = tokenId;
@@ -197,14 +129,15 @@ export function handleFounderNFTMinted(event: FounderNFTMinted): void {
   nft.isStaked = false;
   nft.currentStaker = null;
   nft.stakingSince = null;
-  nft.totalRewardsEarned = ZERO_BD;
-  nft.totalRewardsClaimed = ZERO_BD;
+  nft.totalRewardsEarned = ZERO_BD; // Historical total
+  nft.totalRewardsClaimed = ZERO_BD; // Historical total
 
-  // FIXED: Initialize ALL real-time reward fields
-  nft.pendingRewards = ZERO_BD;
-  nft.lastRewardCalculation = timestamp;
+  // ✅ METADATA for frontend calculation (NOT live rewards)
+  nft.pendingRewards = ZERO_BD; // Snapshot at last event
+  nft.lastRewardCalculation = timestamp; // When we last knew the state
   nft.rewardAccumulationRate = ZERO_BD;
   nft.claimableAmount = ZERO_BD;
+
   nft.lastRewardUpdate = timestamp;
   nft.canUnstake = false;
   nft.nextUnstakeDate = null;
@@ -218,7 +151,6 @@ export function handleFounderNFTMinted(event: FounderNFTMinted): void {
   let platformStats = getOrCreatePlatformStats(timestamp);
   platformStats.totalNFTsMinted = platformStats.totalNFTsMinted + 1;
 
-  // Check if this is a new user (first NFT)
   if (user.totalNFTsOwned == 1) {
     platformStats.totalUsers = platformStats.totalUsers + 1;
   }
@@ -231,63 +163,46 @@ export function handleTokenStaked(event: TokenStaked): void {
   let owner = event.params.owner;
   let timestamp = event.block.timestamp;
 
-  // ADDED: Ensure platform config exists and get minimum staking period
   let config = getOrCreatePlatformConfig(event.address, timestamp);
 
-  // Create or load NFT entity
+  // Load or create NFT
   let nftId = Bytes.fromByteArray(Bytes.fromBigInt(tokenId));
   let nft = FounderNFT.load(nftId);
-
   let isNewNFT = false;
 
   if (nft == null) {
-    // Create NFT entity if it doesn't exist (in case minting wasn't captured)
     nft = new FounderNFT(nftId);
     nft.tokenId = tokenId;
     nft.currentOwner = owner;
     nft.mintedBy = owner;
     nft.totalRewardsEarned = ZERO_BD;
     nft.totalRewardsClaimed = ZERO_BD;
-
-    // Initialize all NEW real-time reward fields for new NFTs
-    nft.pendingRewards = ZERO_BD;
-    nft.lastRewardCalculation = timestamp;
-    nft.rewardAccumulationRate = ZERO_BD;
-    nft.claimableAmount = ZERO_BD;
-
-    nft.lastRewardUpdate = timestamp;
-    nft.canUnstake = false;
-    nft.nextUnstakeDate = null;
-    nft.stakingDuration = ZERO_BI;
     nft.mintedAt = timestamp;
     nft.createdAt = timestamp;
     isNewNFT = true;
   }
 
-  // Update NFT staking status
+  // Update staking status
   nft.isStaked = true;
   nft.currentStaker = owner;
-  nft.stakingSince = timestamp;
-
-  // FIXED: Use minimum staking period from config
-  nft.canUnstake = false; // Initially false until period passes
+  nft.stakingSince = timestamp; // ✅ CRITICAL for frontend calculation
+  nft.canUnstake = false;
   nft.nextUnstakeDate = timestamp.plus(config.minimumStakingPeriod);
   nft.stakingDuration = ZERO_BI;
   nft.updatedAt = timestamp;
   nft.lastRewardUpdate = timestamp;
 
-  // Reset reward calculation fields for new staking
-  nft.pendingRewards = ZERO_BD;
+  // ✅ RESET calculation metadata when staking starts
+  nft.pendingRewards = ZERO_BD; // Zero at staking start
   nft.claimableAmount = ZERO_BD;
+  nft.lastRewardCalculation = timestamp; // Checkpoint for frontend
   nft.rewardAccumulationRate = ZERO_BD;
-  nft.lastRewardCalculation = timestamp;
+
   nft.save();
 
   // Update user
   let user = getOrCreateUser(owner, timestamp);
   user.totalNFTsStaked = user.totalNFTsStaked + 1;
-
-  // If this was a new NFT, update ownership count
   if (isNewNFT) {
     user.totalNFTsOwned = user.totalNFTsOwned + 1;
   }
@@ -302,14 +217,20 @@ export function handleTokenStaked(event: TokenStaked): void {
   stakeEvent.timestamp = timestamp;
   stakeEvent.blockNumber = event.block.number;
   stakeEvent.transactionHash = event.transaction.hash;
-  stakeEvent.rewardPerTokenAtTime = ZERO_BD; // TODO: Get from contract if available
+  stakeEvent.rewardPerTokenAtTime = ZERO_BD;
   stakeEvent.save();
 
   // Update platform stats
   let platformStats = getOrCreatePlatformStats(timestamp);
   platformStats.totalNFTsStaked = platformStats.totalNFTsStaked + 1;
 
-  // Check if this is a new staker
+  if (isNewNFT) {
+    platformStats.totalNFTsMinted = platformStats.totalNFTsMinted + 1;
+    if (user.totalNFTsOwned == 1) {
+      platformStats.totalUsers = platformStats.totalUsers + 1;
+    }
+  }
+
   if (user.totalNFTsStaked == 1) {
     platformStats.totalStakers = platformStats.totalStakers + 1;
   }
@@ -322,22 +243,19 @@ export function handleTokenUnstaked(event: TokenUnstaked): void {
   let owner = event.params.owner;
   let timestamp = event.block.timestamp;
 
-  // Load NFT
   let nftId = Bytes.fromByteArray(Bytes.fromBigInt(tokenId));
   let nft = FounderNFT.load(nftId);
   if (nft == null) return;
 
-  // FIXED: Update rewards one final time before unstaking
-  updateRewardsFromContract(nftId, tokenId, event.address, timestamp);
-
-  // FIXED: Calculate final staking duration safely
+  // Calculate final staking duration
   if (nft.stakingSince !== null) {
-    nft.stakingDuration = timestamp.minus(nft.stakingSince as BigInt);
+    let stakingSinceValue = nft.stakingSince as BigInt;
+    nft.stakingDuration = timestamp.minus(stakingSinceValue);
   } else {
     nft.stakingDuration = ZERO_BI;
   }
 
-  // Update NFT staking status
+  // Update staking status
   nft.isStaked = false;
   nft.currentStaker = null;
   nft.stakingSince = null;
@@ -345,6 +263,12 @@ export function handleTokenUnstaked(event: TokenUnstaked): void {
   nft.nextUnstakeDate = null;
   nft.updatedAt = timestamp;
   nft.lastRewardUpdate = timestamp;
+
+  // ✅ Rewards are auto-claimed on unstake, so reset
+  nft.pendingRewards = ZERO_BD;
+  nft.claimableAmount = ZERO_BD;
+  nft.lastRewardCalculation = timestamp;
+
   nft.save();
 
   // Update user
@@ -352,7 +276,7 @@ export function handleTokenUnstaked(event: TokenUnstaked): void {
   user.totalNFTsStaked = user.totalNFTsStaked - 1;
   user.save();
 
-  // Create stake event
+  // Create event
   let stakeEventId = event.transaction.hash.concatI32(event.logIndex.toI32());
   let stakeEvent = new StakeEvent(stakeEventId);
   stakeEvent.nft = nftId;
@@ -368,7 +292,6 @@ export function handleTokenUnstaked(event: TokenUnstaked): void {
   let platformStats = getOrCreatePlatformStats(timestamp);
   platformStats.totalNFTsStaked = platformStats.totalNFTsStaked - 1;
 
-  // Check if user has no more staked NFTs
   if (user.totalNFTsStaked == 0) {
     platformStats.totalStakers = platformStats.totalStakers - 1;
   }
@@ -379,39 +302,40 @@ export function handleTokenUnstaked(event: TokenUnstaked): void {
 export function handleRewardClaimed(event: RewardClaimed): void {
   let tokenId = event.params.tokenId;
   let amount = event.params.amount;
-  let user = event.params.user; // FIXED: Use 'user' parameter, not 'owner'
+  let user = event.params.user;
   let timestamp = event.block.timestamp;
 
-  // Load NFT
   let nftId = Bytes.fromByteArray(Bytes.fromBigInt(tokenId));
   let nft = FounderNFT.load(nftId);
   if (nft == null) return;
 
-  // Convert amount to decimal
   let rewardAmount = toDecimal(amount);
 
-  // Update NFT reward tracking
+  // ✅ Update historical totals (this is accurate from contract events)
+  nft.totalRewardsEarned = nft.totalRewardsEarned.plus(rewardAmount);
   nft.totalRewardsClaimed = nft.totalRewardsClaimed.plus(rewardAmount);
 
-  // FIXED: Update pending rewards after claim
-  nft.pendingRewards = nft.totalRewardsEarned.minus(nft.totalRewardsClaimed);
-  nft.claimableAmount = nft.pendingRewards;
-  nft.lastRewardCalculation = timestamp;
+  // ✅ RESET calculation metadata after claim
+  nft.pendingRewards = ZERO_BD; // Just claimed, so zero pending
+  nft.claimableAmount = ZERO_BD;
+  nft.lastRewardCalculation = timestamp; // New checkpoint for frontend
   nft.lastRewardUpdate = timestamp;
   nft.updatedAt = timestamp;
   nft.save();
 
   // Update user
-  let userEntity = getOrCreateUser(user, timestamp); // FIXED: Use 'user' variable
+  let userEntity = getOrCreateUser(user, timestamp);
   userEntity.totalRewardsClaimed =
     userEntity.totalRewardsClaimed.plus(rewardAmount);
+  userEntity.totalRewardsEarned =
+    userEntity.totalRewardsEarned.plus(rewardAmount);
   userEntity.save();
 
-  // Create reward claim entity
+  // Create claim record
   let claimId = event.transaction.hash.concatI32(event.logIndex.toI32());
   let claim = new RewardClaim(claimId);
   claim.nft = nftId;
-  claim.user = user; // FIXED: Use 'user' parameter
+  claim.user = user;
   claim.amount = rewardAmount;
   claim.timestamp = timestamp;
   claim.blockNumber = event.block.number;
@@ -427,14 +351,27 @@ export function handleRewardClaimed(event: RewardClaimed): void {
 
 export function handleRewardAdded(event: RewardAdded): void {
   let amount = event.params.amount;
+  let newRewardRate = event.params.newRewardRate;
   let timestamp = event.block.timestamp;
 
-  // Update platform stats
+  // ✅ CRITICAL: Store the new reward rate for frontend calculations
   let platformStats = getOrCreatePlatformStats(timestamp);
+  platformStats.currentRewardRate = toDecimal(newRewardRate);
   platformStats.totalETHReceived = platformStats.totalETHReceived.plus(
     toDecimal(amount)
   );
+
   updatePlatformMetrics(timestamp);
+
+  // ✅ Create a RewardRate snapshot for historical tracking
+  let rateId = event.transaction.hash.concatI32(event.logIndex.toI32());
+  let rate = new RewardRate(rateId);
+  rate.oldRate = platformStats.currentRewardRate; // Previous rate
+  rate.newRate = toDecimal(newRewardRate);
+  rate.timestamp = timestamp;
+  rate.blockNumber = event.block.number;
+  rate.transactionHash = event.transaction.hash;
+  rate.save();
 }
 
 export function handleRewardRateUpdated(event: RewardRateUpdated): void {
@@ -442,7 +379,7 @@ export function handleRewardRateUpdated(event: RewardRateUpdated): void {
   let newRate = event.params.newRate;
   let timestamp = event.block.timestamp;
 
-  // Create reward rate entity
+  // ✅ Store rate change snapshot
   let rateId = event.transaction.hash.concatI32(event.logIndex.toI32());
   let rate = new RewardRate(rateId);
   rate.oldRate = toDecimal(oldRate);
@@ -452,7 +389,7 @@ export function handleRewardRateUpdated(event: RewardRateUpdated): void {
   rate.transactionHash = event.transaction.hash;
   rate.save();
 
-  // Update platform stats
+  // Update platform stats with new rate
   let platformStats = getOrCreatePlatformStats(timestamp);
   platformStats.currentRewardRate = toDecimal(newRate);
   updatePlatformMetrics(timestamp);

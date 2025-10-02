@@ -20,10 +20,10 @@ interface NFTData {
   status: "staked" | "unstaked";
   stakingDuration: string;
   earnedRewards: string;
+  realtimeEarnings: string;
   nextUnstakeDate: string | null;
   canUnstake: boolean;
   stakingSince?: number;
-  realtimeEarnings?: string; // Optional - may not be available immediately
 }
 
 interface StakingData {
@@ -190,111 +190,172 @@ export const useFounderNFTDashboard = () => {
     return new Date(timestamp * 1000).toISOString().split("T")[0];
   }, []);
 
-  // ENHANCED: Core data fetching logic with database-driven configuration
   const fetchDashboardData = useCallback(async () => {
-    if (fetchInProgress.current) {
-      console.log("⚠️ Fetch already in progress, skipping");
-      return;
-    }
-    fetchInProgress.current = true;
+    if (fetchInProgress.current || !address) return;
 
-    if (!address) {
-      console.log("No wallet address, skipping fetch");
-      fetchInProgress.current = false;
-      return;
-    }
+    fetchInProgress.current = true;
 
     try {
       setDashboardData((prev) => ({ ...prev, isLoading: true, error: null }));
-      console.log(
-        "🔍 Using GraphQL-first approach with database configuration"
-      );
 
-      if (!userGraphQLData?.user) {
-        console.log("❌ No GraphQL user data available");
+      if (!userGraphQLData?.user?.nfts) {
         setDashboardData((prev) => ({
           ...prev,
           isLoading: false,
-          error: "No user data available",
+          error: "No NFT data available",
         }));
         fetchInProgress.current = false;
         return;
       }
 
-      // ✅ NEW: Get minimum staking period from database (not hardcoded!)
-      const minimumStakingPeriodSeconds = platformConfigData?.platformConfig
-        ?.minimumStakingPeriod
-        ? Number(platformGraphQLData.platformConfig.minimumStakingPeriod)
-        : 7 * 24 * 60 * 60; // Fallback only if database value not available
+      const minimumStakingPeriodSeconds = 7 * 24 * 60 * 60; // 7 days in seconds
 
+      // ✅ Get platform data from subgraph
+      const currentRewardRate = platformGraphQLData?.platformStats
+        ?.currentRewardRate
+        ? parseFloat(platformGraphQLData.platformStats.currentRewardRate)
+        : 0;
+
+      const totalStakedGlobally =
+        platformGraphQLData?.platformStats?.totalNFTsStaked || 0;
+      const currentTimeSeconds = Math.floor(Date.now() / 1000);
+
+      console.log("📊 Platform Reward System:");
       console.log(
-        `📅 Minimum staking period from DATABASE: ${minimumStakingPeriodSeconds} seconds (${Math.floor(
-          minimumStakingPeriodSeconds / (24 * 60 * 60)
-        )} days)`
+        "  Current Reward Rate:",
+        currentRewardRate,
+        "ETH/sec (total for all stakers)"
+      );
+      console.log("  Total NFTs Staked:", totalStakedGlobally);
+      console.log(
+        "  Reward per NFT per Second:",
+        (currentRewardRate / totalStakedGlobally).toFixed(10),
+        "ETH"
       );
 
-      // Get ALL user's NFTs (not just staked ones)
-      const userNFTs = userGraphQLData.user.nfts || [];
-      console.log(`📊 Processing ${userNFTs.length} user NFTs`);
+      // ✅ Calculate real-time earnings for each NFT
+      const processedNFTs: NFTData[] = userGraphQLData.user.nfts.map(
+        (nft: any) => {
+          const tokenId = Number(nft.tokenId);
+          const stakingSince = Number(nft.stakingSince || 0);
+          const lastRewardCalculation = Number(
+            nft.lastRewardCalculation || stakingSince
+          );
+          const minimumStakingPeriodSeconds = 7 * 24 * 60 * 60;
+          const canUnstakeTime = stakingSince + minimumStakingPeriodSeconds;
 
-      const processedNFTs: NFTData[] = userNFTs.map((nft: any) => {
-        const stakingSince = Number(nft.stakingSince || 0);
-        const currentTime = Math.floor(Date.now() / 1000);
-        const canUnstakeTime = stakingSince + minimumStakingPeriodSeconds; // Using database value!
+          let realtimeEarnings = 0;
 
-        // Safe parsing of reward values with fallbacks
-        const totalRewards = parseFloat(nft.totalRewardsEarned || "0");
-        const pendingRewards = parseFloat(nft.pendingRewards || "0");
-        const realtimeRewards = Math.max(totalRewards, pendingRewards);
-
-        return {
-          id: Number(nft.tokenId),
-          tokenId: `#${nft.tokenId.toString().padStart(4, "0")}`,
-          status: nft.isStaked ? ("staked" as const) : ("unstaked" as const),
-          stakingDuration: stakingSince
-            ? calculateStakingDuration(stakingSince)
-            : "Not staked",
-          earnedRewards: `${totalRewards.toFixed(6)} ETH`,
-          realtimeEarnings: `${realtimeRewards.toFixed(6)} ETH`,
-          canUnstake:
+          if (
             nft.isStaked &&
-            stakingSince &&
-            (minimumStakingPeriodSeconds === 0 ||
-              currentTime >= canUnstakeTime),
-          nextUnstakeDate:
-            nft.isStaked && stakingSince && canUnstakeTime > currentTime
-              ? formatDate(canUnstakeTime)
-              : null,
-          stakingSince,
-        };
-      });
+            stakingSince > 0 &&
+            totalStakedGlobally > 0 &&
+            currentRewardRate > 0
+          ) {
+            // Time since last checkpoint (stake/claim event)
+            const timeSinceLastCalculation =
+              currentTimeSeconds - lastRewardCalculation;
 
-      // Calculate stats from processed NFTs
+            // Calculate: (rewardRate / totalStaked) * timeSinceLastCalculation
+            const rewardPerSecondPerNFT =
+              currentRewardRate / totalStakedGlobally;
+            const newRewardsSinceCalculation =
+              rewardPerSecondPerNFT * timeSinceLastCalculation;
+
+            // Add any pending rewards from subgraph (shouldn't be any if we're calculating correctly)
+            const existingPending = parseFloat(nft.pendingRewards || "0");
+
+            realtimeEarnings = existingPending + newRewardsSinceCalculation;
+
+            console.log(`NFT #${tokenId} Real-time Calculation:`);
+            console.log(
+              `  Staked Since: ${new Date(stakingSince * 1000).toISOString()}`
+            );
+            console.log(
+              `  Last Checkpoint: ${new Date(
+                lastRewardCalculation * 1000
+              ).toISOString()}`
+            );
+            console.log(
+              `  Time Elapsed: ${timeSinceLastCalculation}s (${(
+                timeSinceLastCalculation / 3600
+              ).toFixed(2)}h)`
+            );
+            console.log(
+              `  Rate per NFT: ${rewardPerSecondPerNFT.toFixed(12)} ETH/s`
+            );
+            console.log(
+              `  Earned Since Checkpoint: ${newRewardsSinceCalculation.toFixed(
+                6
+              )} ETH`
+            );
+            console.log(
+              `  Total Real-time Earnings: ${realtimeEarnings.toFixed(6)} ETH`
+            );
+          }
+
+          // Historical claimed rewards from subgraph
+          const totalRewardsClaimed = parseFloat(
+            nft.totalRewardsClaimed || "0"
+          );
+
+          return {
+            id: tokenId,
+            tokenId: `#${tokenId.toString().padStart(4, "0")}`,
+            status: nft.isStaked ? ("staked" as const) : ("unstaked" as const),
+            stakingDuration: stakingSince
+              ? calculateStakingDuration(stakingSince)
+              : "Not staked",
+            earnedRewards: `${realtimeEarnings.toFixed(6)} ETH`,
+            realtimeEarnings: `${realtimeEarnings.toFixed(6)} ETH`,
+            canUnstake:
+              nft.isStaked &&
+              stakingSince &&
+              (minimumStakingPeriodSeconds === 0 ||
+                currentTimeSeconds >= canUnstakeTime),
+            nextUnstakeDate:
+              nft.isStaked &&
+              stakingSince &&
+              canUnstakeTime > currentTimeSeconds
+                ? formatDate(canUnstakeTime)
+                : null,
+            stakingSince,
+          };
+        }
+      );
+
+      // Calculate dashboard totals
       const stakedNFTs = processedNFTs.filter((nft) => nft.status === "staked");
       const totalStaked = stakedNFTs.length;
       const totalOwned = processedNFTs.length;
-      const totalEarnings = userGraphQLData.user.totalRewardsEarned
-        ? parseFloat(userGraphQLData.user.totalRewardsEarned)
-        : 0;
 
-      // Calculate claimable amount from NFTs with available data
-      const claimableAmount = processedNFTs.reduce((sum, nft) => {
-        const pendingRewards = parseFloat(
-          (nft.realtimeEarnings || nft.earnedRewards || "0 ETH").replace(
-            " ETH",
-            ""
-          )
-        );
-        return sum + (isNaN(pendingRewards) ? 0 : pendingRewards);
+      const totalEarningsCalculated = processedNFTs.reduce((sum, nft) => {
+        const earned = parseFloat(nft.earnedRewards.replace(" ETH", ""));
+        return sum + earned;
       }, 0);
 
-      // ✅ NEW: Get additional configuration values from database
+      const claimableAmount = stakedNFTs.reduce((sum, nft) => {
+        const earned = parseFloat(nft.realtimeEarnings.replace(" ETH", ""));
+        return sum + earned;
+      }, 0);
+
+      console.log("📊 Dashboard Summary:");
+      console.log(
+        "  Total Real-time Earnings:",
+        totalEarningsCalculated.toFixed(6),
+        "ETH"
+      );
+      console.log("  Claimable Amount:", claimableAmount.toFixed(6), "ETH");
+      console.log(
+        "  Total Claimed (Historical):",
+        parseFloat(userGraphQLData.user.totalRewardsClaimed || "0").toFixed(6),
+        "ETH"
+      );
+
+      // Get config
       const baseAPR = platformGraphQLData?.platformConfig?.baseAPR
         ? parseFloat(platformGraphQLData.platformConfig.baseAPR)
-        : 5.0; // Fallback
-
-      const emergencyWithdrawEnabled =
-        platformGraphQLData?.platformConfig?.emergencyWithdrawEnabled || false;
+        : 5.0;
 
       setDashboardData((prev) => ({
         ...prev,
@@ -303,39 +364,33 @@ export const useFounderNFTDashboard = () => {
           ...prev.stakingData,
           totalOwned,
           totalStaked,
-          totalRewards: `${totalEarnings.toFixed(6)} ETH`,
+          totalRewards: `${totalEarningsCalculated.toFixed(6)} ETH`,
           minimumStakingPeriod: Math.floor(
             minimumStakingPeriodSeconds / (24 * 60 * 60)
-          ), // Convert to days for display
-          currentRewardRate:
-            platformGraphQLData?.platformStats?.currentRewardRate || "0",
-          estimatedAPR: baseAPR, // ✅ From database
+          ),
+          currentRewardRate: `${currentRewardRate.toFixed(10)} ETH/sec`,
+          estimatedAPR: baseAPR,
           currentAPY: platformGraphQLData?.platformStats?.currentAPY
             ? parseFloat(platformGraphQLData.platformStats.currentAPY)
-            : baseAPR,
-          totalStakedGlobally:
-            platformGraphQLData?.platformStats?.totalNFTsStaked || 0,
+            : 0,
+          totalStakedGlobally,
         },
         earningsData: {
           ...prev.earningsData,
-          totalEarnings: `${totalEarnings.toFixed(6)} ETH`,
+          totalEarnings: `${totalEarningsCalculated.toFixed(6)} ETH`,
           claimableAmount: `${claimableAmount.toFixed(6)} ETH`,
           realtimeClaimable: `${claimableAmount.toFixed(6)} ETH`,
-          platformFees: "0 ETH", // TODO: Add to subgraph if needed
-          daoTokens: "0 ETH", // TODO: Add to subgraph if needed
         },
         isLoading: false,
         error: null,
       }));
 
-      console.log(
-        "🎉 Dashboard data updated successfully with database configuration!"
-      );
+      console.log("✅ Dashboard updated with real-time calculations!");
     } catch (error) {
       console.error("❌ Failed to fetch dashboard data:", error);
       setDashboardData((prev) => ({
         ...prev,
-        error: `Failed to fetch dashboard data: ${error}`,
+        error: "Failed to fetch dashboard data",
         isLoading: false,
       }));
     } finally {
@@ -345,7 +400,6 @@ export const useFounderNFTDashboard = () => {
     address,
     userGraphQLData,
     platformGraphQLData,
-    platformConfigData,
     calculateStakingDuration,
     formatDate,
   ]);
