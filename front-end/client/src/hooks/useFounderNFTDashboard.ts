@@ -1,4 +1,4 @@
-// hooks/useFounderNFTDashboard.ts - LATEST VERSION WITH DATABASE CONFIGURATION
+// hooks/useFounderNFTDashboard.ts - FIXED VERSION
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ethers } from "ethers";
 import { useQuery } from "@apollo/client";
@@ -198,17 +198,63 @@ export const useFounderNFTDashboard = () => {
     try {
       setDashboardData((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      if (!userGraphQLData?.user?.nfts) {
+      console.log("🔍 Fetch Dashboard Data Called");
+      console.log("  User GraphQL Data:", userGraphQLData);
+      console.log("  Platform Config Data:", platformConfigData);
+      console.log("  Platform GraphQL Data:", platformGraphQLData);
+
+      // ✅ CRITICAL FIX: Check if all required data is available
+      if (!userGraphQLData?.user) {
+        console.log("⏳ Waiting for user data to load...");
         setDashboardData((prev) => ({
           ...prev,
           isLoading: false,
-          error: "No NFT data available",
+          error: "User data loading...",
         }));
         fetchInProgress.current = false;
         return;
       }
 
-      const minimumStakingPeriodSeconds = 7 * 24 * 60 * 60; // 7 days in seconds
+      // Check if user has NFTs (empty array is valid)
+      const userNFTs = userGraphQLData.user.nfts || [];
+      console.log("  User NFTs count:", userNFTs.length);
+
+      // ✅ CRITICAL FIX: Check if platform config is loaded
+      if (!platformConfigData?.platformConfig) {
+        console.log("⏳ Waiting for platform config to load...");
+        setDashboardData((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: "Platform configuration loading...",
+        }));
+        fetchInProgress.current = false;
+        return;
+      }
+
+      // Handle case where user has no NFTs (still valid - show empty state)
+      if (userNFTs.length === 0) {
+        console.log("ℹ️ User has no NFTs");
+        setDashboardData((prev) => ({
+          ...prev,
+          nftData: [],
+          stakingData: {
+            ...prev.stakingData,
+            totalOwned: 0,
+            totalStaked: 0,
+            totalRewards: "0",
+          },
+          earningsData: {
+            ...prev.earningsData,
+            totalEarnings: "0",
+            claimableAmount: "0",
+            realtimeClaimable: "0",
+          },
+          isLoading: false,
+          error: null,
+        }));
+        fetchInProgress.current = false;
+        return;
+      }
 
       // ✅ Get platform data from subgraph
       const currentRewardRate = platformGraphQLData?.platformStats
@@ -229,100 +275,96 @@ export const useFounderNFTDashboard = () => {
       console.log("  Total NFTs Staked:", totalStakedGlobally);
       console.log(
         "  Reward per NFT per Second:",
-        (currentRewardRate / totalStakedGlobally).toFixed(10),
+        totalStakedGlobally > 0
+          ? (currentRewardRate / totalStakedGlobally).toFixed(10)
+          : "N/A",
         "ETH"
       );
 
-      // ✅ Calculate real-time earnings for each NFT
-      const processedNFTs: NFTData[] = userGraphQLData.user.nfts.map(
-        (nft: any) => {
-          const tokenId = Number(nft.tokenId);
-          const stakingSince = Number(nft.stakingSince || 0);
-          const lastRewardCalculation = Number(
-            nft.lastRewardCalculation || stakingSince
-          );
-          const minimumStakingPeriodSeconds = 7 * 24 * 60 * 60;
-          const canUnstakeTime = stakingSince + minimumStakingPeriodSeconds;
-
-          let realtimeEarnings = 0;
-
-          if (
-            nft.isStaked &&
-            stakingSince > 0 &&
-            totalStakedGlobally > 0 &&
-            currentRewardRate > 0
-          ) {
-            // Time since last checkpoint (stake/claim event)
-            const timeSinceLastCalculation =
-              currentTimeSeconds - lastRewardCalculation;
-
-            // Calculate: (rewardRate / totalStaked) * timeSinceLastCalculation
-            const rewardPerSecondPerNFT =
-              currentRewardRate / totalStakedGlobally;
-            const newRewardsSinceCalculation =
-              rewardPerSecondPerNFT * timeSinceLastCalculation;
-
-            // Add any pending rewards from subgraph (shouldn't be any if we're calculating correctly)
-            const existingPending = parseFloat(nft.pendingRewards || "0");
-
-            realtimeEarnings = existingPending + newRewardsSinceCalculation;
-
-            console.log(`NFT #${tokenId} Real-time Calculation:`);
-            console.log(
-              `  Staked Since: ${new Date(stakingSince * 1000).toISOString()}`
-            );
-            console.log(
-              `  Last Checkpoint: ${new Date(
-                lastRewardCalculation * 1000
-              ).toISOString()}`
-            );
-            console.log(
-              `  Time Elapsed: ${timeSinceLastCalculation}s (${(
-                timeSinceLastCalculation / 3600
-              ).toFixed(2)}h)`
-            );
-            console.log(
-              `  Rate per NFT: ${rewardPerSecondPerNFT.toFixed(12)} ETH/s`
-            );
-            console.log(
-              `  Earned Since Checkpoint: ${newRewardsSinceCalculation.toFixed(
-                6
-              )} ETH`
-            );
-            console.log(
-              `  Total Real-time Earnings: ${realtimeEarnings.toFixed(6)} ETH`
-            );
-          }
-
-          // Historical claimed rewards from subgraph
-          const totalRewardsClaimed = parseFloat(
-            nft.totalRewardsClaimed || "0"
-          );
-
-          return {
-            id: tokenId,
-            tokenId: `#${tokenId.toString().padStart(4, "0")}`,
-            status: nft.isStaked ? ("staked" as const) : ("unstaked" as const),
-            stakingDuration: stakingSince
-              ? calculateStakingDuration(stakingSince)
-              : "Not staked",
-            earnedRewards: `${realtimeEarnings.toFixed(6)} ETH`,
-            realtimeEarnings: `${realtimeEarnings.toFixed(6)} ETH`,
-            canUnstake:
-              nft.isStaked &&
-              stakingSince &&
-              (minimumStakingPeriodSeconds === 0 ||
-                currentTimeSeconds >= canUnstakeTime),
-            nextUnstakeDate:
-              nft.isStaked &&
-              stakingSince &&
-              canUnstakeTime > currentTimeSeconds
-                ? formatDate(canUnstakeTime)
-                : null,
-            stakingSince,
-          };
-        }
+      // ✅ Safe extraction of minimum staking period
+      const minimumStakingPeriodSeconds = Number(
+        platformConfigData.platformConfig.minimumStakingPeriod || 0
       );
+
+      console.log(
+        "⚙️ Minimum Staking Period:",
+        minimumStakingPeriodSeconds / (24 * 60 * 60),
+        "days"
+      );
+
+      // ✅ Calculate real-time earnings for each NFT
+      const processedNFTs: NFTData[] = userNFTs.map((nft: any) => {
+        const tokenId = Number(nft.tokenId);
+        const stakingSince = Number(nft.stakingSince || 0);
+        const lastRewardCalculation = Number(
+          nft.lastRewardCalculation || stakingSince
+        );
+        const canUnstakeTime = stakingSince + minimumStakingPeriodSeconds;
+
+        let realtimeEarnings = 0;
+
+        if (
+          nft.isStaked &&
+          stakingSince > 0 &&
+          totalStakedGlobally > 0 &&
+          currentRewardRate > 0
+        ) {
+          const timeSinceLastCalculation =
+            currentTimeSeconds - lastRewardCalculation;
+          const rewardPerSecondPerNFT = currentRewardRate / totalStakedGlobally;
+          const newRewardsSinceCalculation =
+            rewardPerSecondPerNFT * timeSinceLastCalculation;
+          const existingPending = parseFloat(nft.pendingRewards || "0");
+          realtimeEarnings = existingPending + newRewardsSinceCalculation;
+
+          console.log(`NFT #${tokenId} Real-time Calculation:`);
+          console.log(
+            `  Staked Since: ${new Date(stakingSince * 1000).toISOString()}`
+          );
+          console.log(
+            `  Last Checkpoint: ${new Date(
+              lastRewardCalculation * 1000
+            ).toISOString()}`
+          );
+          console.log(
+            `  Time Elapsed: ${timeSinceLastCalculation}s (${(
+              timeSinceLastCalculation / 3600
+            ).toFixed(2)}h)`
+          );
+          console.log(
+            `  Rate per NFT: ${rewardPerSecondPerNFT.toFixed(12)} ETH/s`
+          );
+          console.log(
+            `  Earned Since Checkpoint: ${newRewardsSinceCalculation.toFixed(
+              6
+            )} ETH`
+          );
+          console.log(
+            `  Total Real-time Earnings: ${realtimeEarnings.toFixed(6)} ETH`
+          );
+        }
+
+        return {
+          id: tokenId,
+          tokenId: `#${tokenId.toString().padStart(4, "0")}`,
+          status: nft.isStaked ? ("staked" as const) : ("unstaked" as const),
+          stakingDuration: stakingSince
+            ? calculateStakingDuration(stakingSince)
+            : "Not staked",
+          earnedRewards: `${realtimeEarnings.toFixed(6)} ETH`,
+          realtimeEarnings: `${realtimeEarnings.toFixed(6)} ETH`,
+          canUnstake:
+            nft.isStaked &&
+            stakingSince &&
+            (minimumStakingPeriodSeconds === 0 ||
+              currentTimeSeconds >= canUnstakeTime),
+          nextUnstakeDate:
+            nft.isStaked && stakingSince && canUnstakeTime > currentTimeSeconds
+              ? formatDate(canUnstakeTime)
+              : null,
+          stakingSince,
+        };
+      });
 
       // Calculate dashboard totals
       const stakedNFTs = processedNFTs.filter((nft) => nft.status === "staked");
@@ -400,6 +442,7 @@ export const useFounderNFTDashboard = () => {
     address,
     userGraphQLData,
     platformGraphQLData,
+    platformConfigData,
     calculateStakingDuration,
     formatDate,
   ]);
@@ -445,7 +488,6 @@ export const useFounderNFTDashboard = () => {
           }`,
         });
 
-        // Refresh data after successful transaction
         setTimeout(() => {
           fetchDashboardData();
           refetchUserData();
@@ -674,19 +716,66 @@ export const useFounderNFTDashboard = () => {
 
   const refreshData = useCallback(async () => {
     await fetchDashboardData();
-    await Promise.all([refetchUserData(), refetchPlatformData()]);
-  }, [fetchDashboardData, refetchUserData, refetchPlatformData]);
+    await Promise.all([
+      refetchUserData(),
+      refetchPlatformData(),
+      refetchPlatformConfig(),
+    ]);
+  }, [
+    fetchDashboardData,
+    refetchUserData,
+    refetchPlatformData,
+    refetchPlatformConfig,
+  ]);
 
-  // Main effect to trigger data fetching
+  // Main effect to trigger data fetching with aggressive fallback
   useEffect(() => {
-    if (address && userGraphQLData?.user && !fetchInProgress.current) {
-      console.log("🚀 Triggering dashboard fetch with database configuration");
+    console.log("🎯 Main Effect Triggered:", {
+      hasAddress: !!address,
+      hasUserData: !!userGraphQLData?.user,
+      userNFTsCount: userGraphQLData?.user?.nfts?.length || 0,
+      hasConfig: !!platformConfigData?.platformConfig,
+      hasPlatformData: !!platformGraphQLData,
+      fetchInProgress: fetchInProgress.current,
+      userLoading: userGraphQLLoading,
+      platformLoading: platformGraphQLLoading,
+      configLoading: platformConfigLoading,
+    });
+
+    // Primary trigger: all data loaded
+    if (
+      address &&
+      userGraphQLData?.user &&
+      platformConfigData?.platformConfig &&
+      !fetchInProgress.current
+    ) {
+      console.log("🚀 All conditions met - triggering dashboard fetch");
       fetchDashboardData();
+      return;
     }
+
+    // Fallback trigger: user has data but config might be slow
+    // If we have user data and address, try to fetch even without full config
+    if (
+      address &&
+      userGraphQLData?.user &&
+      !fetchInProgress.current &&
+      !platformConfigLoading
+    ) {
+      console.log("⚡ Fallback trigger - fetching with partial data");
+      fetchDashboardData();
+      return;
+    }
+
+    console.log("⏸️ Conditions not met yet - waiting for data");
   }, [
     address,
     userGraphQLData?.user?.id,
-    platformGraphQLData?.platformConfig?.minimumStakingPeriod,
+    platformConfigData?.platformConfig?.minimumStakingPeriod,
+    platformGraphQLData?.platformStats,
+    userGraphQLLoading,
+    platformGraphQLLoading,
+    platformConfigLoading,
     fetchDashboardData,
   ]);
 
@@ -698,7 +787,7 @@ export const useFounderNFTDashboard = () => {
     }
   }, [transactionState.status, fetchDashboardData]);
 
-  // Enhanced error handling
+  // Enhanced error handling with timeout protection
   const error =
     dashboardData.error ||
     (userGraphQLError
@@ -716,6 +805,25 @@ export const useFounderNFTDashboard = () => {
     userGraphQLLoading ||
     platformGraphQLLoading ||
     platformConfigLoading;
+
+  // Prevent infinite loading - if loading for more than 30 seconds with connected wallet, force show data
+  useEffect(() => {
+    if (isLoading && address && isConnected) {
+      const timeout = setTimeout(() => {
+        console.warn("⚠️ Loading timeout - forcing data display");
+        if (fetchInProgress.current) {
+          fetchInProgress.current = false;
+        }
+        setDashboardData((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: prev.error || "Loading took too long - please refresh",
+        }));
+      }, 30000); // 30 second timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoading, address, isConnected]);
 
   return {
     nftData: dashboardData.nftData,
@@ -736,7 +844,6 @@ export const useFounderNFTDashboard = () => {
     graphqlUserData: userGraphQLData,
     graphqlPlatformData: platformGraphQLData,
 
-    // ✅ NEW: Expose configuration data
     platformConfig: platformConfigData?.platformConfig || null,
     minimumStakingPeriodDays: platformConfigData?.platformConfig
       ?.minimumStakingPeriod

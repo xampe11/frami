@@ -1,5 +1,5 @@
 // Auto-generated contract types
-// Generated at: 2025-09-30T22:07:16.395Z
+// Generated at: 2025-10-04T00:59:41.536Z
 // Network: localhost
 
 export interface ContractAddresses {
@@ -31,5 +31,5 @@ export const DEPLOYMENT_INFO: DeploymentInfo = {
   network: "localhost",
   chainId: 31337,
   deploymentBlock: 0,
-  deploymentTimestamp: 1759270018
+  deploymentTimestamp: 1759539574
 };
