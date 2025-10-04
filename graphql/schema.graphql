@@ -55,15 +55,17 @@ type FounderNFT @entity(immutable: false) {
 }
 
 # NEW: Platform configuration
-type PlatformConfig @entity(immutable: false) {
-  id: Bytes!
+type PlatformConfig @entity {
+  id: Bytes! # Always "0x636f6e666967"
   minimumStakingPeriod: BigInt!
-  baseAPR: BigDecimal!
-  performanceMultiplier: BigDecimal!
+  baseAPR: BigInt!
+  performanceMultiplier: BigInt!
   rewardCalculationPeriod: BigInt!
-  maxStakeAmount: BigInt!
+  maxStakeAmount: BigInt
   emergencyWithdrawEnabled: Boolean!
   lastConfigUpdate: BigInt!
+  createdAt: BigInt!
+  updatedAt: BigInt!
 }
 
 # NEW: User analytics

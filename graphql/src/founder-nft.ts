@@ -9,6 +9,11 @@ import {
   RewardRateUpdated,
   RewardAdded,
   ETHReceived,
+  ConfigurationInitialized,
+  ConfigurationUpdated,
+  MinimumStakingPeriodUpdated,
+  BaseAPRUpdated,
+  EmergencyWithdrawToggled,
 } from "../generated/FounderNFT/FounderNFT";
 import {
   User,
@@ -416,4 +421,91 @@ export function handleETHReceived(event: ETHReceived): void {
     toDecimal(amount)
   );
   updatePlatformMetrics(timestamp);
+}
+
+export function handleConfigurationInitialized(
+  event: ConfigurationInitialized
+): void {
+  let config = new PlatformConfig(CONFIG_ID);
+
+  config.minimumStakingPeriod = event.params.minimumStakingPeriod;
+  config.baseAPR = event.params.baseAPR;
+  config.performanceMultiplier = event.params.performanceMultiplier;
+  config.rewardCalculationPeriod = BigInt.fromI32(86400); // 1 day default
+  config.maxStakeAmount = BigInt.fromI32(0); // Unlimited
+  config.emergencyWithdrawEnabled = event.params.emergencyWithdrawEnabled;
+  config.lastConfigUpdate = event.params.timestamp;
+  config.createdAt = event.block.timestamp;
+  config.updatedAt = event.block.timestamp;
+
+  config.save();
+}
+
+export function handleConfigurationUpdated(event: ConfigurationUpdated): void {
+  let config = PlatformConfig.load(CONFIG_ID);
+
+  if (!config) {
+    config = new PlatformConfig(CONFIG_ID);
+    config.createdAt = event.block.timestamp;
+  }
+
+  config.minimumStakingPeriod = event.params.minimumStakingPeriod;
+  config.baseAPR = event.params.baseAPR;
+  config.performanceMultiplier = event.params.performanceMultiplier;
+  config.rewardCalculationPeriod = event.params.rewardCalculationPeriod;
+  config.maxStakeAmount = event.params.maxStakeAmount;
+  config.emergencyWithdrawEnabled = event.params.emergencyWithdrawEnabled;
+  config.lastConfigUpdate = event.params.timestamp;
+  config.updatedAt = event.block.timestamp;
+
+  config.save();
+}
+
+export function handleMinimumStakingPeriodUpdated(
+  event: MinimumStakingPeriodUpdated
+): void {
+  let config = PlatformConfig.load(CONFIG_ID);
+
+  if (!config) {
+    config = new PlatformConfig(CONFIG_ID);
+    config.createdAt = event.block.timestamp;
+  }
+
+  config.minimumStakingPeriod = event.params.newPeriod;
+  config.lastConfigUpdate = event.block.timestamp;
+  config.updatedAt = event.block.timestamp;
+
+  config.save();
+}
+
+export function handleBaseAPRUpdated(event: BaseAPRUpdated): void {
+  let config = PlatformConfig.load(CONFIG_ID);
+
+  if (!config) {
+    config = new PlatformConfig(CONFIG_ID);
+    config.createdAt = event.block.timestamp;
+  }
+
+  config.baseAPR = event.params.newAPR;
+  config.lastConfigUpdate = event.block.timestamp;
+  config.updatedAt = event.block.timestamp;
+
+  config.save();
+}
+
+export function handleEmergencyWithdrawToggled(
+  event: EmergencyWithdrawToggled
+): void {
+  let config = PlatformConfig.load(CONFIG_ID);
+
+  if (!config) {
+    config = new PlatformConfig(CONFIG_ID);
+    config.createdAt = event.block.timestamp;
+  }
+
+  config.emergencyWithdrawEnabled = event.params.enabled;
+  config.lastConfigUpdate = event.block.timestamp;
+  config.updatedAt = event.block.timestamp;
+
+  config.save();
 }

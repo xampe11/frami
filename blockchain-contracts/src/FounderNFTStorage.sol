@@ -3,7 +3,7 @@ pragma solidity ^0.8.28;
 
 /**
  * @title FounderNFTStorage
- * @dev Storage contract for FounderNFT with continuous reward system
+ * @dev Storage contract for FounderNFT with continuous reward system and platform configuration
  */
 contract FounderNFTStorage {
     address internal _platformRegistry;
@@ -43,6 +43,22 @@ contract FounderNFTStorage {
 
     // Pending rewards
     uint256 internal _pendingRewards;
+
+    // ============ NEW: Platform Configuration ============
+
+    /**
+     * @dev Platform configuration parameters
+     * These values can be updated by admin and emit events for subgraph indexing
+     */
+    uint256 internal _baseAPR; // Base annual percentage rate in basis points (e.g., 500 = 5%)
+    uint256 internal _performanceMultiplier; // Performance-based reward multiplier (100 = 1x, 150 = 1.5x)
+    uint256 internal _rewardCalculationPeriod; // Period for reward calculations in seconds
+    uint256 internal _maxStakeAmount; // Maximum amount that can be staked (0 = unlimited)
+    bool internal _emergencyWithdrawEnabled; // Whether emergency withdrawals are allowed
+    uint256 internal _lastConfigUpdate; // Timestamp of last configuration update
+
+    // Storage gap for future upgrades (reduced by 6 slots for new config variables)
+    uint256[44] private __gap;
 
     event EarlyAccessProjectAdded(address indexed projectAddress);
     event EarlyAccessProjectRemoved(address indexed projectAddress);
