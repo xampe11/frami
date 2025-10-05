@@ -6,7 +6,7 @@ dataSources:
     name: FounderNFT
     network: localhost
     source:
-      address: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+      address: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9'
       abi: FounderNFT
       startBlock: 0
     mapping:
@@ -42,12 +42,12 @@ dataSources:
           handler: handleETHReceived
         - event: ConfigurationInitialized(uint256,uint256,uint256,bool,uint256)
           handler: handleConfigurationInitialized
-        - event: ConfigurationUpdated(uint256,uint256,uint256,uint256,uint256,bool,address,uint256)
+        - event: ConfigurationUpdated(uint256,uint256,uint256,uint256,uint256,bool,indexed address,uint256)
           handler: handleConfigurationUpdated
-        - event: MinimumStakingPeriodUpdated(uint256,uint256,address)
+        - event: MinimumStakingPeriodUpdated(uint256,uint256,indexed address)
           handler: handleMinimumStakingPeriodUpdated
-        - event: BaseAPRUpdated(uint256,uint256,address)
+        - event: BaseAPRUpdated(uint256,uint256,indexed address)
           handler: handleBaseAPRUpdated
-        - event: EmergencyWithdrawToggled(bool,address)
+        - event: EmergencyWithdrawToggled(bool,indexed address)
           handler: handleEmergencyWithdrawToggled
       file: ./src/founder-nft.ts

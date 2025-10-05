@@ -86,8 +86,8 @@ function getOrCreatePlatformConfig(
   if (config == null) {
     config = new PlatformConfig(CONFIG_ID);
     config.minimumStakingPeriod = BigInt.fromI32(7 * 24 * 60 * 60); // 7 days default
-    config.baseAPR = BigDecimal.fromString("5.0"); // 5% default
-    config.performanceMultiplier = BigDecimal.fromString("1.0");
+    config.baseAPR = BigInt.fromI32(500); // 5% default
+    config.performanceMultiplier = BigInt.fromI32(100);
     config.rewardCalculationPeriod = BigInt.fromI32(3600); // 1 hour
     config.maxStakeAmount = BigInt.fromI32(10000);
     config.emergencyWithdrawEnabled = false;

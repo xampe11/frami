@@ -1,12 +1,12 @@
 // Auto-generated contract configuration
-// Generated at: 2025-10-04T00:59:41.515Z
+// Generated at: 2025-10-05T19:28:32.614Z
 // Network: localhost
 
 export const contractConfig = {
   "network": "localhost",
   "chainId": 31337,
   "deploymentBlock": 0,
-  "deploymentTimestamp": 1759539574,
+  "deploymentTimestamp": 1759691564,
   "contracts": {
     "founderNFT": {
       "proxy": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
@@ -274,6 +274,19 @@ export const contractConfig = {
         },
         {
           "type": "function",
+          "name": "getBaseAPR",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
           "name": "getCurrentRewardRate",
           "inputs": [],
           "outputs": [
@@ -346,6 +359,44 @@ export const contractConfig = {
               "name": "",
               "type": "uint256",
               "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "getPlatformConfiguration",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "minimumStakingPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "baseAPR",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "performanceMultiplier",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "rewardCalculationPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "maxStakeAmount",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "emergencyWithdrawEnabled",
+              "type": "bool",
+              "internalType": "bool"
             }
           ],
           "stateMutability": "view"
@@ -1175,6 +1226,19 @@ export const contractConfig = {
         },
         {
           "type": "function",
+          "name": "toggleEmergencyWithdraw",
+          "inputs": [
+            {
+              "name": "enabled",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
           "name": "tokenByIndex",
           "inputs": [
             {
@@ -1312,6 +1376,70 @@ export const contractConfig = {
         },
         {
           "type": "function",
+          "name": "updateBaseAPR",
+          "inputs": [
+            {
+              "name": "newAPR",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "updateMinimumStakingPeriod",
+          "inputs": [
+            {
+              "name": "newPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "updatePlatformConfiguration",
+          "inputs": [
+            {
+              "name": "newMinimumStakingPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "newBaseAPR",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "newPerformanceMultiplier",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "newRewardCalculationPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "newMaxStakeAmount",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "newEmergencyWithdrawEnabled",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
           "name": "upgradeToAndCall",
           "inputs": [
             {
@@ -1394,6 +1522,123 @@ export const contractConfig = {
         },
         {
           "type": "event",
+          "name": "BaseAPRUpdated",
+          "inputs": [
+            {
+              "name": "oldAPR",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "newAPR",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "updatedBy",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "ConfigurationInitialized",
+          "inputs": [
+            {
+              "name": "minimumStakingPeriod",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "baseAPR",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "performanceMultiplier",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "emergencyWithdrawEnabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "ConfigurationUpdated",
+          "inputs": [
+            {
+              "name": "minimumStakingPeriod",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "baseAPR",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "performanceMultiplier",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "rewardCalculationPeriod",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "maxStakeAmount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "emergencyWithdrawEnabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            },
+            {
+              "name": "updatedBy",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
           "name": "ETHReceived",
           "inputs": [
             {
@@ -1439,6 +1684,25 @@ export const contractConfig = {
         },
         {
           "type": "event",
+          "name": "EmergencyWithdrawToggled",
+          "inputs": [
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            },
+            {
+              "name": "updatedBy",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
           "name": "FounderNFTMinted",
           "inputs": [
             {
@@ -1465,6 +1729,31 @@ export const contractConfig = {
               "type": "uint64",
               "indexed": false,
               "internalType": "uint64"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "MinimumStakingPeriodUpdated",
+          "inputs": [
+            {
+              "name": "oldPeriod",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "newPeriod",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "updatedBy",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             }
           ],
           "anonymous": false
@@ -1905,6 +2194,11 @@ export const contractConfig = {
               "internalType": "uint256"
             }
           ]
+        },
+        {
+          "type": "error",
+          "name": "InvalidConfigValue",
+          "inputs": []
         },
         {
           "type": "error",

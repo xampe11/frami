@@ -30,6 +30,7 @@ error InvalidPercentage(uint256 provided);
 error NoSalesProceedsToWithdraw();
 error NoWithdrawableFunds();
 error CannotTransferStakedToken(uint256 tokenId);
+error InvalidConfigValue();
 
 // 3. Interfaces
 // None required for this contract
@@ -74,6 +75,43 @@ contract FounderNFT is
     event TokenUnstaked(address indexed owner, uint256 indexed tokenId);
     event RewardRateUpdated(uint256 oldRate, uint256 newRate);
     event ETHReceived(address indexed from, uint256 amount);
+
+    // ============ NEW: Configuration Events ============
+    event ConfigurationInitialized(
+        uint256 minimumStakingPeriod,
+        uint256 baseAPR,
+        uint256 performanceMultiplier,
+        bool emergencyWithdrawEnabled,
+        uint256 timestamp
+    );
+
+    event ConfigurationUpdated(
+        uint256 minimumStakingPeriod,
+        uint256 baseAPR,
+        uint256 performanceMultiplier,
+        uint256 rewardCalculationPeriod,
+        uint256 maxStakeAmount,
+        bool emergencyWithdrawEnabled,
+        address indexed updatedBy,
+        uint256 timestamp
+    );
+
+    event MinimumStakingPeriodUpdated(
+        uint256 oldPeriod,
+        uint256 newPeriod,
+        address indexed updatedBy
+    );
+
+    event BaseAPRUpdated(
+        uint256 oldAPR,
+        uint256 newAPR,
+        address indexed updatedBy
+    );
+
+    event EmergencyWithdrawToggled(
+        bool enabled,
+        address indexed updatedBy
+    );
 
     // 4. Modifiers
     /**
@@ -180,6 +218,22 @@ contract FounderNFT is
         _grantRole(ADMIN_ROLE, initialOwner);
         _grantRole(UPGRADER_ROLE, initialOwner);
         _grantRole(PLATFORM_ROLE, platformRegistry);
+
+        // ============ NEW: Initialize platform configuration ============
+        _baseAPR = 500; // 5%
+        _performanceMultiplier = 100; // 1x
+        _rewardCalculationPeriod = 86400; // 1 day
+        _maxStakeAmount = 0; // Unlimited
+        _emergencyWithdrawEnabled = false;
+        _lastConfigUpdate = block.timestamp;
+
+        emit ConfigurationInitialized(
+            _minimumStakingPeriod,
+            _baseAPR,
+            _performanceMultiplier,
+            _emergencyWithdrawEnabled,
+            block.timestamp
+        );
     }
 
     /**
@@ -738,6 +792,37 @@ contract FounderNFT is
         return _maxSupply;
     }
 
+    // ============ NEW: Configuration View Functions ============
+
+    /**
+     * @notice Get current platform configuration
+     */
+    function getPlatformConfiguration()
+        external
+        view
+        returns (
+            uint256 minimumStakingPeriod,
+            uint256 baseAPR,
+            uint256 performanceMultiplier,
+            uint256 rewardCalculationPeriod,
+            uint256 maxStakeAmount,
+            bool emergencyWithdrawEnabled
+        )
+    {
+        return (
+            _minimumStakingPeriod,
+            _baseAPR,
+            _performanceMultiplier,
+            _rewardCalculationPeriod,
+            _maxStakeAmount,
+            _emergencyWithdrawEnabled
+        );
+    }
+
+    function getBaseAPR() external view returns (uint256) {
+        return _baseAPR;
+    }
+
     // Admin functions
     function setMinimumStakingPeriod(uint256 newPeriod) external onlyRole(ADMIN_ROLE) {
         _minimumStakingPeriod = newPeriod;
@@ -807,6 +892,71 @@ contract FounderNFT is
         if (withdrawable == 0) revert NoWithdrawableFunds();
 
         _transferRewards(msg.sender, withdrawable);
+    }
+
+    // ============ NEW: Configuration Admin Functions ============
+
+    /**
+     * @notice Update complete platform configuration
+     */
+    function updatePlatformConfiguration(
+        uint256 newMinimumStakingPeriod,
+        uint256 newBaseAPR,
+        uint256 newPerformanceMultiplier,
+        uint256 newRewardCalculationPeriod,
+        uint256 newMaxStakeAmount,
+        bool newEmergencyWithdrawEnabled
+    )
+        external
+        onlyRole(ADMIN_ROLE)
+    {
+        if (newBaseAPR > 10000) revert InvalidConfigValue();
+        if (newPerformanceMultiplier == 0) revert InvalidConfigValue();
+        if (newRewardCalculationPeriod == 0) revert InvalidConfigValue();
+
+        _minimumStakingPeriod = newMinimumStakingPeriod;
+        _baseAPR = newBaseAPR;
+        _performanceMultiplier = newPerformanceMultiplier;
+        _rewardCalculationPeriod = newRewardCalculationPeriod;
+        _maxStakeAmount = newMaxStakeAmount;
+        _emergencyWithdrawEnabled = newEmergencyWithdrawEnabled;
+        _lastConfigUpdate = block.timestamp;
+
+        emit ConfigurationUpdated(
+            newMinimumStakingPeriod,
+            newBaseAPR,
+            newPerformanceMultiplier,
+            newRewardCalculationPeriod,
+            newMaxStakeAmount,
+            newEmergencyWithdrawEnabled,
+            msg.sender,
+            block.timestamp
+        );
+    }
+
+    function updateMinimumStakingPeriod(uint256 newPeriod) external onlyRole(ADMIN_ROLE) {
+        uint256 oldPeriod = _minimumStakingPeriod;
+        _minimumStakingPeriod = newPeriod;
+        _lastConfigUpdate = block.timestamp;
+
+        emit MinimumStakingPeriodUpdated(oldPeriod, newPeriod, msg.sender);
+    }
+
+    function updateBaseAPR(uint256 newAPR) external onlyRole(ADMIN_ROLE) {
+        if (newAPR > 10000) revert InvalidConfigValue();
+        
+        uint256 oldAPR = _baseAPR;
+        _baseAPR = newAPR;
+        _lastConfigUpdate = block.timestamp;
+
+        emit BaseAPRUpdated(oldAPR, newAPR, msg.sender);
+    }
+
+    function toggleEmergencyWithdraw(bool enabled) external onlyRole(ADMIN_ROLE) {
+        _emergencyWithdrawEnabled = enabled;
+        _lastConfigUpdate = block.timestamp;
+
+        emit EmergencyWithdrawToggled(enabled, msg.sender);
     }
 
     // Public functions
