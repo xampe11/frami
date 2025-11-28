@@ -2,7 +2,7 @@
   "network": "localhost",
   "chainId": 31337,
   "deploymentBlock": 0,
-  "deploymentTimestamp": 1759691564,
+  "deploymentTimestamp": 1764355474,
   "contracts": {
     "founderNFT": {
       "proxy": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
